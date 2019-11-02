@@ -5,7 +5,10 @@ import harkerrobolib.subsystems.HSDrivetrain;
 
 public class Drivetrain extends HSDrivetrain{
 
-	public Drivetrain
+	public Drivetrain() {
+		
+	}
+
 	@Override
 	protected void initDefaultCommand() {
 		// TODO Auto-generated method stub
