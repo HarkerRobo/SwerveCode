@@ -31,11 +31,20 @@ public class Drivetrain extends Subsystem {
 	private static final boolean BOTTOM_RIGHT_DRIVE_INVERTED = false;
 	private static final boolean BOTTOM_RIGHT_ANGLE_INVERTED = false;
 	
+	private static final boolean TOP_LEFT_DRIVE_SENSOR_PHASE = false;
+	private static final boolean TOP_LEFT_ANGLE_SENSOR_PHASE = false;
+	private static final boolean TOP_RIGHT_DRIVE_SENSOR_PHASE = false;
+	private static final boolean TOP_RIGHT_ANGLE_SENSOR_PHASE = false;
+    private static final boolean BOTTOM_LEFT_DRIVE_SENSOR_PHASE = false;
+	private static final boolean BOTTOM_LEFT_ANGLE_SENSOR_PHASE = false;
+	private static final boolean BOTTOM_RIGHT_DRIVE_SENSOR_PHASE = false;
+	private static final boolean BOTTOM_RIGHT_ANGLE_SENSOR_PHASE = false;
+
 	private Drivetrain() {
-		topLeft = new SwerveModule(RobotMap.TOP_LEFT_DRIVE_ID, TOP_LEFT_DRIVE_INVERTED, RobotMap.TOP_LEFT_ANGLE_ID, TOP_LEFT_ANGLE_INVERTED);
-		topRight = new SwerveModule(RobotMap.TOP_RIGHT_DRIVE_ID, TOP_RIGHT_DRIVE_INVERTED, RobotMap.TOP_RIGHT_ANGLE_ID, TOP_RIGHT_ANGLE_INVERTED);
-		bottomLeft = new SwerveModule(RobotMap.BOTTOM_LEFT_DRIVE_ID, BOTTOM_LEFT_DRIVE_INVERTED, RobotMap.BOTTOM_LEFT_ANGLE_ID, BOTTOM_LEFT_ANGLE_INVERTED);
-		bottomRight = new SwerveModule(RobotMap.BOTTOM_RIGHT_DRIVE_ID, BOTTOM_RIGHT_DRIVE_INVERTED, RobotMap.BOTTOM_RIGHT_ANGLE_ID, BOTTOM_RIGHT_ANGLE_INVERTED);
+		topLeft = new SwerveModule(RobotMap.TOP_LEFT_DRIVE_ID, TOP_LEFT_DRIVE_INVERTED, TOP_LEFT_DRIVE_SENSOR_PHASE, RobotMap.TOP_LEFT_ANGLE_ID, TOP_LEFT_ANGLE_INVERTED, TOP_LEFT_ANGLE_SENSOR_PHASE);
+		topRight = new SwerveModule(RobotMap.TOP_RIGHT_DRIVE_ID, TOP_RIGHT_DRIVE_INVERTED, TOP_RIGHT_DRIVE_SENSOR_PHASE, RobotMap.TOP_RIGHT_ANGLE_ID, TOP_RIGHT_ANGLE_INVERTED, TOP_RIGHT_ANGLE_SENSOR_PHASE);
+		bottomLeft = new SwerveModule(RobotMap.BOTTOM_LEFT_DRIVE_ID, BOTTOM_LEFT_DRIVE_SENSOR_PHASE, BOTTOM_LEFT_DRIVE_INVERTED, RobotMap.BOTTOM_LEFT_ANGLE_ID, BOTTOM_LEFT_ANGLE_INVERTED, BOTTOM_LEFT_ANGLE_SENSOR_PHASE);
+		bottomRight = new SwerveModule(RobotMap.BOTTOM_RIGHT_DRIVE_ID, BOTTOM_RIGHT_DRIVE_INVERTED, BOTTOM_RIGHT_DRIVE_SENSOR_PHASE, RobotMap.BOTTOM_RIGHT_ANGLE_ID, BOTTOM_RIGHT_ANGLE_INVERTED, BOTTOM_RIGHT_ANGLE_SENSOR_PHASE);
 	}
 
 	public SwerveModule getTopLeft() {

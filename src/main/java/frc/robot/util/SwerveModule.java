@@ -28,16 +28,21 @@ public class SwerveModule {
     private final boolean DRIVE_INVERTED;
     private final boolean ANGLE_INVERTED;
 
+    private final boolean DRIVE_SENSOR_PHASE;
+    private final boolean ANGLE_SENSOR_PHASE;
 
-    public SwerveModule(int driveId, boolean invertDriveTalon, int angleId, boolean invertAngleTalon) {
+    public SwerveModule(int driveId, boolean invertDriveTalon, boolean driveSensorPhase, int angleId, boolean invertAngleTalon, boolean angleSensorPhase) {
         driveMotor = new HSTalon(driveId);
         angleMotor = new HSTalon(angleId);
 
         DRIVE_INVERTED = invertDriveTalon;
         ANGLE_INVERTED = invertAngleTalon;
 
-        talonInit(driveMotor, DRIVE_INVERTED);
-        talonInit(angleMotor, ANGLE_INVERTED);
+        DRIVE_SENSOR_PHASE = driveSensorPhase;
+        ANGLE_SENSOR_PHASE = angleSensorPhase;
+
+        driveTalonInit(driveMotor, DRIVE_INVERTED, DRIVE_SENSOR_PHASE);
+        angleTalonInit(angleMotor, ANGLE_INVERTED, ANGLE_SENSOR_PHASE);
     }        
     
     public HSTalon getAngleMotor() {
@@ -48,7 +53,23 @@ public class SwerveModule {
         return driveMotor;
     } 
     
-    public static void talonInit(HSTalon talon, boolean invert) {
+    public static void driveTalonInit(HSTalon talon, boolean invert, boolean sensorPhase) {
+        talon.configFactoryDefault();
+        
+        talon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+
+        talon.setNeutralMode(NeutralMode.Brake);
+
+        talon.configVoltageCompSaturation(VOLTAGE_COMP);
+        talon.enableVoltageCompensation(true);
+
+        talon.setInverted(invert);
+        talon.setSensorPhase(sensorPhase);
+
+        configCurrentLimit(talon);
+    }
+
+    public static void angleTalonInit(HSTalon talon, boolean invert, boolean sensorPhase) {
         talon.configFactoryDefault();
         
         talon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
@@ -59,6 +80,7 @@ public class SwerveModule {
         talon.enableVoltageCompensation(true);
 
         talon.setInverted(invert);
+        talon.setSensorPhase(sensorPhase);
 
         configCurrentLimit(talon);
     }
