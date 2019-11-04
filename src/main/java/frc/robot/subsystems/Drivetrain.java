@@ -4,18 +4,38 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.RobotMap;
 import frc.robot.util.SwerveModule;
 
+/**
+ * Simulates the drivetrain subsystem on the robot. 
+ * 
+ * @version 11/3/19
+ * @author Angela Jia
+ * @author Jatin Kohli
+ * @author Shahzeb Lakhani
+ * @author Anirudh Kotamraju
+ */
 public class Drivetrain extends Subsystem {
+
+	public static Drivetrain instance;
 
     private SwerveModule topLeft;
     private SwerveModule topRight;
     private SwerveModule bottomLeft;
 	private SwerveModule bottomRight;
 
-	public Drivetrain() {
-		topLeft = new SwerveModule(RobotMap.TOP_LEFT_DRIVE_ID, RobotMap.TOP_LEFT_ANGLE_ID);
-		topRight = new SwerveModule(RobotMap.TOP_RIGHT_DRIVE_ID, RobotMap.TOP_RIGHT_ANGLE_ID);
-		bottomLeft = new SwerveModule(RobotMap.BOTTOM_LEFT_DRIVE_ID, RobotMap.BOTTOM_LEFT_ANGLE_ID);
-		bottomRight = new SwerveModule(RobotMap.BOTTOM_RIGHT_DRIVE_ID, RobotMap.BOTTOM_RIGHT_ANGLE_ID);
+	private static final boolean TOP_LEFT_DRIVE_INVERTED = false;
+	private static final boolean TOP_LEFT_ANGLE_INVERTED = false;
+	private static final boolean TOP_RIGHT_DRIVE_INVERTED = false;
+	private static final boolean TOP_RIGHT_ANGLE_INVERTED = false;
+    private static final boolean BOTTOM_LEFT_DRIVE_INVERTED = false;
+	private static final boolean BOTTOM_LEFT_ANGLE_INVERTED = false;
+	private static final boolean BOTTOM_RIGHT_DRIVE_INVERTED = false;
+	private static final boolean BOTTOM_RIGHT_ANGLE_INVERTED = false;
+	
+	private Drivetrain() {
+		topLeft = new SwerveModule(RobotMap.TOP_LEFT_DRIVE_ID, TOP_LEFT_DRIVE_INVERTED, RobotMap.TOP_LEFT_ANGLE_ID, TOP_LEFT_ANGLE_INVERTED);
+		topRight = new SwerveModule(RobotMap.TOP_RIGHT_DRIVE_ID, TOP_RIGHT_DRIVE_INVERTED, RobotMap.TOP_RIGHT_ANGLE_ID, TOP_RIGHT_ANGLE_INVERTED);
+		bottomLeft = new SwerveModule(RobotMap.BOTTOM_LEFT_DRIVE_ID, BOTTOM_LEFT_DRIVE_INVERTED, RobotMap.BOTTOM_LEFT_ANGLE_ID, BOTTOM_LEFT_ANGLE_INVERTED);
+		bottomRight = new SwerveModule(RobotMap.BOTTOM_RIGHT_DRIVE_ID, BOTTOM_RIGHT_DRIVE_INVERTED, RobotMap.BOTTOM_RIGHT_ANGLE_ID, BOTTOM_RIGHT_ANGLE_INVERTED);
 	}
 
 	public SwerveModule getTopLeft() {
@@ -33,14 +53,14 @@ public class Drivetrain extends Subsystem {
 	public SwerveModule getBottomRight() {
 		return bottomRight;
 	}
-
-	public void talonInit() {
-		
-	}
 	
 	@Override
 	protected void initDefaultCommand() {
 		
 	}
-    
+	
+	public static Drivetrain getInstance() {
+		if(instance == null) instance = new Drivetrain();
+		return instance;
+	}
 }

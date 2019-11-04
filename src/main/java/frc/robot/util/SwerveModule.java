@@ -5,6 +5,15 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 import harkerrobolib.wrappers.HSTalon;
 
+/**
+ * Simulates a swerve module on the drivetrain.
+ * 
+ * @version 11/3/19
+ * @author Angela Jia
+ * @author Jatin Kohli
+ * @author Shahzeb Lakhani
+ * @author Anirudh Kotamraju
+ */
 public class SwerveModule {
 
     private static final double VOLTAGE_COMP = 10;
@@ -16,17 +25,19 @@ public class SwerveModule {
     private HSTalon angleMotor;
     private HSTalon driveMotor;
 
-    private static final boolean TOP_LEFT_INVERTED = false;
-    private static final boolean TOP_RIGHT_INVERTED = false;
-    private static final boolean BOTTOM_LEFT_INVERTED = false;
-    private static final boolean BOTTOM_RIGHT_INVERTED = false;
+    private final boolean DRIVE_INVERTED;
+    private final boolean ANGLE_INVERTED;
 
-    public SwerveModule(int driveId, int angleId) {
+
+    public SwerveModule(int driveId, boolean invertDriveTalon, int angleId, boolean invertAngleTalon) {
         driveMotor = new HSTalon(driveId);
         angleMotor = new HSTalon(angleId);
 
-        talonInit(driveMotor);
-        talonInit(angleMotor);
+        DRIVE_INVERTED = invertDriveTalon;
+        ANGLE_INVERTED = invertAngleTalon;
+
+        talonInit(driveMotor, DRIVE_INVERTED);
+        talonInit(angleMotor, ANGLE_INVERTED);
     }        
     
     public HSTalon getAngleMotor() {
@@ -37,7 +48,7 @@ public class SwerveModule {
         return driveMotor;
     } 
     
-    public static void talonInit(HSTalon talon) {
+    public static void talonInit(HSTalon talon, boolean invert) {
         talon.configFactoryDefault();
         
         talon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
@@ -46,6 +57,8 @@ public class SwerveModule {
 
         talon.configVoltageCompSaturation(VOLTAGE_COMP);
         talon.enableVoltageCompensation(true);
+
+        talon.setInverted(invert);
 
         configCurrentLimit(talon);
     }
