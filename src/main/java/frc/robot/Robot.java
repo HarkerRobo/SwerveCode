@@ -7,12 +7,10 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.PWMVictorSPX;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Scheduler;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import frc.robot.subsystems.Drivetrain;
 
 /**
@@ -24,19 +22,20 @@ import frc.robot.subsystems.Drivetrain;
  */
 public class Robot extends TimedRobot {
 
-    private OI oi;
-    private Drivetrain dt;
-
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
      */
     @Override
     public void robotInit() {
-        oi = new OI();
-        dt = Drivetrain.getInstance();
+        OI.initBindings();
+
+        Drivetrain.getInstance();
     }
 
+    /**
+     * This function is called periodically once the robot has started up, regardless of mode.
+     */
     @Override
     public void robotPeriodic() {
         Scheduler.getInstance().run();
@@ -78,5 +77,23 @@ public class Robot extends TimedRobot {
     @Override
     public void testPeriodic() {
         Scheduler.getInstance().run();
+    }
+
+    /**
+     * This function is called periodically when the robot is disabled.
+     */
+    @Override
+    public void disabledPeriodic() {
+        Drivetrain.getInstance().getTopLeft().getDriveMotor().set(ControlMode.Disabled, 0);
+        Drivetrain.getInstance().getTopLeft().getAngleMotor().set(ControlMode.Disabled, 0);
+
+        Drivetrain.getInstance().getTopRight().getDriveMotor().set(ControlMode.Disabled, 0);
+        Drivetrain.getInstance().getTopRight().getAngleMotor().set(ControlMode.Disabled, 0);
+
+        Drivetrain.getInstance().getBottomLeft().getDriveMotor().set(ControlMode.Disabled, 0);
+        Drivetrain.getInstance().getBottomLeft().getAngleMotor().set(ControlMode.Disabled, 0);
+
+        Drivetrain.getInstance().getBottomRight().getDriveMotor().set(ControlMode.Disabled, 0);
+        Drivetrain.getInstance().getBottomRight().getAngleMotor().set(ControlMode.Disabled, 0);
     }
 }

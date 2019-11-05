@@ -6,31 +6,34 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import harkerrobolib.wrappers.HSTalon;
 
 /**
- * Simulates a swerve module on the drivetrain.
+ * A swerve module on the drivetrain.
+ * A swerve module contains one motor to spin the wheel and another to change the wheel's angle.
  * 
- * @version 11/3/19
  * @author Angela Jia
  * @author Jatin Kohli
  * @author Shahzeb Lakhani
  * @author Anirudh Kotamraju
  * @author Chirag Kaushik
+ * @since 11/1/19
  */
 public class SwerveModule {
 
+    //Voltage/Current Constants
     private static final double VOLTAGE_COMP = 10;
 
     private static final int CURRENT_CONTINUOUS = 20;
     private static final int CURRENT_PEAK = 30;
     private static final int CURRENT_PEAK_DUR = 500;
 
-    private HSTalon angleMotor;
-    private HSTalon driveMotor;
-
+    //Inversions
     private final boolean DRIVE_INVERTED;
     private final boolean ANGLE_INVERTED;
 
     private final boolean DRIVE_SENSOR_PHASE;
     private final boolean ANGLE_SENSOR_PHASE;
+
+    private HSTalon angleMotor;
+    private HSTalon driveMotor;
 
     public SwerveModule(int driveId, boolean invertDriveTalon, boolean driveSensorPhase, int angleId, boolean invertAngleTalon, boolean angleSensorPhase) {
         driveMotor = new HSTalon(driveId);
@@ -42,30 +45,19 @@ public class SwerveModule {
         DRIVE_SENSOR_PHASE = driveSensorPhase;
         ANGLE_SENSOR_PHASE = angleSensorPhase;
 
-        driveTalonInit(driveMotor, DRIVE_INVERTED, DRIVE_SENSOR_PHASE);
-        angleTalonInit(angleMotor, ANGLE_INVERTED, ANGLE_SENSOR_PHASE);
-    }        
+        driveTalonInit(driveMotor);
+        angleTalonInit(angleMotor);
+    }
     
-    public HSTalon getAngleMotor() {
-        return angleMotor;    
-    }            
-        
-    public HSTalon getDriveMotor() {
-        return driveMotor;
-    } 
-    
-    public static void driveTalonInit(HSTalon talon, boolean invert, boolean sensorPhase) {
+    public void driveTalonInit(HSTalon talon) {
         talon.configFactoryDefault();
         
         talon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
 
         talon.setNeutralMode(NeutralMode.Brake);
 
-        talon.configVoltageCompSaturation(VOLTAGE_COMP);
-        talon.enableVoltageCompensation(true);
-
-        talon.setInverted(invert);
-        talon.setSensorPhase(sensorPhase);
+        talon.setInverted(DRIVE_INVERTED);
+        talon.setSensorPhase(DRIVE_SENSOR_PHASE);
         
         talon.configForwardSoftLimitEnable(false);
         talon.configReverseSoftLimitEnable(false);
@@ -74,32 +66,49 @@ public class SwerveModule {
         talon.setSelectedSensorPosition(0);
 
         configCurrentLimit(talon);
+
+        talon.configVoltageCompSaturation(VOLTAGE_COMP);
+        talon.enableVoltageCompensation(true);
+
+        talon.setInverted(DRIVE_INVERTED);
+        talon.setSensorPhase(DRIVE_SENSOR_PHASE);
     }
 
-    public static void angleTalonInit(HSTalon talon, boolean invert, boolean sensorPhase) {
+    public void angleTalonInit(HSTalon talon) {
         talon.configFactoryDefault();
         
         talon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
 
         talon.setNeutralMode(NeutralMode.Brake);
 
-        talon.configVoltageCompSaturation(VOLTAGE_COMP);
-        talon.enableVoltageCompensation(true);
-
-        talon.setInverted(invert);
-        talon.setSensorPhase(sensorPhase);
+        talon.setInverted(ANGLE_INVERTED);
+        talon.setSensorPhase(ANGLE_SENSOR_PHASE);
 
         talon.configForwardSoftLimitEnable(false);
         talon.configReverseSoftLimitEnable(false);
         talon.overrideLimitSwitchesEnable(false);
 
         configCurrentLimit(talon);
-    }
 
+        talon.configVoltageCompSaturation(VOLTAGE_COMP);
+        talon.enableVoltageCompensation(true);
+
+        talon.setInverted(ANGLE_INVERTED);
+        talon.setSensorPhase(ANGLE_SENSOR_PHASE);
+    } 
+    
     public static void configCurrentLimit(HSTalon talon) {
         talon.configContinuousCurrentLimit(CURRENT_CONTINUOUS);
         talon.configPeakCurrentLimit(CURRENT_PEAK);
         talon.configPeakCurrentDuration(CURRENT_PEAK_DUR);
         talon.enableCurrentLimit(true);
+    }
+    
+    public HSTalon getAngleMotor() {
+        return angleMotor;    
+    }            
+        
+    public HSTalon getDriveMotor() {
+        return driveMotor;
     }
 }

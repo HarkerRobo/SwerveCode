@@ -9,9 +9,14 @@ import frc.robot.subsystems.Drivetrain;
 
 /**
  * Runs each swerve module with the same output.
+ * On the driver controller:
+ *      A moves the drive motors forward (spins wheels)
+ *      B moves the drive motors backward (spins wheels in opposite direction)
+ *      Y moves the angle motors forward (rotates wheel angles)
+ *      X moves the angle motors backward (rotates wheel angles in opposite direction)
  * 
  * @author Chirag Kaushik
- * @since 11/4
+ * @since 11/4/19
  */
 public class SwervePercentOutput extends Command {
     private static final double OUTPUT = 0.2;
