@@ -13,6 +13,7 @@ import harkerrobolib.wrappers.HSTalon;
  * @author Jatin Kohli
  * @author Shahzeb Lakhani
  * @author Anirudh Kotamraju
+ * @author Chirag Kaushik
  */
 public class SwerveModule {
 
@@ -65,6 +66,12 @@ public class SwerveModule {
 
         talon.setInverted(invert);
         talon.setSensorPhase(sensorPhase);
+        
+        talon.configForwardSoftLimitEnable(false);
+        talon.configReverseSoftLimitEnable(false);
+        talon.overrideLimitSwitchesEnable(false);
+
+        talon.setSelectedSensorPosition(0);
 
         configCurrentLimit(talon);
     }
@@ -81,6 +88,10 @@ public class SwerveModule {
 
         talon.setInverted(invert);
         talon.setSensorPhase(sensorPhase);
+
+        talon.configForwardSoftLimitEnable(false);
+        talon.configReverseSoftLimitEnable(false);
+        talon.overrideLimitSwitchesEnable(false);
 
         configCurrentLimit(talon);
     }

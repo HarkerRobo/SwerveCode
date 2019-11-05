@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.RobotMap;
+import frc.robot.commands.SwervePercentOutput;
 import frc.robot.util.SwerveModule;
 
 /**
@@ -12,6 +13,7 @@ import frc.robot.util.SwerveModule;
  * @author Jatin Kohli
  * @author Shahzeb Lakhani
  * @author Anirudh Kotamraju
+ *  @author Chirag Kaushik
  */
 public class Drivetrain extends Subsystem {
 
@@ -23,22 +25,22 @@ public class Drivetrain extends Subsystem {
 	private SwerveModule bottomRight;
 
 	private static final boolean TOP_LEFT_DRIVE_INVERTED = false;
-	private static final boolean TOP_LEFT_ANGLE_INVERTED = false;
+	private static final boolean TOP_LEFT_ANGLE_INVERTED = true;
 	private static final boolean TOP_RIGHT_DRIVE_INVERTED = false;
 	private static final boolean TOP_RIGHT_ANGLE_INVERTED = false;
-    private static final boolean BOTTOM_LEFT_DRIVE_INVERTED = false;
+    private static final boolean BOTTOM_LEFT_DRIVE_INVERTED = true;
 	private static final boolean BOTTOM_LEFT_ANGLE_INVERTED = false;
 	private static final boolean BOTTOM_RIGHT_DRIVE_INVERTED = false;
 	private static final boolean BOTTOM_RIGHT_ANGLE_INVERTED = false;
 	
-	private static final boolean TOP_LEFT_DRIVE_SENSOR_PHASE = false;
+	private static final boolean TOP_LEFT_DRIVE_SENSOR_PHASE = true;
 	private static final boolean TOP_LEFT_ANGLE_SENSOR_PHASE = false;
-	private static final boolean TOP_RIGHT_DRIVE_SENSOR_PHASE = false;
-	private static final boolean TOP_RIGHT_ANGLE_SENSOR_PHASE = false;
-    private static final boolean BOTTOM_LEFT_DRIVE_SENSOR_PHASE = false;
-	private static final boolean BOTTOM_LEFT_ANGLE_SENSOR_PHASE = false;
-	private static final boolean BOTTOM_RIGHT_DRIVE_SENSOR_PHASE = false;
-	private static final boolean BOTTOM_RIGHT_ANGLE_SENSOR_PHASE = false;
+	private static final boolean TOP_RIGHT_DRIVE_SENSOR_PHASE = true;
+	private static final boolean TOP_RIGHT_ANGLE_SENSOR_PHASE = true;
+    private static final boolean BOTTOM_LEFT_DRIVE_SENSOR_PHASE = true;
+	private static final boolean BOTTOM_LEFT_ANGLE_SENSOR_PHASE = true;
+	private static final boolean BOTTOM_RIGHT_DRIVE_SENSOR_PHASE = true;
+	private static final boolean BOTTOM_RIGHT_ANGLE_SENSOR_PHASE = true;
 
 	private Drivetrain() {
 		topLeft = new SwerveModule(RobotMap.TOP_LEFT_DRIVE_ID, TOP_LEFT_DRIVE_INVERTED, TOP_LEFT_DRIVE_SENSOR_PHASE, RobotMap.TOP_LEFT_ANGLE_ID, TOP_LEFT_ANGLE_INVERTED, TOP_LEFT_ANGLE_SENSOR_PHASE);
@@ -65,7 +67,7 @@ public class Drivetrain extends Subsystem {
 	
 	@Override
 	protected void initDefaultCommand() {
-		
+		setDefaultCommand(new SwervePercentOutput());
 	}
 	
 	public static Drivetrain getInstance() {
