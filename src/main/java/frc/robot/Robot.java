@@ -28,7 +28,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void robotInit() {
-        OI.initBindings();
+        OI.getInstance().initBindings();
 
         Drivetrain.getInstance();
     }

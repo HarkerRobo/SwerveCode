@@ -13,30 +13,40 @@ import harkerrobolib.wrappers.XboxGamepad;
  * @since 11/1/19
  */
 public class OI {
+    private static OI instance;
 
     private static final int DRIVER_PORT = 0;
     private static final int OPERATOR_PORT = 1;
+    
+    public static final double XBOX_JOYSTICK_DEADBAND = 0.1;
 
-    private static XboxGamepad driverGamepad;
-    private static XboxGamepad operatorGamepad;
+    private XboxGamepad operatorGamepad;
+    private XboxGamepad driverGamepad;
 
-    public static void initBindings() {
+    private OI() {
         driverGamepad = new XboxGamepad(DRIVER_PORT);
         operatorGamepad = new XboxGamepad(OPERATOR_PORT);
-
-        SmartDashboard.putBoolean("MemeMode enabled?", memeMode());
-        operatorGamepad.getButtonA().whenPressed(new ConditionalCommand(() -> memeMode(), new MemeMode(10)));
+        initBindings();
     }
 
-    public static XboxGamepad getDriverGamepad() {
+    public void initBindings() {
+        
+
+        //Controller Bindings below
+
+    }
+
+    public XboxGamepad getDriverGamepad() {
         return driverGamepad;
     }
 
-    public static XboxGamepad getOperatorGamepad() {
+    public XboxGamepad getOperatorGamepad() {
         return operatorGamepad;
     }
-
-    private boolean memeMode() {
-        return operatorGamepad.getLeftBumper().getButtonBumperLeftState() && operatorGamepad.RightBumper().getButtonBumperRightState();
+    
+    public static OI getInstance() {
+        if(instance == null)
+            instance = new OI();
+        return instance;
     }
 }

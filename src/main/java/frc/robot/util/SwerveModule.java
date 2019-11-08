@@ -3,6 +3,7 @@ package frc.robot.util;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 
+import frc.robot.RobotMap;
 import harkerrobolib.wrappers.HSTalon;
 
 /**
@@ -113,7 +114,7 @@ public class SwerveModule {
     }
 
     public boolean shouldInvert(int desiredPos) {
-        return Math.abs(talon.getAngleMotor().getSelectedSensorPosition() - desiredPos) > 90;
+        return Math.abs(getAngleMotor().getSelectedSensorPosition() - desiredPos) > 90;
     }
 
     /**
@@ -122,41 +123,23 @@ public class SwerveModule {
      * @param targetAngle the angle (in degrees) of the setpoint
      */
     public void setTargetAngle(double targetAngle) {
-        targetAngle = targetAngle % 360;
-        targetAngle += mZeroOffset;
-        double currentAngle = angleMotor.getSelectedSensorPosition(0) * (360.0/1024.0);
-        double currentAngleMod = modulate360(currentAngle);
-        if (currentAngleMod < 0) currentAngleMod += 360;
+        // targetAngle = targetAngle % 360;
+        // targetAngle += mZeroOffset;
+        // double currentAngle = angleMotor.getSelectedSensorPosition(0) * (360.0/1024.0);
+        // double currentAngleMod = modulate360(currentAngle);
+        // if (currentAngleMod < 0) currentAngleMod += 360;
         
-        double delta = currentAngleMod - targetAngle;
-        while (delta > 180) {
-            targetAngle += 360;
-        }
-        while (delta < -180) {
-            targetAngle -= 360;
-        }
+        // double delta = currentAngleMod - targetAngle;
+        // while (delta > 180) {
+        //     targetAngle += 360;
+        // }
+        // while (delta < -180) {
+        //     targetAngle -= 360;
+        // }
        
-        targetAngle += currentAngle - currentAngleMod;
-        lastTargetAngle = targetAngle;
+        // targetAngle += currentAngle - currentAngleMod;
+        // lastTargetAngle = targetAngle;
         
-        int rawAngle = convertDegreesToEncoder(targetAngle);
-        setRawAngle(rawAngle);
-    }
-
-    public void setRawAngle(int rawAngle)  {
-        angleMotor.set(rawAngle);
-    }
-
-    private int toCounts(double angle)
-    {
-        return (angle*RobotMap.ENCODER_TICKS_PER_REVOLUTION)/360.0;
-    }
-    
-    public void setTargetSpeed(double speed) {
-        
-    }
-
-    public double getAngle() {
-        return velocity.getAngle();
+        // int rawAngle = convertDegreesToEncoder(targetAngle);
     }
 }

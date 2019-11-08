@@ -10,7 +10,7 @@ package frc.robot.util;
  * 
  * @since November 7, 2019
  */
-public Vector {
+public class Vector {
     private double x;
     private double y;
     
@@ -38,14 +38,14 @@ public Vector {
      * Adds the current vector to another vector and returns the sum.
      */
     public Vector add(Vector other) {
-        return addVectors(this, other);
+        return add(this, other);
     }
     
     /**
      * Gets the magnitude of the vector.
      */
     public double getMagnitude() {
-        return Math.sqrt(x * x + y * y)
+        return Math.sqrt(x * x + y * y);
     }
 
     /**
