@@ -21,19 +21,23 @@ public class SwerveModule {
     //Voltage/Current Constants
     private static final double VOLTAGE_COMP = 10;
 
-    private static final int CURRENT_CONTINUOUS = 20;
-    private static final int CURRENT_PEAK = 30;
+    private static final int CURRENT_CONTINUOUS = 40;
+    private static final int CURRENT_PEAK = 60;
     private static final int CURRENT_PEAK_DUR = 500;
 
-    //Inversions
+    // Motor inversions
     private final boolean DRIVE_INVERTED;
     private final boolean ANGLE_INVERTED;
+
+    public boolean swerveDriveInverted; // Whether the motor is inverted when turning the angle motors
 
     private final boolean DRIVE_SENSOR_PHASE;
     private final boolean ANGLE_SENSOR_PHASE;
 
     private HSTalon angleMotor;
     private HSTalon driveMotor;
+    
+    private Vector velocity;
 
     public SwerveModule(int driveId, boolean invertDriveTalon, boolean driveSensorPhase, int angleId, boolean invertAngleTalon, boolean angleSensorPhase) {
         driveMotor = new HSTalon(driveId);
@@ -44,6 +48,8 @@ public class SwerveModule {
 
         DRIVE_SENSOR_PHASE = driveSensorPhase;
         ANGLE_SENSOR_PHASE = angleSensorPhase;
+
+        swerveDriveInverted = false;
 
         driveTalonInit(driveMotor);
         angleTalonInit(angleMotor);
@@ -69,9 +75,6 @@ public class SwerveModule {
 
         talon.configVoltageCompSaturation(VOLTAGE_COMP);
         talon.enableVoltageCompensation(true);
-
-        talon.setInverted(DRIVE_INVERTED);
-        talon.setSensorPhase(DRIVE_SENSOR_PHASE);
     }
 
     public void angleTalonInit(HSTalon talon) {
@@ -92,9 +95,6 @@ public class SwerveModule {
 
         talon.configVoltageCompSaturation(VOLTAGE_COMP);
         talon.enableVoltageCompensation(true);
-
-        talon.setInverted(ANGLE_INVERTED);
-        talon.setSensorPhase(ANGLE_SENSOR_PHASE);
     } 
     
     public static void configCurrentLimit(HSTalon talon) {
@@ -110,5 +110,53 @@ public class SwerveModule {
         
     public HSTalon getDriveMotor() {
         return driveMotor;
+    }
+
+    public boolean shouldInvert(int desiredPos) {
+        return Math.abs(talon.getAngleMotor().getSelectedSensorPosition() - desiredPos) > 90;
+    }
+
+    /**
+     * Sets the target angle of the swerve module.
+     * 
+     * @param targetAngle the angle (in degrees) of the setpoint
+     */
+    public void setTargetAngle(double targetAngle) {
+        targetAngle = targetAngle % 360;
+        targetAngle += mZeroOffset;
+        double currentAngle = angleMotor.getSelectedSensorPosition(0) * (360.0/1024.0);
+        double currentAngleMod = modulate360(currentAngle);
+        if (currentAngleMod < 0) currentAngleMod += 360;
+        
+        double delta = currentAngleMod - targetAngle;
+        while (delta > 180) {
+            targetAngle += 360;
+        }
+        while (delta < -180) {
+            targetAngle -= 360;
+        }
+       
+        targetAngle += currentAngle - currentAngleMod;
+        lastTargetAngle = targetAngle;
+        
+        int rawAngle = convertDegreesToEncoder(targetAngle);
+        setRawAngle(rawAngle);
+    }
+
+    public void setRawAngle(int rawAngle)  {
+        angleMotor.set(rawAngle);
+    }
+
+    private int toCounts(double angle)
+    {
+        return (angle*RobotMap.ENCODER_TICKS_PER_REVOLUTION)/360.0;
+    }
+    
+    public void setTargetSpeed(double speed) {
+        
+    }
+
+    public double getAngle() {
+        return velocity.getAngle();
     }
 }

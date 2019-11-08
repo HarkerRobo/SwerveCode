@@ -24,7 +24,8 @@ public class OI {
         driverGamepad = new XboxGamepad(DRIVER_PORT);
         operatorGamepad = new XboxGamepad(OPERATOR_PORT);
 
-        //Controller Bindings below
+        SmartDashboard.putBoolean("MemeMode enabled?", memeMode());
+        operatorGamepad.getButtonA().whenPressed(new ConditionalCommand(() -> memeMode(), new MemeMode(10)));
     }
 
     public static XboxGamepad getDriverGamepad() {
@@ -33,5 +34,9 @@ public class OI {
 
     public static XboxGamepad getOperatorGamepad() {
         return operatorGamepad;
+    }
+
+    private boolean memeMode() {
+        return operatorGamepad.getLeftBumper().getButtonBumperLeftState() && operatorGamepad.RightBumper().getButtonBumperRightState();
     }
 }

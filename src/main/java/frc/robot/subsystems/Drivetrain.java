@@ -76,10 +76,43 @@ public class Drivetrain extends Subsystem {
 	protected void initDefaultCommand() {
 		setDefaultCommand(new SwervePercentOutput());
 	}
+
+	public void changeAngle(double angle) {
+		topLeft.setAngle(angle);
+		topRight.setAngle(angle);
+		bottomLeft.setAngle(angle);
+		bottomRight.setAngle(angle);
+	}
 	
 	public static Drivetrain getInstance() {
-        if(instance == null) 
-            instance = new Drivetrain();
+		if(instance == null) 
+			instance = new Drivetrain();
 		return instance;
+	}
+
+	/***
+	 * 
+	 */
+	public void setDrivetrain(Vector tr, Vector tl, Vector br, Vector bl) {
+		
+		// Scale down the vectors so that the largest magnitude is at the maximum speed
+		double largestMag = Math.max4(tr.getMagnitude(), tl.getMagnitude(), br,getMagnitude(), bl.getMagnitude());
+		
+		if(largestMag < 1) 
+			largestMag = 1;
+
+		tr.scale(1 / largestMag);
+		tl.scale(1 / largestMag);
+		br.scale(1 / largestMag);
+		bl.scale(1 / largestMag);
+
+		topRight.setVector(tr.getMagnitude());
+		topLeft.setVector(tl.getMagnitude());
+		bottomRight.setVector(br.getMagnitude());		
+		bottomLeft.setVector(bl.getMagnitude());
+	}
+
+	public double max4(double a, double b, double c, double d) {
+		return Math.max(Math.max(a, b), Math.max(c, d));
 	}
 }
