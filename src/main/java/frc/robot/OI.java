@@ -30,10 +30,6 @@ public class OI {
     }
 
     public void initBindings() {
-        
-
-        //Controller Bindings below
-
     }
 
     public XboxGamepad getDriverGamepad() {

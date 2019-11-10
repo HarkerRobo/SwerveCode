@@ -48,7 +48,6 @@ public class Robot extends TimedRobot {
     public void robotInit() {
         OI.getInstance().initBindings();
         Drivetrain.getInstance();
-    
     }
 
     /**
@@ -96,6 +95,13 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
         Scheduler.getInstance().run();
+    }
+
+    /**
+     * This function is called once each time the robot enters test mode.
+     */
+    @Override
+    public void testInit() {
     }
 
     /**

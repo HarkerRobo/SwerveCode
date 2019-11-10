@@ -3,9 +3,6 @@ package frc.robot.util;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 
-import frc.robot.RobotMap;
-import harkerrobolib.util.Conversions;
-import harkerrobolib.util.Conversions.AngleUnit;
 import harkerrobolib.wrappers.HSTalon;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -19,12 +16,13 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
  * @author Shahzeb Lakhani
  * @author Anirudh Kotamraju
  * @author Chirag Kaushik
+ * @author Arjun Dixit
  * @since 11/1/19
  */
 public class SwerveModule {
 
+    //Encoder ticks per one rotation of the wheel angle gear, gear ratio is 1:1
     public static final int ENCODER_TICKS = 4096;
-
 
     //Voltage/Current Constants
     private static final double VOLTAGE_COMP = 10;
@@ -36,15 +34,15 @@ public class SwerveModule {
     // Motor inversions
     private final boolean DRIVE_INVERTED;
     private final boolean ANGLE_INVERTED;
-    public boolean swerveDriveInverted; // Whether the drive motor is inverted when turning the angle motors
 
     private final boolean DRIVE_SENSOR_PHASE;
     private final boolean ANGLE_SENSOR_PHASE;
 
+    // Whether the drive motor should be inverted due to turning logic
+    public boolean swerveDriveInverted; 
+
     private HSTalon angleMotor;
     private HSTalon driveMotor;
-    
-    // private Vector velocity;
 
     public SwerveModule(int driveId, boolean invertDriveTalon, boolean driveSensorPhase, int angleId, boolean invertAngleTalon, boolean angleSensorPhase) {
         driveMotor = new HSTalon(driveId);
@@ -55,8 +53,6 @@ public class SwerveModule {
 
         DRIVE_SENSOR_PHASE = driveSensorPhase;
         ANGLE_SENSOR_PHASE = angleSensorPhase;
-
-        // swerveDriveInverted = false;
 
         driveTalonInit(driveMotor);
         angleTalonInit(angleMotor);
@@ -82,7 +78,6 @@ public class SwerveModule {
 
         talon.configVoltageCompSaturation(VOLTAGE_COMP);
         talon.enableVoltageCompensation(true);
-        
     }
 
     public void angleTalonInit(HSTalon talon) {
@@ -111,7 +106,36 @@ public class SwerveModule {
         talon.configPeakCurrentDuration(CURRENT_PEAK_DUR);
         talon.enableCurrentLimit(true);
     }
-    
+
+    public void invertOutput() {
+        swerveDriveInverted = !swerveDriveInverted;
+    }
+
+    public void setOutputPercent(double output) {
+        driveMotor.set(ControlMode.PercentOutput, output * (swerveDriveInverted ? -1 : 1));
+    }
+
+    public void setOutputVelocity(int velocity) {
+        driveMotor.set(ControlMode.Velocity, velocity * (swerveDriveInverted ? -1 : 1));
+    }
+
+    /**
+     * Sets the angle motor to go to the desired angle
+     * 
+     * @param targetAngle the angle (in degrees) of the setpoint
+     */
+    public void setTargetAngle(double targetAngle) { 
+        int targetPos = (int)((targetAngle / 360) * 4096);
+        angleMotor.set(ControlMode.Position, targetPos);
+    }
+
+    /**
+     * Returns the current angle in degrees
+     */
+    public double getAngleDegrees() {
+        return angleMotor.getSelectedSensorPosition() * 360.0 / SwerveModule.ENCODER_TICKS; //Convert encoder ticks to degrees
+    }
+
     public HSTalon getAngleMotor() {
         return angleMotor;    
     }            
@@ -119,32 +143,4 @@ public class SwerveModule {
     public HSTalon getDriveMotor() {
         return driveMotor;
     }
-
-    public void setOutput(double output) {
-        driveMotor.set(ControlMode.PercentOutput, output * (swerveDriveInverted ? -1 : 1));
-    }
-
-    public void invertOutput() {
-        swerveDriveInverted = !swerveDriveInverted;
-    }
-
-    /**
-     * Sets the target angle of the swerve module.
-     * 
-     * @param targetAngle the angle (in degrees) of the setpoint
-     */
-    public void setTargetAngle(double targetAngle) { 
-        int rawAngle = (int)((targetAngle / 360) * 4096);
-        angleMotor.set(ControlMode.Position, rawAngle);
-        System.out.println(rawAngle);
-    }
-
-    /**
-     * Returns the current angle in degrees from [0, 360)
-     */
-    public double getAngleDegrees() {
-        double rawAngle = angleMotor.getSelectedSensorPosition() * 360.0 / SwerveModule.ENCODER_TICKS; //Convert encoder ticks to degrees
-        return rawAngle;// % 360 + 360) % 360; //Map Degrees into the range [0, 360) and return
-    }
-
 }

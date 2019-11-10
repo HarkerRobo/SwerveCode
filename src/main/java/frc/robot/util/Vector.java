@@ -8,7 +8,7 @@ package frc.robot.util;
  * @author Chirag Kaushik
  * @author Aimee Wang
  * 
- * @since November 7, 2019
+ * @since 11/7/19
  */
 public class Vector {
     private double x;
@@ -21,39 +21,6 @@ public class Vector {
     public Vector(double x, double y) {
         this.x = x;
         this.y = y;
-    }
-
-    /**
-     * Adds two vectors and returns the sum.
-     * 
-     * TODO: scaling down using omega factor
-     */
-    public static Vector add(Vector first, Vector second) {
-        Vector newVector = new Vector(first.getX() + second.getX(), first.getY() + second.getY());
-        // double scale = Math.max(first.getMagnitude(),second.getMagnitude())
-        return newVector;
-    }
-
-    /**
-     * Adds the current vector to another vector and returns the sum.
-     */
-    public Vector add(Vector other) {
-        return add(this, other);
-    }
-    
-    /**
-     * Gets the magnitude of the vector.
-     */
-    public double getMagnitude() {
-        return Math.sqrt(x * x + y * y);
-    }
-
-    /**
-     * Returns the angle of the vector with respect to the positive x axis in degrees. 
-     * Returns a vaue within the range of [0,360)
-     */
-    public double getAngle() {
-        return ((Math.atan2(y, x) * 180 / Math.PI) + 180) % 360;
     }
 
     /**
@@ -70,10 +37,44 @@ public class Vector {
         return y;
     }
 
+    /**
+     * Returns the angle of the vector with respect to the positive x axis in degrees. 
+     * Returns a vaue within the range of [0,360)
+     */
+    public double getAngle() {
+        double angle = Math.atan2(y, x) * 180 / Math.PI; //Angle in degrees, range: (-180,180]
+        return (angle + 360) % 360; //Convert to desired range
+    }
+
+    /**
+     * Gets the magnitude of the vector.
+     */
+    public double getMagnitude() {
+        return Math.sqrt(x * x + y * y);
+    }
+
+    /**
+     * Returns this vector after scaling it by a certain factor
+     * 
+     * @param scale The value to multiply each of the vector's components by
+     */
     public Vector scale(double scale) {
         x *= scale;
         y *= scale;
         return this;
     }
 
+    /**
+     * Adds two vectors and returns the sum in a new Vector.
+     */
+    public static Vector add(Vector first, Vector second) {
+        return new Vector(first.getX() + second.getX(), first.getY() + second.getY());
+    }
+
+    /**
+     * Adds this Vector to another Vector and returns the sum in a new Vector.
+     */
+    public Vector add(Vector other) {
+        return add(this, other);
+    }
 }

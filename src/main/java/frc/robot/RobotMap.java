@@ -20,7 +20,7 @@ public class RobotMap {
     public static final int PRIMARY_INDEX = 0;
     public static final int AUXILIARY_INDEX = 1;
     
-    //Drivetrian CAN ids.
+    //Drivetrain CAN ids.
     public static final int TL_DRIVE_ID = 1;
     public static final int TL_ANGLE_ID = 0;
 
@@ -34,5 +34,4 @@ public class RobotMap {
     public static final int BR_ANGLE_ID = 2;
 
 	public static final int PIGEON_ID = 1;
-
 }
