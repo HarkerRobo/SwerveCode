@@ -49,10 +49,11 @@ public class Vector {
     }
 
     /**
-     * Returns the angle of the vector with respect to the positive x axis in degrees.
+     * Returns the angle of the vector with respect to the positive x axis in degrees. 
+     * Returns a vaue within the range of [0,360)
      */
     public double getAngle() {
-        return Math.atan2(y, x) * 180 / Math.PI;
+        return ((Math.atan2(y, x) * 180 / Math.PI) + 180) % 360;
     }
 
     /**
@@ -69,9 +70,10 @@ public class Vector {
         return y;
     }
 
-    public void scale(double scale) {
+    public Vector scale(double scale) {
         x *= scale;
         y *= scale;
+        return this;
     }
 
 }

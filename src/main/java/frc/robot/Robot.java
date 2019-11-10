@@ -11,15 +11,33 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Scheduler;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Drivetrain;
 
 /**
- * The VM is configured to automatically run this class, and to call the
- * functions corresponding to each mode, as described in the TimedRobot
- * documentation. If you change the name of this class or the package after
- * creating this project, you must also update the manifest file in the resource
- * directory.
- */
+* Send it? You don't know what it means? Well, let me tell you a little story. Think of the 'send' as the package. 
+* We're sending that package. Where? Doesn't matter. It's about the send, not the destination. Now, let's begin. 
+* Let's say you order a package off of Amazon™, but it never makes it past the website. That right there? That's 
+* a no send. No sender. Not even sent. Now you apply it to the Cheesy Poofs. Let's say we start a match, and the 
+* FMS data is sent out. But, the robot doesn't move. The Poofs don't pass the auto line, and they don't collect 
+* their five points. Bam. No send. Not a single aspect of the autonomous was sent. Anywhere.
+*
+* Half send? Well, let's say you order that package off of Amazon™. This time, it makes it past the website and 
+* your package leaves the warehouse; but, it's otherwise lost, stolen, or destroyed on its way to your house. 
+* Half send. That's a half sender. It probably got halfway there, but wasn't fully sent. Let's look back at the 
+* Poofs' auton. Now, the match starts, and Lockdown© moves. But, alas, its elevator hits the scale and the robot 
+* tips over, or only two of the four cubes successfully get placed. Bam, half send. That's a half sender. Half of 
+* those power cubes were sent.
+* 
+* Fully send, though? Well, let's, again, say you order that same package off of Amazon™. This time around, 
+* the package arrives all in one piece, no damage. You pick it up, sign for it, and use its contents. Now that, 
+* my friend, is a full send. Back to the auton though. Now the Poofs pickup those four power cubes and place all 
+* four of them on the scale. They now own that scale. Bam, full send. Those four cubes? Fully sent. You could say 
+* that those first fifteen seconds were a full send.
+* 
+* But, you go 53-0? Now, that's not a full send, that's a next level of send. That, my good friend, is a FULL 53ND.
+* This is the art of the send, and let me ask you: are you silly?
+*/
 public class Robot extends TimedRobot {
 
     /**
@@ -29,8 +47,8 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         OI.getInstance().initBindings();
-
         Drivetrain.getInstance();
+    
     }
 
     /**
@@ -39,6 +57,15 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         Scheduler.getInstance().run();
+        
+        SmartDashboard.putNumber("Top Left Rotation Output", Drivetrain.getInstance().getTopLeft().getAngleMotor().getMotorOutputPercent());
+        SmartDashboard.putNumber("Top Left Drive Output", Drivetrain.getInstance().getTopLeft().getDriveMotor().getMotorOutputPercent());
+        SmartDashboard.putNumber("Top Right Rotation Output", Drivetrain.getInstance().getTopRight().getAngleMotor().getMotorOutputPercent());
+        SmartDashboard.putNumber("Top Right Drive Output", Drivetrain.getInstance().getTopRight().getDriveMotor().getMotorOutputPercent());
+        SmartDashboard.putNumber("Back Left Rotation Output", Drivetrain.getInstance().getBackLeft().getAngleMotor().getMotorOutputPercent());
+        SmartDashboard.putNumber("Back Left Drive Output", Drivetrain.getInstance().getBackLeft().getDriveMotor().getMotorOutputPercent());
+        SmartDashboard.putNumber("Back Right Rotation Output", Drivetrain.getInstance().getBackRight().getAngleMotor().getMotorOutputPercent());
+        SmartDashboard.putNumber("Back Right Drive Output", Drivetrain.getInstance().getBackRight().getDriveMotor().getMotorOutputPercent());
     }
 
     /**
@@ -90,10 +117,10 @@ public class Robot extends TimedRobot {
         Drivetrain.getInstance().getTopRight().getDriveMotor().set(ControlMode.Disabled, 0);
         Drivetrain.getInstance().getTopRight().getAngleMotor().set(ControlMode.Disabled, 0);
 
-        Drivetrain.getInstance().getBottomLeft().getDriveMotor().set(ControlMode.Disabled, 0);
-        Drivetrain.getInstance().getBottomLeft().getAngleMotor().set(ControlMode.Disabled, 0);
+        Drivetrain.getInstance().getBackLeft().getDriveMotor().set(ControlMode.Disabled, 0);
+        Drivetrain.getInstance().getBackLeft().getAngleMotor().set(ControlMode.Disabled, 0);
 
-        Drivetrain.getInstance().getBottomRight().getDriveMotor().set(ControlMode.Disabled, 0);
-        Drivetrain.getInstance().getBottomRight().getAngleMotor().set(ControlMode.Disabled, 0);
+        Drivetrain.getInstance().getBackRight().getDriveMotor().set(ControlMode.Disabled, 0);
+        Drivetrain.getInstance().getBackRight().getAngleMotor().set(ControlMode.Disabled, 0);
     }
 }

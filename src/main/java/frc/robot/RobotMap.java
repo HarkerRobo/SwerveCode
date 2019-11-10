@@ -33,4 +33,6 @@ public class RobotMap {
     public static final int BR_DRIVE_ID = 4;
     public static final int BR_ANGLE_ID = 2;
 
+	public static final int PIGEON_ID = 1;
+
 }

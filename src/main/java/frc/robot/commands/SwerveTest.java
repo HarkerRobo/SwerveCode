@@ -28,61 +28,61 @@ public class SwerveTest extends Command {
     public void execute() {
         if(OI.getInstance().getDriverGamepad().getButtonAState()) {
             Drivetrain.getInstance().getTopRight().getDriveMotor().set(ControlMode.PercentOutput, OUTPUT);
-            Drivetrain.getInstance().getBottomRight().getDriveMotor().set(ControlMode.PercentOutput, OUTPUT);
+            Drivetrain.getInstance().getBackRight().getDriveMotor().set(ControlMode.PercentOutput, OUTPUT);
             Drivetrain.getInstance().getTopLeft().getDriveMotor().set(ControlMode.PercentOutput, OUTPUT);
-            Drivetrain.getInstance().getBottomLeft().getDriveMotor().set(ControlMode.PercentOutput, OUTPUT);
+            Drivetrain.getInstance().getBackLeft().getDriveMotor().set(ControlMode.PercentOutput, OUTPUT);
         } 
         else if(OI.getInstance().getDriverGamepad().getButtonBState()) {
             Drivetrain.getInstance().getTopRight().getDriveMotor().set(ControlMode.PercentOutput, -OUTPUT);
-            Drivetrain.getInstance().getBottomRight().getDriveMotor().set(ControlMode.PercentOutput, -OUTPUT);
+            Drivetrain.getInstance().getBackRight().getDriveMotor().set(ControlMode.PercentOutput, -OUTPUT);
             Drivetrain.getInstance().getTopLeft().getDriveMotor().set(ControlMode.PercentOutput, -OUTPUT);
-            Drivetrain.getInstance().getBottomLeft().getDriveMotor().set(ControlMode.PercentOutput, -OUTPUT);
+            Drivetrain.getInstance().getBackLeft().getDriveMotor().set(ControlMode.PercentOutput, -OUTPUT);
         } else {
             Drivetrain.getInstance().getTopRight().getDriveMotor().set(ControlMode.Disabled, 0);
-            Drivetrain.getInstance().getBottomRight().getDriveMotor().set(ControlMode.Disabled, 0);
+            Drivetrain.getInstance().getBackRight().getDriveMotor().set(ControlMode.Disabled, 0);
             Drivetrain.getInstance().getTopLeft().getDriveMotor().set(ControlMode.Disabled, 0);
-            Drivetrain.getInstance().getBottomLeft().getDriveMotor().set(ControlMode.Disabled, 0);
+            Drivetrain.getInstance().getBackLeft().getDriveMotor().set(ControlMode.Disabled, 0);
         }
         if(OI.getInstance().getDriverGamepad().getButtonYState()) {
             Drivetrain.getInstance().getTopRight().getAngleMotor().set(ControlMode.PercentOutput, OUTPUT);
-            Drivetrain.getInstance().getBottomRight().getAngleMotor().set(ControlMode.PercentOutput, OUTPUT);
+            Drivetrain.getInstance().getBackRight().getAngleMotor().set(ControlMode.PercentOutput, OUTPUT);
             Drivetrain.getInstance().getTopLeft().getAngleMotor().set(ControlMode.PercentOutput, OUTPUT);
-            Drivetrain.getInstance().getBottomLeft().getAngleMotor().set(ControlMode.PercentOutput, OUTPUT);
+            Drivetrain.getInstance().getBackLeft().getAngleMotor().set(ControlMode.PercentOutput, OUTPUT);
         } else 
         if(OI.getInstance().getDriverGamepad().getButtonXState()) {
             Drivetrain.getInstance().getTopRight().getAngleMotor().set(ControlMode.PercentOutput, -OUTPUT);
-            Drivetrain.getInstance().getBottomRight().getAngleMotor().set(ControlMode.PercentOutput,- OUTPUT);
+            Drivetrain.getInstance().getBackRight().getAngleMotor().set(ControlMode.PercentOutput,- OUTPUT);
             Drivetrain.getInstance().getTopLeft().getAngleMotor().set(ControlMode.PercentOutput, -OUTPUT);
-            Drivetrain.getInstance().getBottomLeft().getAngleMotor().set(ControlMode.PercentOutput, -OUTPUT);
+            Drivetrain.getInstance().getBackLeft().getAngleMotor().set(ControlMode.PercentOutput, -OUTPUT);
         } else {
             Drivetrain.getInstance().getTopRight().getAngleMotor().set(ControlMode.Disabled, 0);
-            Drivetrain.getInstance().getBottomRight().getAngleMotor().set(ControlMode.Disabled, 0);
+            Drivetrain.getInstance().getBackRight().getAngleMotor().set(ControlMode.Disabled, 0);
             Drivetrain.getInstance().getTopLeft().getAngleMotor().set(ControlMode.Disabled, 0);
-            Drivetrain.getInstance().getBottomLeft().getAngleMotor().set(ControlMode.Disabled, 0);
+            Drivetrain.getInstance().getBackLeft().getAngleMotor().set(ControlMode.Disabled, 0);
         }
 
         SmartDashboard.putNumber("dt tr angle", Drivetrain.getInstance().getTopRight().getAngleMotor().getSelectedSensorPosition());
         SmartDashboard.putNumber("dt tl angle", Drivetrain.getInstance().getTopLeft().getAngleMotor().getSelectedSensorPosition());
-        SmartDashboard.putNumber("dt br angle", Drivetrain.getInstance().getBottomRight().getAngleMotor().getSelectedSensorPosition());
-        SmartDashboard.putNumber("dt bl angle", Drivetrain.getInstance().getBottomLeft().getAngleMotor().getSelectedSensorPosition());
+        SmartDashboard.putNumber("dt br angle", Drivetrain.getInstance().getBackRight().getAngleMotor().getSelectedSensorPosition());
+        SmartDashboard.putNumber("dt bl angle", Drivetrain.getInstance().getBackLeft().getAngleMotor().getSelectedSensorPosition());
 
         SmartDashboard.putNumber("dt tr drive", Drivetrain.getInstance().getTopRight().getDriveMotor().getSelectedSensorPosition());
         SmartDashboard.putNumber("dt tl drive", Drivetrain.getInstance().getTopLeft().getDriveMotor().getSelectedSensorPosition());
-        SmartDashboard.putNumber("dt br drive", Drivetrain.getInstance().getBottomRight().getDriveMotor().getSelectedSensorPosition());
-        SmartDashboard.putNumber("dt bl drive", Drivetrain.getInstance().getBottomLeft().getDriveMotor().getSelectedSensorPosition());
+        SmartDashboard.putNumber("dt br drive", Drivetrain.getInstance().getBackRight().getDriveMotor().getSelectedSensorPosition());
+        SmartDashboard.putNumber("dt bl drive", Drivetrain.getInstance().getBackLeft().getDriveMotor().getSelectedSensorPosition());
     }
 
     public void end() {
 
         Drivetrain.getInstance().getTopRight().getDriveMotor().set(ControlMode.Disabled, 0);
-        Drivetrain.getInstance().getBottomRight().getDriveMotor().set(ControlMode.Disabled, 0);
+        Drivetrain.getInstance().getBackRight().getDriveMotor().set(ControlMode.Disabled, 0);
         Drivetrain.getInstance().getTopLeft().getDriveMotor().set(ControlMode.Disabled, 0);
-        Drivetrain.getInstance().getBottomLeft().getDriveMotor().set(ControlMode.Disabled, 0);
+        Drivetrain.getInstance().getBackLeft().getDriveMotor().set(ControlMode.Disabled, 0);
 
         Drivetrain.getInstance().getTopRight().getAngleMotor().set(ControlMode.Disabled, 0);
-        Drivetrain.getInstance().getBottomRight().getAngleMotor().set(ControlMode.Disabled, 0);
+        Drivetrain.getInstance().getBackRight().getAngleMotor().set(ControlMode.Disabled, 0);
         Drivetrain.getInstance().getTopLeft().getAngleMotor().set(ControlMode.Disabled, 0);
-        Drivetrain.getInstance().getBottomLeft().getAngleMotor().set(ControlMode.Disabled, 0);
+        Drivetrain.getInstance().getBackLeft().getAngleMotor().set(ControlMode.Disabled, 0);
     }
 
 
