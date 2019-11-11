@@ -69,6 +69,7 @@ public class Drivetrain extends Subsystem {
     public static final int[] OFFSETS = {1637, 6846, 11239, 4520};
 
 	private Drivetrain() {
+        moduleArr = new SwerveModule[4];
         
         for(int i = 0; i < 4; i++) {
             moduleArr[i] = new SwerveModule(RobotMap.DRIVE_IDS[i], DRIVE_INVERTED[i], DRIVE_SENSOR_PHASE_ARR[i], 
