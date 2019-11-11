@@ -21,7 +21,7 @@ import harkerrobolib.util.MathUtil;
  * @author Shahzeb Lakhani
  * @author Anirudh Kotamraju
  * @author Arjun Dixit
- * @since 11/4/19
+ * @since 11/11/19
  */
 public class SwervePercentOutput extends IndefiniteCommand {
     private static final double ROTATION_MAGNITUDE = Math.sqrt(Math.pow(Drivetrain.DT_LENGTH, 2) + Math.pow(Drivetrain.DT_WIDTH, 2)); 
@@ -47,39 +47,35 @@ public class SwervePercentOutput extends IndefiniteCommand {
 
         Vector translation = new Vector(translateX, translateY);
 
-        Vector topLeftRotation = new Vector(Drivetrain.DT_LENGTH, Drivetrain.DT_WIDTH);
-        Vector topRightRotation = new Vector(Drivetrain.DT_LENGTH, -Drivetrain.DT_WIDTH);
-        Vector backLeftRotation = new Vector(-Drivetrain.DT_LENGTH, Drivetrain.DT_WIDTH);
-        Vector backRightRotation = new Vector(-Drivetrain.DT_LENGTH, -Drivetrain.DT_WIDTH);
+        //initialize rotation vectors
+        Vector[] rotationVectors = {new Vector(Drivetrain.DT_LENGTH, Drivetrain.DT_WIDTH),
+                                    new Vector(Drivetrain.DT_LENGTH, -Drivetrain.DT_WIDTH),
+                                    new Vector(-Drivetrain.DT_LENGTH, Drivetrain.DT_WIDTH),
+                                    new Vector(-Drivetrain.DT_LENGTH, -Drivetrain.DT_WIDTH)};
 
         //Scale by ROTATION_MAGNITUDE to make the magnitude of all vectors 1
         //and then by turnMagnitude to reflect the desired rotational speed
-        topLeftRotation.scale(turnMagnitude / ROTATION_MAGNITUDE);
-        topRightRotation.scale(turnMagnitude / ROTATION_MAGNITUDE);
-        backLeftRotation.scale(turnMagnitude / ROTATION_MAGNITUDE);
-        backRightRotation.scale(turnMagnitude / ROTATION_MAGNITUDE);
+        for(Vector vec : rotationVectors)
+            vec.scale(turnMagnitude / ROTATION_MAGNITUDE);
         
-        Vector sumTopLeft = Vector.add(topLeftRotation, translation).scale(OUTPUT_MULTIPLIER);
-        Vector sumTopRight = Vector.add(topRightRotation, translation).scale(OUTPUT_MULTIPLIER);
-        Vector sumBackLeft = Vector.add(backLeftRotation, translation).scale(OUTPUT_MULTIPLIER);
-        Vector sumBackRight = Vector.add(backRightRotation, translation).scale(OUTPUT_MULTIPLIER);
-        
-        // Scale down the vectors so that the largest possible magnitude is 1 (100% output)
-        double largestMag = max4(sumTopLeft.getMagnitude(), sumTopRight.getMagnitude(), sumBackLeft.getMagnitude(), sumBackRight.getMagnitude());
+        Vector[] combinedVectors = new Vector[rotationVectors.length];
+        double largestMag = 0;
+
+        //Combine rotation vectors with translation vectors and scale to output of left joystick
+        for(int i = 0; i < 4; i++) {
+            combinedVectors[i] = (Vector.add(rotationVectors[i], translation)).scale(OUTPUT_MULTIPLIER);
+            if(combinedVectors[i].getMagnitude() > largestMag)
+                largestMag = combinedVectors[i].getMagnitude(); //get largest magnitude out of all vectors
+        }
 		
-		if(largestMag < 1) 
+		if(largestMag < 1)
 			largestMag = 1; //Set to 1 so none of the vectors are modified
+        
+        //scale vectors
+        for(Vector vec : combinedVectors)
+            vec.scale(1 / largestMag);
 
-        sumTopLeft.scale(1 / largestMag);
-		sumTopRight.scale(1 / largestMag);
-		sumBackLeft.scale(1 / largestMag);
-		sumBackRight.scale(1 / largestMag);
-
-        Drivetrain.getInstance().setDrivetrain(sumTopLeft, sumTopRight, sumBackLeft, sumBackRight);
-    }
-
-    public static double max4(double a, double b, double c, double d) {
-		return Math.max(Math.max(a, b), Math.max(c, d));
+        Drivetrain.getInstance().setDrivetrain(combinedVectors);
     }
     
     @Override

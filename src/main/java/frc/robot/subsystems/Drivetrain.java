@@ -35,31 +35,16 @@ public class Drivetrain extends Subsystem {
 
 	public static Drivetrain instance;
 
-    private SwerveModule topLeft;
-    private SwerveModule topRight;
-    private SwerveModule backLeft;
-    private SwerveModule backRight;
+    private SwerveModule[] moduleArr;
     
     private boolean isFieldSensitive;
     private HSPigeon pigeon;
 
-	private static final boolean TL_DRIVE_INVERTED = true;
-	private static final boolean TL_ANGLE_INVERTED = false;
-	private static final boolean TR_DRIVE_INVERTED = true;
-	private static final boolean TR_ANGLE_INVERTED = true;
-    private static final boolean BL_DRIVE_INVERTED = true;
-	private static final boolean BL_ANGLE_INVERTED = true;
-	private static final boolean BR_DRIVE_INVERTED = true;
-    private static final boolean BR_ANGLE_INVERTED = true;
-    
-	private static final boolean TL_DRIVE_SENSOR_PHASE = true;
-	private static final boolean TL_ANGLE_SENSOR_PHASE = false;
-	private static final boolean TR_DRIVE_SENSOR_PHASE = true;
-	private static final boolean TR_ANGLE_SENSOR_PHASE = true;
-    private static final boolean BL_DRIVE_SENSOR_PHASE = true;
-	private static final boolean BL_ANGLE_SENSOR_PHASE = true;
-	private static final boolean BR_DRIVE_SENSOR_PHASE = true;
-	private static final boolean BR_ANGLE_SENSOR_PHASE = true;
+    private static final boolean[] DRIVE_INVERTED = {true, true, true, true};
+    private static final boolean[] ANGLE_INVERTED = {false, true, true, true};
+
+    private static final boolean[] DRIVE_SENSOR_PHASE_ARR = {true, true, true, true};
+    private static final boolean[] ANGLE_SENSOR_PHASE_ARR = {false, true, true, true};
 
     public static final int ANGLE_POSITION_SLOT = 0;
 	private static final double ANGLE_POSITION_KP = 0.3;
@@ -81,26 +66,16 @@ public class Drivetrain extends Subsystem {
      */
     public static final double DT_LENGTH = 20.6; 
     
-    public static final int TL_OFFSET = 1637;
-    public static final int TR_OFFSET = 6846;
-    public static final int BL_OFFSET = 11239;
-    private static final int BR_OFFSET = 4520;
+    public static final int[] OFFSETS = {1637, 6846, 11239, 4520};
 
 	private Drivetrain() {
-		topLeft = new SwerveModule(RobotMap.TL_DRIVE_ID, TL_DRIVE_INVERTED, TL_DRIVE_SENSOR_PHASE, RobotMap.TL_ANGLE_ID, TL_ANGLE_INVERTED, TL_ANGLE_SENSOR_PHASE);
-		topRight = new SwerveModule(RobotMap.TR_DRIVE_ID, TR_DRIVE_INVERTED, TR_DRIVE_SENSOR_PHASE, RobotMap.TR_ANGLE_ID, TR_ANGLE_INVERTED, TR_ANGLE_SENSOR_PHASE);
-		backLeft = new SwerveModule(RobotMap.BL_DRIVE_ID, BL_DRIVE_INVERTED, BL_DRIVE_SENSOR_PHASE, RobotMap.BL_ANGLE_ID, BL_ANGLE_INVERTED, BL_ANGLE_SENSOR_PHASE);
-		backRight = new SwerveModule(RobotMap.BR_DRIVE_ID, BR_DRIVE_INVERTED, BR_DRIVE_SENSOR_PHASE, RobotMap.BR_ANGLE_ID, BR_ANGLE_INVERTED, BR_ANGLE_SENSOR_PHASE);
-
-        int tlAngleOffset = (topLeft.getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs() - TL_OFFSET) / 4;
-        int trAngleOffset = (topRight.getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs() - TR_OFFSET) / 4;
-        int blAngleOffset = (backLeft.getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs() - BL_OFFSET) / 4;
-        int brAngleOffset = (backRight.getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs() - BR_OFFSET) / 4;
-
-        topLeft.getAngleMotor().setSelectedSensorPosition(tlAngleOffset);
-        topRight.getAngleMotor().setSelectedSensorPosition(trAngleOffset);
-        backLeft.getAngleMotor().setSelectedSensorPosition(blAngleOffset);
-        backRight.getAngleMotor().setSelectedSensorPosition(brAngleOffset);
+        
+        for(int i = 0; i < 4; i++) {
+            moduleArr[i] = new SwerveModule(RobotMap.DRIVE_IDS[i], DRIVE_INVERTED[i], DRIVE_SENSOR_PHASE_ARR[i], 
+                                            RobotMap.ANGLE_IDS[i], ANGLE_INVERTED[i], ANGLE_SENSOR_PHASE_ARR[i]);
+            HSTalon angleMotor = moduleArr[i].getAngleMotor();
+            angleMotor.setSelectedSensorPosition((angleMotor.getSensorCollection().getPulseWidthRiseToFallUs() - OFFSETS[i]) / 4);
+        }
 
         setupPositionPID();
         setupVelocityPID();
@@ -132,11 +107,9 @@ public class Drivetrain extends Subsystem {
 	/**
 	 * Sets the output of the drivetrain based on desired output vectors for each swerve module
 	 */
-	public void setDrivetrain(Vector tl, Vector tr, Vector bl, Vector br) {
-		setSwerveModule(topLeft, tl.getMagnitude(), convertAngle(topLeft, tl.getAngle()));
-		setSwerveModule(topRight, tr.getMagnitude(), convertAngle(topRight, tr.getAngle()));
-		setSwerveModule(backLeft, bl.getMagnitude(), convertAngle(backLeft, bl.getAngle()));
-		setSwerveModule(backRight, br.getMagnitude(), convertAngle(backRight, br.getAngle()));
+	public void setDrivetrain(Vector[] vecArr) {
+        for(int i = 0; i < 4; i++)
+            setSwerveModule(moduleArr[i], vecArr[i].getMagnitude(), convertAngle(moduleArr[i], vecArr[i].getAngle()));
 	}
 
 	/** 
@@ -193,10 +166,8 @@ public class Drivetrain extends Subsystem {
      * Stops all drive motors while holding the current angle
      */
 	public void stopAllDrive() {
-        setSwerveModule(topLeft, 0, topLeft.getAngleDegrees());
-        setSwerveModule(topRight, 0, topRight.getAngleDegrees());
-        setSwerveModule(backLeft, 0, backLeft.getAngleDegrees());
-        setSwerveModule(backRight, 0, backRight.getAngleDegrees());
+        for(SwerveModule module : moduleArr)
+            setSwerveModule(module, 0, module.getAngleDegrees());
 	}
 	
 	/**
@@ -204,46 +175,45 @@ public class Drivetrain extends Subsystem {
 	 * Drivetrain.getInstance().applyToAll((motor) -> motor.doSomething());
 	 */
 	public void applyToAll(Consumer<SwerveModule> consumer) {
-		consumer.accept(topLeft);
-		consumer.accept(topRight);
-		consumer.accept(backLeft);
-		consumer.accept(backRight);
+        for(SwerveModule module : moduleArr)
+		    consumer.accept(module);
 	}
 
 	/**
 	 * Calls a method on the angle motor of each swerve module.
 	 */
 	public void applyToAllAngle(Consumer<HSTalon> consumer) {
-		consumer.accept(topLeft.getAngleMotor());
-		consumer.accept(topRight.getAngleMotor());
-		consumer.accept(backLeft.getAngleMotor());
-		consumer.accept(backRight.getAngleMotor());
+        for(SwerveModule module : moduleArr)
+		    consumer.accept(module.getAngleMotor());
 	}
 
 	/**
 	 * Calls a method on the drive motor of each swerve module.
 	 */
 	public void applyToAllDrive(Consumer<HSTalon> consumer) {
-		consumer.accept(topLeft.getDriveMotor());
-		consumer.accept(topRight.getDriveMotor());
-		consumer.accept(backLeft.getDriveMotor());
-		consumer.accept(backRight.getDriveMotor());
+		for(SwerveModule module : moduleArr)
+		    consumer.accept(module.getDriveMotor());
+    }
+
+    public SwerveModule[] getModuleArr()
+    {
+        return moduleArr;
     }
 	
     public SwerveModule getTopLeft() {
-		return topLeft;
+		return moduleArr[0];
 	}
 
 	public SwerveModule getTopRight() {
-		return topRight;
+		return moduleArr[1];
 	}
 
 	public SwerveModule getBackLeft() {
-		return backLeft;
+		return moduleArr[2];
 	}
 
 	public SwerveModule getBackRight() {
-		return backRight;
+		return moduleArr[3];
     }
     
     public HSPigeon getPigeon() {

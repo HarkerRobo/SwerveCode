@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.util.SwerveModule;
 
 /**
 * Send it? You don't know what it means? Well, let me tell you a little story. Think of the 'send' as the package. 
@@ -117,16 +118,11 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void disabledPeriodic() {
-        Drivetrain.getInstance().getTopLeft().getDriveMotor().set(ControlMode.Disabled, 0);
-        Drivetrain.getInstance().getTopLeft().getAngleMotor().set(ControlMode.Disabled, 0);
+        SwerveModule[] modules = Drivetrain.getInstance().getModuleArr();
 
-        Drivetrain.getInstance().getTopRight().getDriveMotor().set(ControlMode.Disabled, 0);
-        Drivetrain.getInstance().getTopRight().getAngleMotor().set(ControlMode.Disabled, 0);
-
-        Drivetrain.getInstance().getBackLeft().getDriveMotor().set(ControlMode.Disabled, 0);
-        Drivetrain.getInstance().getBackLeft().getAngleMotor().set(ControlMode.Disabled, 0);
-
-        Drivetrain.getInstance().getBackRight().getDriveMotor().set(ControlMode.Disabled, 0);
-        Drivetrain.getInstance().getBackRight().getAngleMotor().set(ControlMode.Disabled, 0);
+        for(SwerveModule module : modules) {
+            module.getDriveMotor().set(ControlMode.Disabled, 0);
+            module.getAngleMotor().set(ControlMode.Disabled, 0);
+        }
     }
 }
