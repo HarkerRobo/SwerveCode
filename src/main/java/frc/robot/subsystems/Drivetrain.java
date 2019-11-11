@@ -70,7 +70,9 @@ public class Drivetrain extends Subsystem {
 	private static final double DRIVE_VELOCITY_KP = 0.0;
 	private static final double DRIVE_VELOCITY_KI = 0.0;
 	private static final double DRIVE_VELOCITY_KD = 0.0;
-	private static final double DRIVE_VELOCITY_KF = 0.0;
+    private static final double DRIVE_VELOCITY_KF = 0.0;
+    
+    public static final double OPEN_LOOP_RAMP = 0.2;
 
     /**
      * Inches between both of the wheels on the front or back

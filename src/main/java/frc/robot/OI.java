@@ -1,5 +1,6 @@
 package frc.robot;
 
+import frc.robot.util.HSDDRPad;
 import harkerrobolib.wrappers.XboxGamepad;
 
 /**
@@ -17,15 +18,19 @@ public class OI {
 
     private static final int DRIVER_PORT = 0;
     private static final int OPERATOR_PORT = 1;
+    private static final int DDR_PORT = 2;
     
     public static final double XBOX_JOYSTICK_DEADBAND = 0.1;
 
     private XboxGamepad operatorGamepad;
     private XboxGamepad driverGamepad;
+    private HSDDRPad ddrGamepad;
 
     private OI() {
         driverGamepad = new XboxGamepad(DRIVER_PORT);
         operatorGamepad = new XboxGamepad(OPERATOR_PORT);
+        ddrGamepad = new HSDDRPad(DDR_PORT);
+
         initBindings();
     }
 
@@ -38,6 +43,10 @@ public class OI {
 
     public XboxGamepad getOperatorGamepad() {
         return operatorGamepad;
+    }
+
+    public HSDDRPad getDDRGamepad() {
+        return ddrGamepad;
     }
     
     public static OI getInstance() {
