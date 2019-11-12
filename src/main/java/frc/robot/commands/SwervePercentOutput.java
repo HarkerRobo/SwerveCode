@@ -26,7 +26,7 @@ import harkerrobolib.util.MathUtil;
 public class SwervePercentOutput extends IndefiniteCommand {
     private static final double ROTATION_MAGNITUDE = Math.sqrt(Math.pow(Drivetrain.DT_LENGTH, 2) + Math.pow(Drivetrain.DT_WIDTH, 2)); 
 
-    private static final double OUTPUT_MULTIPLIER = 0.2;
+    private static final double OUTPUT_MULTIPLIER = 0.5;
     
     public SwervePercentOutput() {
         requires(Drivetrain.getInstance());
