@@ -45,6 +45,8 @@ public class SwerveModule {
     private HSTalon driveMotor;
 
     public SwerveModule(int driveId, boolean invertDriveTalon, boolean driveSensorPhase, int angleId, boolean invertAngleTalon, boolean angleSensorPhase) {
+        swerveDriveInverted = false;
+        
         driveMotor = new HSTalon(driveId);
         angleMotor = new HSTalon(angleId);
 

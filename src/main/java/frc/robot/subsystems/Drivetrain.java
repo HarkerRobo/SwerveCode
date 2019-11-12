@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.RobotMap;
 import frc.robot.commands.SwervePercentOutput;
 import frc.robot.util.SwerveModule;
@@ -43,13 +44,13 @@ public class Drivetrain extends Subsystem {
     private boolean isFieldSensitive;
     private HSPigeon pigeon;
 
-	private static final boolean TL_DRIVE_INVERTED = true;
+	private static final boolean TL_DRIVE_INVERTED = false;
 	private static final boolean TL_ANGLE_INVERTED = false;
-	private static final boolean TR_DRIVE_INVERTED = true;
+	private static final boolean TR_DRIVE_INVERTED = false;
 	private static final boolean TR_ANGLE_INVERTED = true;
-    private static final boolean BL_DRIVE_INVERTED = true;
+    private static final boolean BL_DRIVE_INVERTED = false;
 	private static final boolean BL_ANGLE_INVERTED = true;
-	private static final boolean BR_DRIVE_INVERTED = true;
+	private static final boolean BR_DRIVE_INVERTED = false;
     private static final boolean BR_ANGLE_INVERTED = true;
     
 	private static final boolean TL_DRIVE_SENSOR_PHASE = true;
@@ -62,7 +63,7 @@ public class Drivetrain extends Subsystem {
 	private static final boolean BR_ANGLE_SENSOR_PHASE = true;
 
     public static final int ANGLE_POSITION_SLOT = 0;
-	private static final double ANGLE_POSITION_KP = 0.3;
+	private static final double ANGLE_POSITION_KP = 0.5;
 	private static final double ANGLE_POSITION_KI = 0.0;
 	private static final double ANGLE_POSITION_KD = 0.0;
 
@@ -81,10 +82,10 @@ public class Drivetrain extends Subsystem {
      */
     public static final double DT_LENGTH = 20.6; 
     
-    public static final int TL_OFFSET = 1637;
-    public static final int TR_OFFSET = 6846;
-    public static final int BL_OFFSET = 11239;
-    private static final int BR_OFFSET = 4520;
+    public static final int TL_OFFSET = 2212;//1749;//2212-1749
+    public static final int TR_OFFSET = 6730;//7638;
+    public static final int BL_OFFSET = 11327;
+    private static final int BR_OFFSET = 4605;
 
 	private Drivetrain() {
 		topLeft = new SwerveModule(RobotMap.TL_DRIVE_ID, TL_DRIVE_INVERTED, TL_DRIVE_SENSOR_PHASE, RobotMap.TL_ANGLE_ID, TL_ANGLE_INVERTED, TL_ANGLE_SENSOR_PHASE);
@@ -136,7 +137,12 @@ public class Drivetrain extends Subsystem {
 		setSwerveModule(topLeft, tl.getMagnitude(), convertAngle(topLeft, tl.getAngle()));
 		setSwerveModule(topRight, tr.getMagnitude(), convertAngle(topRight, tr.getAngle()));
 		setSwerveModule(backLeft, bl.getMagnitude(), convertAngle(backLeft, bl.getAngle()));
-		setSwerveModule(backRight, br.getMagnitude(), convertAngle(backRight, br.getAngle()));
+        setSwerveModule(backRight, br.getMagnitude(), convertAngle(backRight, br.getAngle()));
+        
+        SmartDashboard.putNumber("top left error", topLeft.getAngleMotor().getClosedLoopError());
+        SmartDashboard.putNumber("top right error", topRight.getAngleMotor().getClosedLoopError());
+        SmartDashboard.putNumber("bottom left error", backLeft.getAngleMotor().getClosedLoopError());
+        SmartDashboard.putNumber("bottom right error", backRight.getDriveMotor().getClosedLoopError());
 	}
 
 	/** 
@@ -167,14 +173,14 @@ public class Drivetrain extends Subsystem {
         }
         
         //Step 3
-		if (currDegrees - targetAngle > 90) {
-			module.invertOutput();
-			targetAngle += 180;
-        }
-        else if (currDegrees - targetAngle < -90) {
-            module.invertOutput();
-            targetAngle -= 180;
-        }
+		// if (Math.abs(currDegrees - targetAngle) > 90) {
+		// 	module.invertOutput();
+		// 	targetAngle += 180;
+        // }
+        // else if (currDegrees - targetAngle < -90) {
+        //     module.invertOutput();
+        //     targetAngle -= 180;
+        // }
         
         //Step 4
         if(isFieldSensitive) {
