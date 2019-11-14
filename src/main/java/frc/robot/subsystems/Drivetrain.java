@@ -73,6 +73,15 @@ public class Drivetrain extends Subsystem {
 	private static final double DRIVE_VELOCITY_KD = 0.0;
 	private static final double DRIVE_VELOCITY_KF = 0.0;
 
+    public static final int MOTION_PROF_SLOT = 2;
+    private static final double MOTION_PROF_DRIVE_kF = 0;
+    private static final double MOTION_PROF_DRIVE_kP = 0;
+    private static final double MOTION_PROF_DRIVE_kI = 0;
+    private static final double MOTION_PROF_DRIVE_kD = 0;
+
+    public static final double MOTION_PROF_RAMP_RATE = 0.3;
+
+    private static final int MOTION_FRAME_PERIOD = 0;
     /**
      * Inches between both of the wheels on the front or back
      */
@@ -105,7 +114,8 @@ public class Drivetrain extends Subsystem {
 
         setupPositionPID();
         setupVelocityPID();
-        
+        setupMotionProfilePID();
+
         isFieldSensitive = false;
         pigeon = new HSPigeon(RobotMap.PIGEON_ID);
         pigeon.configFactoryDefault();
@@ -130,6 +140,15 @@ public class Drivetrain extends Subsystem {
         applyToAllDrive((driveMotor) -> driveMotor.config_kD(DRIVE_VELOCITY_SLOT, DRIVE_VELOCITY_KD));
 	}
     
+    private void setupMotionProfilePID() {
+        applyToAllDrive((driveMotor) -> driveMotor.config_kF(MOTION_PROF_SLOT, MOTION_PROF_DRIVE_kF));
+        applyToAllDrive((driveMotor) -> driveMotor.config_kP(MOTION_PROF_SLOT, MOTION_PROF_DRIVE_kP));
+        applyToAllDrive((driveMotor) -> driveMotor.config_kI(MOTION_PROF_SLOT, MOTION_PROF_DRIVE_kI));
+        applyToAllDrive((driveMotor) -> driveMotor.config_kD(MOTION_PROF_SLOT, MOTION_PROF_DRIVE_kD));
+        //Didn't remember what to do here something about status frame period. 
+        //Didn't want to copy paste.
+    }
+
 	/**
 	 * Sets the output of the drivetrain based on desired output vectors for each swerve module
 	 */
