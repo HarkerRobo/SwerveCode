@@ -22,7 +22,8 @@ public class SwerveDriveWithMotionProfile extends Command {
         timeTaken = leftPath.length * timeDur;
     }
 
-    public void setupTrajectoryStream(BufferedStreamTrajectory stream, double[][] path) {
+    /**
+     * public void setupTrajectoryStream(BufferedStreamTrajectory stream, double[][] path) {
         for(int i = 0; i < path.length; i++) {
             TrajectoryPoint point = new TrajectoryPoint();
             point.position = Conversions.convert(PositionUnit.FEET, path[i][0], PositionUnit.ENCODER_UNITS);
@@ -40,6 +41,24 @@ public class SwerveDriveWithMotionProfile extends Command {
             point.profileSlotSelect0 = Drivetrain.MOTION_PROF_SLOT;
             point.timeDur = 0;
             stream.Write(point);
+        }
+    }
+    */
+    /**
+     * Determines the hypotenuse between the current point 
+     * and the next point and sets that to be the position/speed
+     */
+    public void setupTrajectoryStreamDrive(BufferedStreamTrajectory stream, double[][] path) {
+        for(int i = 1; i < path.length; i++) {
+            
+        }
+    }
+
+    /**
+     * Determines the angle between the two points and sets that to be the desired angle
+     */
+    public void setupTrajectoryStreamAngle(BufferedStreamTrajectory stream, double[][] path) {
+        for(int i = 0; i < path.length; i++) {
         }
     }
 
