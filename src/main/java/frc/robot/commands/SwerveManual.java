@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.OI;
 import frc.robot.RobotMap;
 import frc.robot.subsystems.Drivetrain;
@@ -37,11 +36,11 @@ public class SwerveManual extends IndefiniteCommand {
     @Override
     protected void initialize() {
         Drivetrain.getInstance().applyToAllAngle(
-            (motor) -> motor.selectProfileSlot(Drivetrain.ANGLE_POSITION_SLOT, RobotMap.PRIMARY_INDEX)
+            (angleMotor) -> angleMotor.selectProfileSlot(Drivetrain.ANGLE_POSITION_SLOT, RobotMap.PRIMARY_INDEX)
         );
 
         Drivetrain.getInstance().applyToAllDrive(
-            (driveMotor) -> driveMotor.selectProfileSlot(RobotMap.PRIMARY_INDEX, Drivetrain.DRIVE_VELOCITY_SLOT)
+            (driveMotor) -> driveMotor.selectProfileSlot(Drivetrain.DRIVE_VELOCITY_SLOT, RobotMap.PRIMARY_INDEX)
         );
     }
 
@@ -53,7 +52,7 @@ public class SwerveManual extends IndefiniteCommand {
 
         Vector translation = new Vector(translateX, translateY);
 
-        //Step 1
+        //Adjust for field sensitive drive using pigeon
         if(Drivetrain.getInstance().isFieldSensitive()) {
             translation.rotate(-Drivetrain.getInstance().getPigeon().getFusedHeading());
         }
@@ -77,25 +76,20 @@ public class SwerveManual extends IndefiniteCommand {
         
         // Scale down the vectors so that the largest possible magnitude is 1 (100% output)
         double largestMag = max4(sumTopLeft.getMagnitude(), sumTopRight.getMagnitude(), sumBackLeft.getMagnitude(), sumBackRight.getMagnitude());
-		
-		if(largestMag < 1) 
-			largestMag = 1; //Set to 1 so none of the vectors are modified
+        
+        if(largestMag < 1) 
+            largestMag = 1; //Set to 1 so none of the vectors are modified
 
         sumTopLeft.scale(1 / largestMag);
-		sumTopRight.scale(1 / largestMag);
-		sumBackLeft.scale(1 / largestMag);
-		sumBackRight.scale(1 / largestMag);
+        sumTopRight.scale(1 / largestMag);
+        sumBackLeft.scale(1 / largestMag);
+        sumBackRight.scale(1 / largestMag);
 
         Drivetrain.getInstance().setDrivetrain(sumTopLeft, sumTopRight, sumBackLeft, sumBackRight, IS_PERCENT_OUTPUT);
-
-        SmartDashboard.putNumber("top left error", Drivetrain.getInstance().getTopLeft().getAngleMotor().getClosedLoopError());
-        SmartDashboard.putNumber("top right error", Drivetrain.getInstance().getTopRight().getAngleMotor().getClosedLoopError());
-        SmartDashboard.putNumber("bottom left error", Drivetrain.getInstance().getBackLeft().getAngleMotor().getClosedLoopError());
-        SmartDashboard.putNumber("bottom right error", Drivetrain.getInstance().getBackRight().getDriveMotor().getClosedLoopError());
     }
 
     public static double max4(double a, double b, double c, double d) {
-		return Math.max(Math.max(a, b), Math.max(c, d));
+        return Math.max(Math.max(a, b), Math.max(c, d));
     }
     
     @Override

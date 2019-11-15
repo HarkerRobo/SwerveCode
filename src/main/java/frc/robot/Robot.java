@@ -59,20 +59,21 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         Scheduler.getInstance().run();
-    
-        SmartDashboard.putNumber("tl phase", Drivetrain.getInstance().getTopLeft().getDriveMotor().getSelectedSensorPosition());
-        SmartDashboard.putNumber("tr phase", Drivetrain.getInstance().getTopRight().getDriveMotor().getSelectedSensorPosition());
-        SmartDashboard.putNumber("bl phase", Drivetrain.getInstance().getBackLeft().getDriveMotor().getSelectedSensorPosition());
-        SmartDashboard.putNumber("br phase", Drivetrain.getInstance().getBackRight().getDriveMotor().getSelectedSensorPosition());
 
-        // SmartDashboard.putNumber("TL Rotation Output", Drivetrain.getInstance().getTopLeft().getAngleMotor().getMotorOutputPercent());
-        // SmartDashboard.putNumber("TL Drive Output", Drivetrain.getInstance().getTopLeft().getDriveMotor().getMotorOutputPercent());
-        // SmartDashboard.putNumber("TR Rotation Output", Drivetrain.getInstance().getTopRight().getAngleMotor().getMotorOutputPercent());
-        // SmartDashboard.putNumber("TR Drive Output", Drivetrain.getInstance().getTopRight().getDriveMotor().getMotorOutputPercent());
-        // SmartDashboard.putNumber("BL Rotation Output", Drivetrain.getInstance().getBackLeft().getAngleMotor().getMotorOutputPercent());
-        // SmartDashboard.putNumber("BL Drive Output", Drivetrain.getInstance().getBackLeft().getDriveMotor().getMotorOutputPercent());
-        // SmartDashboard.putNumber("BR Rotation Output", Drivetrain.getInstance().getBackRight().getAngleMotor().getMotorOutputPercent());
-        // SmartDashboard.putNumber("BR Drive Output", Drivetrain.getInstance().getBackRight().getDriveMotor().getMotorOutputPercent());
+        SmartDashboard.putNumber("TL Drive Desired Vel", Drivetrain.getInstance().getTopLeft().getDriveMotor().getClosedLoopTarget());
+        SmartDashboard.putNumber("TR Drive Desired Vel", Drivetrain.getInstance().getTopRight().getDriveMotor().getClosedLoopTarget());
+        SmartDashboard.putNumber("BL Drive Desired Vel", Drivetrain.getInstance().getBackLeft().getDriveMotor().getClosedLoopTarget());
+        SmartDashboard.putNumber("BR Drive Desired Vel", Drivetrain.getInstance().getBackRight().getDriveMotor().getClosedLoopTarget());
+
+        SmartDashboard.putNumber("TL Drive Actual Vel", Drivetrain.getInstance().getTopLeft().getDriveMotor().getMotorOutputPercent() * Drivetrain.MAX_DRIVE_VELOCITY);
+        SmartDashboard.putNumber("TR Drive Actual Vel", Drivetrain.getInstance().getTopRight().getDriveMotor().getMotorOutputPercent() * Drivetrain.MAX_DRIVE_VELOCITY);
+        SmartDashboard.putNumber("BL Drive Actual Vel", Drivetrain.getInstance().getBackLeft().getDriveMotor().getMotorOutputPercent() * Drivetrain.MAX_DRIVE_VELOCITY);
+        SmartDashboard.putNumber("BR Drive Actual Vel", Drivetrain.getInstance().getBackRight().getDriveMotor().getMotorOutputPercent() * Drivetrain.MAX_DRIVE_VELOCITY);
+
+        SmartDashboard.putNumber("TL Drive Vel Error", Drivetrain.getInstance().getTopLeft().getDriveMotor().getClosedLoopError());
+        SmartDashboard.putNumber("TR Drive Vel Error", Drivetrain.getInstance().getTopRight().getDriveMotor().getClosedLoopError());
+        SmartDashboard.putNumber("BL Drive Vel Error", Drivetrain.getInstance().getBackLeft().getDriveMotor().getClosedLoopError());
+        SmartDashboard.putNumber("BR Drive Vel Error", Drivetrain.getInstance().getBackRight().getDriveMotor().getClosedLoopError());
 
         // SmartDashboard.putNumber("TL RiseToFall", Drivetrain.getInstance().getTopLeft().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
         // SmartDashboard.putNumber("TR RiseToFall", Drivetrain.getInstance().getTopRight().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
