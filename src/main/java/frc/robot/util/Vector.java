@@ -77,4 +77,16 @@ public class Vector {
     public Vector add(Vector other) {
         return add(this, other);
     }
+
+    /**
+     * Rotate the vector about the origin by an angle (in degrees)
+     */
+    public void rotate(double theta) {
+        double radians = theta * Math.PI / 180;
+        double oldX = x;
+        double oldY = y;
+
+        x = oldX * Math.cos(radians) - oldY * Math.sin(radians);
+        y = oldX * Math.sin(radians) + oldY * Math.cos(radians);
+    }
 }

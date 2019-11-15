@@ -44,8 +44,15 @@ public class SwervePercentOutput extends IndefiniteCommand {
         double translateX = MathUtil.mapJoystickOutput(OI.getInstance().getDriverGamepad().getLeftX(), OI.XBOX_JOYSTICK_DEADBAND);
         double translateY = MathUtil.mapJoystickOutput(OI.getInstance().getDriverGamepad().getLeftY(), OI.XBOX_JOYSTICK_DEADBAND);
         double turnMagnitude = MathUtil.mapJoystickOutput(OI.getInstance().getDriverGamepad().getRightX(), OI.XBOX_JOYSTICK_DEADBAND);
+       
+        
 
         Vector translation = new Vector(translateX, translateY);
+
+        //Step 1
+        if(Drivetrain.getInstance().isFieldSensitive()) {
+            translation.rotate(-Drivetrain.getInstance().getPigeon().getFusedHeading());
+        }
 
         Vector topLeftRotation = new Vector(Drivetrain.DT_LENGTH, Drivetrain.DT_WIDTH);
         Vector topRightRotation = new Vector(Drivetrain.DT_LENGTH, -Drivetrain.DT_WIDTH);

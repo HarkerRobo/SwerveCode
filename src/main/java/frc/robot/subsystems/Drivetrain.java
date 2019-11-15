@@ -73,6 +73,7 @@ public class Drivetrain extends Subsystem {
 	private static final double DRIVE_VELOCITY_KD = 0.0;
 	private static final double DRIVE_VELOCITY_KF = 0.0;
 
+    
     /**
      * Inches between both of the wheels on the front or back
      */
@@ -106,7 +107,7 @@ public class Drivetrain extends Subsystem {
         setupPositionPID();
         setupVelocityPID();
         
-        isFieldSensitive = false;
+        isFieldSensitive = true;
         pigeon = new HSPigeon(RobotMap.PIGEON_ID);
         pigeon.configFactoryDefault();
         pigeon.zero();
@@ -152,17 +153,19 @@ public class Drivetrain extends Subsystem {
      * 
      * 1. Subtract 90 degrees. 0 degrees on the Joysticks and desired Vectors points to the right (positive x axis)
      *    while 0 degrees on the robot points forward (positive y axis). The subtraction deals with this offset.
-     * 2. Increase/Decrease the targetAngle by 360 degrees until it is within +- 180 degrees of the current angle
-     * 3. Ensure the angle motor does not have to turn more than 90 degrees 
+     * 2. If using Field Sensitive Mode, ensure the direction of 0 degrees is relative to the field
+     *    rather than the robot's orientation 
+     * 3. Increase/Decrease the targetAngle by 360 degrees until it is within +- 180 degrees of the current angle
+     * 4. Ensure the angle motor does not have to turn more than 90 degrees 
      *    (if we need to turn 179 degrees, we can instead turn -1 degree and invert output)
-     * 4. If using Field Sensitive Mode, ensure the direction of 0 degrees is relative to the field
-     *    rather than the robot's orientation    
 	 */
     public double convertAngle(SwerveModule module, double targetAngle) {
-        //Step 1
+        //Step 0
         targetAngle -= 90; 
 
         double currDegrees = module.getAngleDegrees();
+
+        
 
         //Step 2
         while (currDegrees - targetAngle > 180) {
@@ -182,10 +185,6 @@ public class Drivetrain extends Subsystem {
         //     targetAngle -= 180;
         // }
         
-        //Step 4
-        if(isFieldSensitive) {
-            targetAngle -= pigeon.getYaw(); //Postive Yaw = Counter-clockwise turning
-        }
 
 		return (targetAngle);
 	}
@@ -254,6 +253,10 @@ public class Drivetrain extends Subsystem {
     
     public HSPigeon getPigeon() {
         return pigeon;
+    }
+
+    public boolean isFieldSensitive() {
+        return isFieldSensitive;
     }
 
     public static Drivetrain getInstance() {
