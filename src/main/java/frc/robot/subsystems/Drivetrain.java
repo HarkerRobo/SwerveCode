@@ -3,7 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.RobotMap;
-import frc.robot.commands.SwervePercentOutput;
+import frc.robot.commands.SwerveManual;
 import frc.robot.util.SwerveModule;
 import frc.robot.util.Vector;
 import harkerrobolib.wrappers.HSPigeon;
@@ -33,7 +33,6 @@ import java.util.function.Consumer;
  * @since 11/1/19
  */
 public class Drivetrain extends Subsystem {
-
 	public static Drivetrain instance;
 
     private SwerveModule topLeft;
@@ -71,7 +70,9 @@ public class Drivetrain extends Subsystem {
 	private static final double DRIVE_VELOCITY_KP = 0.0;
 	private static final double DRIVE_VELOCITY_KI = 0.0;
 	private static final double DRIVE_VELOCITY_KD = 0.0;
-	private static final double DRIVE_VELOCITY_KF = 0.0;
+    private static final double DRIVE_VELOCITY_KF = 0.2;
+
+    private static final double MAX_DRIVE_VELOCITY = 13;
 
     
     /**
@@ -115,16 +116,18 @@ public class Drivetrain extends Subsystem {
 
     @Override
 	protected void initDefaultCommand() {
-		setDefaultCommand(new SwervePercentOutput());
+		setDefaultCommand(new SwerveManual());
     }
     
     public void setupPositionPID() {
+        applyToAllDrive((driveMotor) -> driveMotor.selectProfileSlot(RobotMap.PRIMARY_INDEX, ANGLE_POSITION_SLOT));
         applyToAllAngle((angleMotor) -> angleMotor.config_kP(ANGLE_POSITION_SLOT, ANGLE_POSITION_KP));
         applyToAllAngle((angleMotor) -> angleMotor.config_kI(ANGLE_POSITION_SLOT, ANGLE_POSITION_KI));
         applyToAllAngle((angleMotor) -> angleMotor.config_kD(ANGLE_POSITION_SLOT, ANGLE_POSITION_KD));
 	}
 	
     public void setupVelocityPID() {
+        applyToAllDrive((driveMotor) -> driveMotor.selectProfileSlot(RobotMap.PRIMARY_INDEX, DRIVE_VELOCITY_SLOT));
         applyToAllDrive((driveMotor) -> driveMotor.config_kF(DRIVE_VELOCITY_SLOT, DRIVE_VELOCITY_KF));
 		applyToAllDrive((driveMotor) -> driveMotor.config_kP(DRIVE_VELOCITY_SLOT, DRIVE_VELOCITY_KP));
         applyToAllDrive((driveMotor) -> driveMotor.config_kI(DRIVE_VELOCITY_SLOT, DRIVE_VELOCITY_KI));
@@ -134,11 +137,16 @@ public class Drivetrain extends Subsystem {
 	/**
 	 * Sets the output of the drivetrain based on desired output vectors for each swerve module
 	 */
-	public void setDrivetrain(Vector tl, Vector tr, Vector bl, Vector br) {
-		setSwerveModule(topLeft, tl.getMagnitude(), convertAngle(topLeft, tl.getAngle()));
-		setSwerveModule(topRight, tr.getMagnitude(), convertAngle(topRight, tr.getAngle()));
-		setSwerveModule(backLeft, bl.getMagnitude(), convertAngle(backLeft, bl.getAngle()));
-        setSwerveModule(backRight, br.getMagnitude(), convertAngle(backRight, br.getAngle()));
+	public void setDrivetrain(Vector tl, Vector tr, Vector bl, Vector br, boolean isPercentOutput) {
+        double tlOutput = isPercentOutput ? tl.getMagnitude() : tl.getMagnitude() * MAX_DRIVE_VELOCITY;
+        double trOutput = isPercentOutput ? tr.getMagnitude() : tr.getMagnitude() * MAX_DRIVE_VELOCITY;
+        double blOutput = isPercentOutput ? bl.getMagnitude() : bl.getMagnitude() * MAX_DRIVE_VELOCITY;
+        double brOutput = isPercentOutput ? br.getMagnitude() : br.getMagnitude() * MAX_DRIVE_VELOCITY;
+
+		setSwerveModule(topLeft, tlOutput, convertAngle(topLeft, tl.getAngle()), isPercentOutput);
+		setSwerveModule(topRight, trOutput, convertAngle(topRight, tr.getAngle()), isPercentOutput);
+		setSwerveModule(backLeft, blOutput, convertAngle(backLeft, bl.getAngle()), isPercentOutput);
+        setSwerveModule(backRight, brOutput, convertAngle(backRight, br.getAngle()), isPercentOutput);
         
         SmartDashboard.putNumber("top left error", topLeft.getAngleMotor().getClosedLoopError());
         SmartDashboard.putNumber("top right error", topRight.getAngleMotor().getClosedLoopError());
@@ -189,19 +197,19 @@ public class Drivetrain extends Subsystem {
 		return (targetAngle);
 	}
 
-	public void setSwerveModule(SwerveModule module, double output, double angle) {
+	public void setSwerveModule(SwerveModule module, double output, double angle, boolean isPercentOutput) {
         module.setTargetAngle(angle);
-        module.setOutputPercent(output);
+        module.setDriveOutput(output, isPercentOutput);
 	}
 
     /**
      * Stops all drive motors while holding the current angle
      */
 	public void stopAllDrive() {
-        setSwerveModule(topLeft, 0, topLeft.getAngleDegrees());
-        setSwerveModule(topRight, 0, topRight.getAngleDegrees());
-        setSwerveModule(backLeft, 0, backLeft.getAngleDegrees());
-        setSwerveModule(backRight, 0, backRight.getAngleDegrees());
+        setSwerveModule(topLeft, 0, topLeft.getAngleDegrees(), true);
+        setSwerveModule(topRight, 0, topRight.getAngleDegrees(), true);
+        setSwerveModule(backLeft, 0, backLeft.getAngleDegrees(), true);
+        setSwerveModule(backRight, 0, backRight.getAngleDegrees(), true);
 	}
 	
 	/**

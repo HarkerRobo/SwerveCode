@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Drivetrain;
+import harkerrobolib.util.Conversions;
 
 /**
  * Send it? You don't know what it means? Well, let me tell you a little story. Think of the 'send' as the package. 
@@ -48,6 +49,8 @@ public class Robot extends TimedRobot {
     public void robotInit() {
         OI.getInstance().initBindings();
         Drivetrain.getInstance();
+
+        Conversions.setWheelDiameter(4);
     }
 
     /**

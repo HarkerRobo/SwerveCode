@@ -8,7 +8,8 @@ import harkerrobolib.commands.IndefiniteCommand;
 import harkerrobolib.util.MathUtil;
 
 /**
- * Controls the Swerve Modules using PercentOutput for the drive motors and Position PID for the angle motors.
+ * Controls the Swerve Modules using PercentOutput or Velociy for the drive motors and 
+ * Position PID for the angle motors.
  * The left joystick controls translation (velocity direction and magnitude)
  * The right joystick's X axis controls rotation (angular velocity magnitude)
  * 
@@ -23,12 +24,12 @@ import harkerrobolib.util.MathUtil;
  * @author Arjun Dixit
  * @since 11/4/19
  */
-public class SwervePercentOutput extends IndefiniteCommand {
+public class SwerveManual extends IndefiniteCommand {
     private static final double ROTATION_MAGNITUDE = Math.sqrt(Math.pow(Drivetrain.DT_LENGTH, 2) + Math.pow(Drivetrain.DT_WIDTH, 2)); 
-
     private static final double OUTPUT_MULTIPLIER = 0.5;
+    private static final boolean IS_PERCENT_OUTPUT = true;
     
-    public SwervePercentOutput() {
+    public SwerveManual() {
         requires(Drivetrain.getInstance());
     }
 
@@ -44,8 +45,6 @@ public class SwervePercentOutput extends IndefiniteCommand {
         double translateX = MathUtil.mapJoystickOutput(OI.getInstance().getDriverGamepad().getLeftX(), OI.XBOX_JOYSTICK_DEADBAND);
         double translateY = MathUtil.mapJoystickOutput(OI.getInstance().getDriverGamepad().getLeftY(), OI.XBOX_JOYSTICK_DEADBAND);
         double turnMagnitude = MathUtil.mapJoystickOutput(OI.getInstance().getDriverGamepad().getRightX(), OI.XBOX_JOYSTICK_DEADBAND);
-       
-        
 
         Vector translation = new Vector(translateX, translateY);
 
@@ -82,7 +81,7 @@ public class SwervePercentOutput extends IndefiniteCommand {
 		sumBackLeft.scale(1 / largestMag);
 		sumBackRight.scale(1 / largestMag);
 
-        Drivetrain.getInstance().setDrivetrain(sumTopLeft, sumTopRight, sumBackLeft, sumBackRight);
+        Drivetrain.getInstance().setDrivetrain(sumTopLeft, sumTopRight, sumBackLeft, sumBackRight, IS_PERCENT_OUTPUT);
     }
 
     public static double max4(double a, double b, double c, double d) {

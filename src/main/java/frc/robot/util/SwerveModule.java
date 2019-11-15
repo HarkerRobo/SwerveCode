@@ -3,6 +3,8 @@ package frc.robot.util;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 
+import harkerrobolib.util.Conversions;
+import harkerrobolib.util.Conversions.SpeedUnit;
 import harkerrobolib.wrappers.HSTalon;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -112,15 +114,22 @@ public class SwerveModule {
     public void invertOutput() {
         swerveDriveInverted = !swerveDriveInverted;
     }
-
-    public void setOutputPercent(double output) {
-        driveMotor.set(ControlMode.PercentOutput, output * (swerveDriveInverted ? -1 : 1));
+ 
+    /**
+     * Sets the drive output of the swerve module in either percent output or velocity in feet per second.
+     * 
+     * @param output the output of the swerve module
+     * @param isPercentOutput true if the output is in percent output, false if it is in feet per second.
+     */
+    public void setDriveOutput(double output, boolean isPercentOutput) {
+        output *= (swerveDriveInverted ? -1 : 1);
+        if(isPercentOutput) {
+            driveMotor.set(ControlMode.PercentOutput, output);
+        } else {
+            driveMotor.set(ControlMode.Velocity, Conversions.convert(SpeedUnit.FEET_PER_SECOND, output, SpeedUnit.ENCODER_UNITS));
+        }
     }
-
-    public void setOutputVelocity(int velocity) {
-        driveMotor.set(ControlMode.Velocity, velocity * (swerveDriveInverted ? -1 : 1));
-    }
-
+    
     /**
      * Sets the angle motor to go to the desired angle
      * 
