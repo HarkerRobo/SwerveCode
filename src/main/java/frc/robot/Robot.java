@@ -59,20 +59,25 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         Scheduler.getInstance().run();
-        
-        SmartDashboard.putNumber("TL Rotation Output", Drivetrain.getInstance().getTopLeft().getAngleMotor().getMotorOutputPercent());
-        SmartDashboard.putNumber("TL Drive Output", Drivetrain.getInstance().getTopLeft().getDriveMotor().getMotorOutputPercent());
-        SmartDashboard.putNumber("TR Rotation Output", Drivetrain.getInstance().getTopRight().getAngleMotor().getMotorOutputPercent());
-        SmartDashboard.putNumber("TR Drive Output", Drivetrain.getInstance().getTopRight().getDriveMotor().getMotorOutputPercent());
-        SmartDashboard.putNumber("BL Rotation Output", Drivetrain.getInstance().getBackLeft().getAngleMotor().getMotorOutputPercent());
-        SmartDashboard.putNumber("BL Drive Output", Drivetrain.getInstance().getBackLeft().getDriveMotor().getMotorOutputPercent());
-        SmartDashboard.putNumber("BR Rotation Output", Drivetrain.getInstance().getBackRight().getAngleMotor().getMotorOutputPercent());
-        SmartDashboard.putNumber("BR Drive Output", Drivetrain.getInstance().getBackRight().getDriveMotor().getMotorOutputPercent());
+    
+        SmartDashboard.putNumber("tl phase", Drivetrain.getInstance().getTopLeft().getDriveMotor().getSelectedSensorPosition());
+        SmartDashboard.putNumber("tr phase", Drivetrain.getInstance().getTopRight().getDriveMotor().getSelectedSensorPosition());
+        SmartDashboard.putNumber("bl phase", Drivetrain.getInstance().getBackLeft().getDriveMotor().getSelectedSensorPosition());
+        SmartDashboard.putNumber("br phase", Drivetrain.getInstance().getBackRight().getDriveMotor().getSelectedSensorPosition());
 
-        SmartDashboard.putNumber("TL RiseToFall", Drivetrain.getInstance().getTopLeft().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
-        SmartDashboard.putNumber("TR RiseToFall", Drivetrain.getInstance().getTopRight().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
-        SmartDashboard.putNumber("BL RiseToFall", Drivetrain.getInstance().getBackLeft().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
-        SmartDashboard.putNumber("BR RiseToFall", Drivetrain.getInstance().getBackRight().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
+        // SmartDashboard.putNumber("TL Rotation Output", Drivetrain.getInstance().getTopLeft().getAngleMotor().getMotorOutputPercent());
+        // SmartDashboard.putNumber("TL Drive Output", Drivetrain.getInstance().getTopLeft().getDriveMotor().getMotorOutputPercent());
+        // SmartDashboard.putNumber("TR Rotation Output", Drivetrain.getInstance().getTopRight().getAngleMotor().getMotorOutputPercent());
+        // SmartDashboard.putNumber("TR Drive Output", Drivetrain.getInstance().getTopRight().getDriveMotor().getMotorOutputPercent());
+        // SmartDashboard.putNumber("BL Rotation Output", Drivetrain.getInstance().getBackLeft().getAngleMotor().getMotorOutputPercent());
+        // SmartDashboard.putNumber("BL Drive Output", Drivetrain.getInstance().getBackLeft().getDriveMotor().getMotorOutputPercent());
+        // SmartDashboard.putNumber("BR Rotation Output", Drivetrain.getInstance().getBackRight().getAngleMotor().getMotorOutputPercent());
+        // SmartDashboard.putNumber("BR Drive Output", Drivetrain.getInstance().getBackRight().getDriveMotor().getMotorOutputPercent());
+
+        // SmartDashboard.putNumber("TL RiseToFall", Drivetrain.getInstance().getTopLeft().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
+        // SmartDashboard.putNumber("TR RiseToFall", Drivetrain.getInstance().getTopRight().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
+        // SmartDashboard.putNumber("BL RiseToFall", Drivetrain.getInstance().getBackLeft().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
+        // SmartDashboard.putNumber("BR RiseToFall", Drivetrain.getInstance().getBackRight().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
     
         SmartDashboard.putNumber("Pigeon Heading", Drivetrain.getInstance().getPigeon().getFusedHeading());
     }

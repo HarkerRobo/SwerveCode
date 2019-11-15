@@ -120,14 +120,12 @@ public class Drivetrain extends Subsystem {
     }
     
     public void setupPositionPID() {
-        applyToAllDrive((driveMotor) -> driveMotor.selectProfileSlot(RobotMap.PRIMARY_INDEX, ANGLE_POSITION_SLOT));
         applyToAllAngle((angleMotor) -> angleMotor.config_kP(ANGLE_POSITION_SLOT, ANGLE_POSITION_KP));
         applyToAllAngle((angleMotor) -> angleMotor.config_kI(ANGLE_POSITION_SLOT, ANGLE_POSITION_KI));
         applyToAllAngle((angleMotor) -> angleMotor.config_kD(ANGLE_POSITION_SLOT, ANGLE_POSITION_KD));
 	}
 	
     public void setupVelocityPID() {
-        applyToAllDrive((driveMotor) -> driveMotor.selectProfileSlot(RobotMap.PRIMARY_INDEX, DRIVE_VELOCITY_SLOT));
         applyToAllDrive((driveMotor) -> driveMotor.config_kF(DRIVE_VELOCITY_SLOT, DRIVE_VELOCITY_KF));
 		applyToAllDrive((driveMotor) -> driveMotor.config_kP(DRIVE_VELOCITY_SLOT, DRIVE_VELOCITY_KP));
         applyToAllDrive((driveMotor) -> driveMotor.config_kI(DRIVE_VELOCITY_SLOT, DRIVE_VELOCITY_KI));
@@ -148,10 +146,12 @@ public class Drivetrain extends Subsystem {
 		setSwerveModule(backLeft, blOutput, convertAngle(backLeft, bl.getAngle()), isPercentOutput);
         setSwerveModule(backRight, brOutput, convertAngle(backRight, br.getAngle()), isPercentOutput);
         
-        SmartDashboard.putNumber("top left error", topLeft.getAngleMotor().getClosedLoopError());
-        SmartDashboard.putNumber("top right error", topRight.getAngleMotor().getClosedLoopError());
-        SmartDashboard.putNumber("bottom left error", backLeft.getAngleMotor().getClosedLoopError());
-        SmartDashboard.putNumber("bottom right error", backRight.getDriveMotor().getClosedLoopError());
+        
+
+        SmartDashboard.putNumber("TLVel", topLeft.getDriveMotor().getMotorOutputPercent()*MAX_DRIVE_VELOCITY);
+        SmartDashboard.putNumber("TRVel", topRight.getDriveMotor().getMotorOutputPercent()*MAX_DRIVE_VELOCITY);
+        SmartDashboard.putNumber("BLVel", backRight.getDriveMotor().getMotorOutputPercent()*MAX_DRIVE_VELOCITY);
+        SmartDashboard.putNumber("BRVel", backRight.getDriveMotor().getMotorOutputPercent()*MAX_DRIVE_VELOCITY);
 	}
 
 	/** 

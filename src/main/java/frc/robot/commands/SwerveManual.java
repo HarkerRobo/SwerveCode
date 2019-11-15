@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.OI;
 import frc.robot.RobotMap;
 import frc.robot.subsystems.Drivetrain;
@@ -27,7 +28,7 @@ import harkerrobolib.util.MathUtil;
 public class SwerveManual extends IndefiniteCommand {
     private static final double ROTATION_MAGNITUDE = Math.sqrt(Math.pow(Drivetrain.DT_LENGTH, 2) + Math.pow(Drivetrain.DT_WIDTH, 2)); 
     private static final double OUTPUT_MULTIPLIER = 0.5;
-    private static final boolean IS_PERCENT_OUTPUT = true;
+    private static final boolean IS_PERCENT_OUTPUT = false;
     
     public SwerveManual() {
         requires(Drivetrain.getInstance());
@@ -37,6 +38,10 @@ public class SwerveManual extends IndefiniteCommand {
     protected void initialize() {
         Drivetrain.getInstance().applyToAllAngle(
             (motor) -> motor.selectProfileSlot(Drivetrain.ANGLE_POSITION_SLOT, RobotMap.PRIMARY_INDEX)
+        );
+
+        Drivetrain.getInstance().applyToAllDrive(
+            (driveMotor) -> driveMotor.selectProfileSlot(RobotMap.PRIMARY_INDEX, Drivetrain.DRIVE_VELOCITY_SLOT)
         );
     }
 
@@ -82,6 +87,11 @@ public class SwerveManual extends IndefiniteCommand {
 		sumBackRight.scale(1 / largestMag);
 
         Drivetrain.getInstance().setDrivetrain(sumTopLeft, sumTopRight, sumBackLeft, sumBackRight, IS_PERCENT_OUTPUT);
+
+        SmartDashboard.putNumber("top left error", Drivetrain.getInstance().getTopLeft().getAngleMotor().getClosedLoopError());
+        SmartDashboard.putNumber("top right error", Drivetrain.getInstance().getTopRight().getAngleMotor().getClosedLoopError());
+        SmartDashboard.putNumber("bottom left error", Drivetrain.getInstance().getBackLeft().getAngleMotor().getClosedLoopError());
+        SmartDashboard.putNumber("bottom right error", Drivetrain.getInstance().getBackRight().getDriveMotor().getClosedLoopError());
     }
 
     public static double max4(double a, double b, double c, double d) {
