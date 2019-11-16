@@ -90,6 +90,8 @@ public class Drivetrain extends Subsystem {
     public static final int BL_OFFSET = 11327;
     private static final int BR_OFFSET = 4605;
 
+	public static final double PIGEON_kP = 0.02;
+
     private Drivetrain() {
         topLeft = new SwerveModule(RobotMap.TL_DRIVE_ID, TL_DRIVE_INVERTED, TL_DRIVE_SENSOR_PHASE, RobotMap.TL_ANGLE_ID, TL_ANGLE_INVERTED, TL_ANGLE_SENSOR_PHASE);
         topRight = new SwerveModule(RobotMap.TR_DRIVE_ID, TR_DRIVE_INVERTED, TR_DRIVE_SENSOR_PHASE, RobotMap.TR_ANGLE_ID, TR_ANGLE_INVERTED, TR_ANGLE_SENSOR_PHASE);

@@ -1,5 +1,8 @@
 package frc.robot.commands;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.OI;
 import frc.robot.RobotMap;
 import frc.robot.subsystems.Drivetrain;
@@ -28,9 +31,13 @@ public class SwerveManual extends IndefiniteCommand {
     private static final double ROTATION_MAGNITUDE = Math.sqrt(Math.pow(Drivetrain.DT_LENGTH, 2) + Math.pow(Drivetrain.DT_WIDTH, 2)); 
     private static final double OUTPUT_MULTIPLIER = 0.5;
     private static final boolean IS_PERCENT_OUTPUT = false;
+    private static boolean pigeonFlag; //True if the Driver Right X input is non-zero
+    private static double pigeonAngle;
     
     public SwerveManual() {
         requires(Drivetrain.getInstance());
+        pigeonFlag = false;
+        pigeonAngle = 0;
     }
 
     @Override
@@ -49,6 +56,17 @@ public class SwerveManual extends IndefiniteCommand {
         double translateX = MathUtil.mapJoystickOutput(OI.getInstance().getDriverGamepad().getLeftX(), OI.XBOX_JOYSTICK_DEADBAND);
         double translateY = MathUtil.mapJoystickOutput(OI.getInstance().getDriverGamepad().getLeftY(), OI.XBOX_JOYSTICK_DEADBAND);
         double turnMagnitude = MathUtil.mapJoystickOutput(OI.getInstance().getDriverGamepad().getRightX(), OI.XBOX_JOYSTICK_DEADBAND);
+        
+        if(pigeonFlag && turnMagnitude == 0) { //If there was joystick input but now there is not
+            pigeonAngle = Drivetrain.getInstance().getPigeon().getFusedHeading(); //Update angle to closed loop to
+        }
+
+        pigeonFlag = Math.abs(turnMagnitude) > 0; //Update pigeon flag
+
+        if(!pigeonFlag) { //If there is no joystick input currently
+            turnMagnitude = -Drivetrain.PIGEON_kP*(pigeonAngle - Drivetrain.getInstance().getPigeon().getFusedHeading());
+            SmartDashboard.putNumber("Pigeon Error", pigeonAngle - Drivetrain.getInstance().getPigeon().getFusedHeading());
+        }
 
         Vector translation = new Vector(translateX, translateY);
 
@@ -86,6 +104,11 @@ public class SwerveManual extends IndefiniteCommand {
         sumBackRight.scale(1 / largestMag);
 
         Drivetrain.getInstance().setDrivetrain(sumTopLeft, sumTopRight, sumBackLeft, sumBackRight, IS_PERCENT_OUTPUT);
+
+        // if (turnMagnitude<=0.1&&translateX<=0.1&&translateY<=0.1)
+        // {
+        //     Drivetrain.getInstance().applyToAllAngle((angleMotor) -> angleMotor.set(ControlMode.PercentOutput, 0));
+        // }
     }
 
     public static double max4(double a, double b, double c, double d) {
@@ -95,6 +118,7 @@ public class SwerveManual extends IndefiniteCommand {
     @Override
     protected void end() {
         Drivetrain.getInstance().stopAllDrive();
+
     }
 
     @Override
