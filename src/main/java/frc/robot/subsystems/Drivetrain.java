@@ -61,7 +61,7 @@ public class Drivetrain extends Subsystem {
     private static final boolean BR_ANGLE_SENSOR_PHASE = true;
 
     public static final int ANGLE_POSITION_SLOT = 0;
-    private static final double ANGLE_POSITION_KP = 1.0;
+    private static final double ANGLE_POSITION_KP = 0.85;//1.0
     private static final double ANGLE_POSITION_KI = 0.0;
     private static final double ANGLE_POSITION_KD = 30.0;
 
@@ -71,7 +71,7 @@ public class Drivetrain extends Subsystem {
     private static final double DRIVE_VELOCITY_KD = 0.0;
     private static final double DRIVE_VELOCITY_KF = 0.046;// theoretical:  0.034;
 
-    public static final double MAX_DRIVE_VELOCITY = 8;//6;
+    public static final double MAX_DRIVE_VELOCITY = 11;
     public static final double DRIVE_RAMP_RATE = 0.1;
     public static final double ANGLE_RAMP_RATE = 0.05;
     public static final double GEAR_RATIO = 6;
@@ -153,8 +153,7 @@ public class Drivetrain extends Subsystem {
     }
 
     public void setSwerveModule(SwerveModule module, double output, double angle, boolean isPercentOutput) {
-        module.setTargetAngle(angle);
-        module.setDriveOutput(output, isPercentOutput);
+        module.setAngleAndDrive(angle, output, isPercentOutput);
     }
 
     /** 
