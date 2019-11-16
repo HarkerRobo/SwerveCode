@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Drivetrain;
 import harkerrobolib.util.Conversions;
+import harkerrobolib.util.MathUtil;
 
 /**
  * Send it? You don't know what it means? Well, let me tell you a little story. Think of the 'send' as the package. 
@@ -49,7 +50,7 @@ public class Robot extends TimedRobot {
     public void robotInit() {
         OI.getInstance().initBindings();
         Drivetrain.getInstance();
-
+        Drivetrain.getInstance().getPigeon().setFusedHeading(0);
         Conversions.setWheelDiameter(4);
     }
 
@@ -60,21 +61,10 @@ public class Robot extends TimedRobot {
     public void robotPeriodic() {
         Scheduler.getInstance().run();
 
-        SmartDashboard.putNumber("TL Drive Desired Vel", Drivetrain.getInstance().getTopLeft().getDriveMotor().getClosedLoopTarget());
-        SmartDashboard.putNumber("TR Drive Desired Vel", Drivetrain.getInstance().getTopRight().getDriveMotor().getClosedLoopTarget());
-        SmartDashboard.putNumber("BL Drive Desired Vel", Drivetrain.getInstance().getBackLeft().getDriveMotor().getClosedLoopTarget());
-        SmartDashboard.putNumber("BR Drive Desired Vel", Drivetrain.getInstance().getBackRight().getDriveMotor().getClosedLoopTarget());
-
-        SmartDashboard.putNumber("TL Drive Actual Vel", Drivetrain.getInstance().getTopLeft().getDriveMotor().getMotorOutputPercent() * Drivetrain.MAX_DRIVE_VELOCITY);
-        SmartDashboard.putNumber("TR Drive Actual Vel", Drivetrain.getInstance().getTopRight().getDriveMotor().getMotorOutputPercent() * Drivetrain.MAX_DRIVE_VELOCITY);
-        SmartDashboard.putNumber("BL Drive Actual Vel", Drivetrain.getInstance().getBackLeft().getDriveMotor().getMotorOutputPercent() * Drivetrain.MAX_DRIVE_VELOCITY);
-        SmartDashboard.putNumber("BR Drive Actual Vel", Drivetrain.getInstance().getBackRight().getDriveMotor().getMotorOutputPercent() * Drivetrain.MAX_DRIVE_VELOCITY);
-
-        SmartDashboard.putNumber("TL Drive Vel Error", Drivetrain.getInstance().getTopLeft().getDriveMotor().getClosedLoopError());
-        SmartDashboard.putNumber("TR Drive Vel Error", Drivetrain.getInstance().getTopRight().getDriveMotor().getClosedLoopError());
-        SmartDashboard.putNumber("BL Drive Vel Error", Drivetrain.getInstance().getBackLeft().getDriveMotor().getClosedLoopError());
-        SmartDashboard.putNumber("BR Drive Vel Error", Drivetrain.getInstance().getBackRight().getDriveMotor().getClosedLoopError());
-
+        SmartDashboard.putNumber("TL Actual Angle", Drivetrain.getInstance().getTopLeft().getAngleDegrees());
+        SmartDashboard.putNumber("TL Desired Angle", Drivetrain.getInstance().getTopLeft().getAngleDegrees());
+        SmartDashboard.putNumber("TL Angle Error", MathUtil.constrain(Drivetrain.getInstance().getTopLeft().getAngleMotor().getClosedLoopError(), -100, 100));
+        SmartDashboard.putNumber("TL Percent Output", Drivetrain.getInstance().getTopLeft().getAngleMotor().getOutputCurrent());
         // SmartDashboard.putNumber("TL RiseToFall", Drivetrain.getInstance().getTopLeft().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
         // SmartDashboard.putNumber("TR RiseToFall", Drivetrain.getInstance().getTopRight().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
         // SmartDashboard.putNumber("BL RiseToFall", Drivetrain.getInstance().getBackLeft().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());

@@ -61,17 +61,20 @@ public class Drivetrain extends Subsystem {
     private static final boolean BR_ANGLE_SENSOR_PHASE = true;
 
     public static final int ANGLE_POSITION_SLOT = 0;
-    private static final double ANGLE_POSITION_KP = 0.5;
+    private static final double ANGLE_POSITION_KP = 1.0;
     private static final double ANGLE_POSITION_KI = 0.0;
-    private static final double ANGLE_POSITION_KD = 0.0;
+    private static final double ANGLE_POSITION_KD = 30.0;
 
     public static final int DRIVE_VELOCITY_SLOT = 0;
-    private static final double DRIVE_VELOCITY_KP = 0.0;
+    private static final double DRIVE_VELOCITY_KP = 0.13;
     private static final double DRIVE_VELOCITY_KI = 0.0;
     private static final double DRIVE_VELOCITY_KD = 0.0;
-    private static final double DRIVE_VELOCITY_KF = 0.2;
+    private static final double DRIVE_VELOCITY_KF = 0.046;// theoretical:  0.034;
 
-    public static final double MAX_DRIVE_VELOCITY = 13;
+    public static final double MAX_DRIVE_VELOCITY = 8;//6;
+    public static final double DRIVE_RAMP_RATE = 0.1;
+    public static final double ANGLE_RAMP_RATE = 0.05;
+    public static final double GEAR_RATIO = 6;
     
     /**
      * Inches between both of the wheels on the front or back
@@ -121,6 +124,7 @@ public class Drivetrain extends Subsystem {
         applyToAllAngle((angleMotor) -> angleMotor.config_kP(ANGLE_POSITION_SLOT, ANGLE_POSITION_KP));
         applyToAllAngle((angleMotor) -> angleMotor.config_kI(ANGLE_POSITION_SLOT, ANGLE_POSITION_KI));
         applyToAllAngle((angleMotor) -> angleMotor.config_kD(ANGLE_POSITION_SLOT, ANGLE_POSITION_KD));
+        applyToAllAngle((angleMotor) -> angleMotor.configClosedloopRamp(ANGLE_RAMP_RATE));
     }
     
     public void setupVelocityPID() {
@@ -128,6 +132,7 @@ public class Drivetrain extends Subsystem {
         applyToAllDrive((driveMotor) -> driveMotor.config_kP(DRIVE_VELOCITY_SLOT, DRIVE_VELOCITY_KP));
         applyToAllDrive((driveMotor) -> driveMotor.config_kI(DRIVE_VELOCITY_SLOT, DRIVE_VELOCITY_KI));
         applyToAllDrive((driveMotor) -> driveMotor.config_kD(DRIVE_VELOCITY_SLOT, DRIVE_VELOCITY_KD));
+        applyToAllDrive((driveMotor) -> driveMotor.configClosedloopRamp(DRIVE_RAMP_RATE));
     }
     
     /**

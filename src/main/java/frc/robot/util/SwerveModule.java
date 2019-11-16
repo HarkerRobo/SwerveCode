@@ -3,6 +3,7 @@ package frc.robot.util;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 
+import frc.robot.subsystems.Drivetrain;
 import harkerrobolib.util.Conversions;
 import harkerrobolib.util.Conversions.SpeedUnit;
 import harkerrobolib.wrappers.HSTalon;
@@ -29,9 +30,11 @@ public class SwerveModule {
     //Voltage/Current Constants
     private static final double VOLTAGE_COMP = 10;
 
-    private static final int CURRENT_CONTINUOUS = 40;
-    private static final int CURRENT_PEAK = 60;
-    private static final int CURRENT_PEAK_DUR = 500;
+    private static final int DRIVE_CURRENT_CONTINUOUS = 40;
+    private static final int DRIVE_CURRENT_PEAK = 60;
+    private static final int ANGLE_CURRENT_CONTINUOUS = 15;
+    private static final int ANGLE_CURRENT_PEAK = 15;
+    private static final int CURRENT_PEAK_DUR = 50;
 
     // Motor inversions
     private final boolean DRIVE_INVERTED;
@@ -78,7 +81,10 @@ public class SwerveModule {
 
         talon.setSelectedSensorPosition(0);
 
-        configCurrentLimit(talon);
+        talon.configContinuousCurrentLimit(DRIVE_CURRENT_CONTINUOUS);
+        talon.configPeakCurrentLimit(DRIVE_CURRENT_PEAK);
+        talon.configPeakCurrentDuration(CURRENT_PEAK_DUR);
+        talon.enableCurrentLimit(true);
 
         talon.configVoltageCompSaturation(VOLTAGE_COMP);
         talon.enableVoltageCompensation(true);
@@ -98,17 +104,13 @@ public class SwerveModule {
         talon.configReverseSoftLimitEnable(false);
         talon.overrideLimitSwitchesEnable(false);
 
-        configCurrentLimit(talon);
+        talon.configContinuousCurrentLimit(ANGLE_CURRENT_CONTINUOUS);
+        talon.configPeakCurrentLimit(ANGLE_CURRENT_PEAK);
+        talon.configPeakCurrentDuration(CURRENT_PEAK_DUR);
+        talon.enableCurrentLimit(true);
 
         talon.configVoltageCompSaturation(VOLTAGE_COMP);
         talon.enableVoltageCompensation(true);
-    } 
-    
-    public static void configCurrentLimit(HSTalon talon) {
-        talon.configContinuousCurrentLimit(CURRENT_CONTINUOUS);
-        talon.configPeakCurrentLimit(CURRENT_PEAK);
-        talon.configPeakCurrentDuration(CURRENT_PEAK_DUR);
-        talon.enableCurrentLimit(true);
     }
 
     public void invertOutput() {
@@ -126,7 +128,7 @@ public class SwerveModule {
         if(isPercentOutput) {
             driveMotor.set(ControlMode.PercentOutput, output);
         } else {
-            driveMotor.set(ControlMode.Velocity, Conversions.convert(SpeedUnit.FEET_PER_SECOND, output, SpeedUnit.ENCODER_UNITS));
+            driveMotor.set(ControlMode.Velocity, Conversions.convert(SpeedUnit.FEET_PER_SECOND, output, SpeedUnit.ENCODER_UNITS)* Drivetrain.GEAR_RATIO);
         }
     }
     
