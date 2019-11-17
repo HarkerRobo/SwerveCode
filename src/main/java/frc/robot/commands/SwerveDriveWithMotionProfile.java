@@ -16,7 +16,7 @@ import jaci.pathfinder.modifiers.SwerveModifier;
  * Follows the specified trajectories by close looping and adding necessary Feed Forwards.
  * 
  * @author Shahzeb Lakhani
- * @version 11/13/19
+ * @version 11/16/19
  */
 public class SwerveDriveWithMotionProfile extends Command {
     private static final int MIN_BUFFERED_POINTS = 4;
