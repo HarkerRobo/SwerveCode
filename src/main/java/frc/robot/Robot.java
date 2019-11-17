@@ -13,6 +13,8 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Drivetrain;
+import harkerrobolib.util.Conversions;
+import harkerrobolib.util.MathUtil;
 
 /**
  * Send it? You don't know what it means? Well, let me tell you a little story. Think of the 'send' as the package. 
@@ -48,6 +50,8 @@ public class Robot extends TimedRobot {
     public void robotInit() {
         OI.getInstance().initBindings();
         Drivetrain.getInstance();
+        Drivetrain.getInstance().getPigeon().setFusedHeading(0);
+        Conversions.setWheelDiameter(4);
     }
 
     /**
@@ -56,22 +60,17 @@ public class Robot extends TimedRobot {
     @Override
     public void robotPeriodic() {
         Scheduler.getInstance().run();
-        
-        SmartDashboard.putNumber("TL Rotation Output", Drivetrain.getInstance().getTopLeft().getAngleMotor().getMotorOutputPercent());
-        SmartDashboard.putNumber("TL Drive Output", Drivetrain.getInstance().getTopLeft().getDriveMotor().getMotorOutputPercent());
-        SmartDashboard.putNumber("TR Rotation Output", Drivetrain.getInstance().getTopRight().getAngleMotor().getMotorOutputPercent());
-        SmartDashboard.putNumber("TR Drive Output", Drivetrain.getInstance().getTopRight().getDriveMotor().getMotorOutputPercent());
-        SmartDashboard.putNumber("BL Rotation Output", Drivetrain.getInstance().getBackLeft().getAngleMotor().getMotorOutputPercent());
-        SmartDashboard.putNumber("BL Drive Output", Drivetrain.getInstance().getBackLeft().getDriveMotor().getMotorOutputPercent());
-        SmartDashboard.putNumber("BR Rotation Output", Drivetrain.getInstance().getBackRight().getAngleMotor().getMotorOutputPercent());
-        SmartDashboard.putNumber("BR Drive Output", Drivetrain.getInstance().getBackRight().getDriveMotor().getMotorOutputPercent());
 
-        SmartDashboard.putNumber("TL RiseToFall", Drivetrain.getInstance().getTopLeft().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
-        SmartDashboard.putNumber("TR RiseToFall", Drivetrain.getInstance().getTopRight().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
-        SmartDashboard.putNumber("BL RiseToFall", Drivetrain.getInstance().getBackLeft().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
-        SmartDashboard.putNumber("BR RiseToFall", Drivetrain.getInstance().getBackRight().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
+        SmartDashboard.putNumber("TL Actual Angle", Drivetrain.getInstance().getTopLeft().getAngleDegrees());
+        SmartDashboard.putNumber("TL Desired Angle", Drivetrain.getInstance().getTopLeft().getAngleDegrees());
+        SmartDashboard.putNumber("TL Angle Error", MathUtil.constrain(Drivetrain.getInstance().getTopLeft().getAngleMotor().getClosedLoopError(), -100, 100));
+        SmartDashboard.putNumber("TL Percent Output", Drivetrain.getInstance().getTopLeft().getAngleMotor().getOutputCurrent());
+        // SmartDashboard.putNumber("TL RiseToFall", Drivetrain.getInstance().getTopLeft().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
+        // SmartDashboard.putNumber("TR RiseToFall", Drivetrain.getInstance().getTopRight().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
+        // SmartDashboard.putNumber("BL RiseToFall", Drivetrain.getInstance().getBackLeft().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
+        // SmartDashboard.putNumber("BR RiseToFall", Drivetrain.getInstance().getBackRight().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
     
-        SmartDashboard.putNumber("Pigeon Yaw", Drivetrain.getInstance().getPigeon().getYaw());
+        SmartDashboard.putNumber("Pigeon Heading", Drivetrain.getInstance().getPigeon().getFusedHeading());
     }
 
     /**

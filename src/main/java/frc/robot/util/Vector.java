@@ -14,10 +14,16 @@ public class Vector {
     private double x;
     private double y;
     
+    /**
+     * Creates a Vector with <0,0>
+     */
     public Vector() {
         this(0, 0);
     }
 
+    /**
+     * Creates a Vector with <x,y>
+     */
     public Vector(double x, double y) {
         this.x = x;
         this.y = y;
@@ -76,5 +82,20 @@ public class Vector {
      */
     public Vector add(Vector other) {
         return add(this, other);
+    }
+
+    /**
+     * Rotates this vector about the origin by an angle (in degrees),
+     * changing its x and y pos
+     * 
+     * Positive angle means a counter-clockwise rotation
+     */
+    public void rotate(double degrees) {
+        double radians = degrees * Math.PI / 180;
+        double oldX = x;
+        double oldY = y;
+
+        x = oldX * Math.cos(radians) - oldY * Math.sin(radians);
+        y = oldX * Math.sin(radians) + oldY * Math.cos(radians);
     }
 }
