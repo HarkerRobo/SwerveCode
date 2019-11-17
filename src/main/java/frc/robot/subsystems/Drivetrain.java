@@ -89,19 +89,21 @@ public class Drivetrain extends Subsystem {
 
     private static final int MOTION_FRAME_PERIOD = 5;
   
-    public static final double MAX_DRIVE_VELOCITY = 5;
+    public static final double MAX_DRIVE_VELOCITY = 9;
+    public static final double MAX_DRIVE_ACCELERATION = 4;
+    public static final double MAX_DRIVE_JERK = 50;
     public static final double DRIVE_RAMP_RATE = 0.1;
     public static final double ANGLE_RAMP_RATE = 0.05;
     public static final double GEAR_RATIO = 6;
     
     /**
-     * Inches between both of the wheels on the front or back
+     * Meters between both of the wheels on the front or back
      */
-    public static final double DT_WIDTH = 16.5;
+    public static final double DT_WIDTH = 0.419; //16.5 in 
     /**
-     * Inches between both of the wheels on the left or right
+     * Meters between both of the wheels on the left or right
      */
-    public static final double DT_LENGTH = 20.6; 
+    public static final double DT_LENGTH = 0.523; //20.6 in
     
     public static final int TL_OFFSET = 2212;//1749;//2212-1749
     public static final int TR_OFFSET = 6730;//7638;
@@ -199,12 +201,10 @@ public class Drivetrain extends Subsystem {
      * 1. Subtract 90 degrees. 0 degrees on the Joysticks and desired Vectors points to the right (positive x axis)
      *    while 0 degrees on the robot points forward (positive y axis). The subtraction deals with this offset.
      * 2. Increase/Decrease the targetAngle by 360 degrees until it is within +- 180 degrees of the current angle
-     * 3. (Optional) Ensure the angle motor does not have to turn more than 90 degrees 
-     *    (if we need to turn 179 degrees, we can instead turn -1 degree and invert output)
      * 
      * @return The desired angle after all modifications
      */
-    public double convertAngle(SwerveModule module, double targetAngle) {
+    public static double convertAngle(SwerveModule module, double targetAngle) {
         //Step 1
         targetAngle -= 90; 
 
@@ -218,17 +218,7 @@ public class Drivetrain extends Subsystem {
             targetAngle -= 360;
         }
         
-        //Step 3
-        // if (Math.abs(currDegrees - targetAngle) > 90) {
-        //    module.invertOutput();
-        //    targetAngle += 180;
-        // }
-        // else if (currDegrees - targetAngle < -90) {
-        //     module.invertOutput();
-        //     targetAngle -= 180;
-        // }
-        
-        return (targetAngle);
+        return targetAngle;
     }
 
     /**

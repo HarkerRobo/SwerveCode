@@ -131,12 +131,13 @@ public class SwerveModule {
         if(isPercentOutput) {
             driveMotor.set(ControlMode.PercentOutput, output);
         } else {
-            driveMotor.set(ControlMode.Velocity, Conversions.convert(SpeedUnit.FEET_PER_SECOND, output, SpeedUnit.ENCODER_UNITS)* Drivetrain.GEAR_RATIO);
+            driveMotor.set(ControlMode.Velocity, Conversions.convert(SpeedUnit.FEET_PER_SECOND, output, SpeedUnit.ENCODER_UNITS) * Drivetrain.GEAR_RATIO);
         }
     }
     
     public void setAngleAndDrive(double targetAngle, double output, boolean isPercentOutput) {
         boolean shouldReverse = Math.abs(targetAngle - getAngleDegrees()) > 90;
+        
         if (shouldReverse) {
             setDriveOutput(-output, isPercentOutput);
             if (targetAngle - getAngleDegrees() > 90) {

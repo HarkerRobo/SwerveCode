@@ -123,16 +123,10 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void disabledPeriodic() {
-        Drivetrain.getInstance().getTopLeft().getDriveMotor().set(ControlMode.Disabled, 0);
-        Drivetrain.getInstance().getTopLeft().getAngleMotor().set(ControlMode.Disabled, 0);
+        Drivetrain.getInstance().applyToAllAngle((talon) -> talon.set(ControlMode.Disabled, 0));
+        Drivetrain.getInstance().applyToAllDrive((talon) -> talon.set(ControlMode.Disabled, 0));
 
-        Drivetrain.getInstance().getTopRight().getDriveMotor().set(ControlMode.Disabled, 0);
-        Drivetrain.getInstance().getTopRight().getAngleMotor().set(ControlMode.Disabled, 0);
-
-        Drivetrain.getInstance().getBackLeft().getDriveMotor().set(ControlMode.Disabled, 0);
-        Drivetrain.getInstance().getBackLeft().getAngleMotor().set(ControlMode.Disabled, 0);
-
-        Drivetrain.getInstance().getBackRight().getDriveMotor().set(ControlMode.Disabled, 0);
-        Drivetrain.getInstance().getBackRight().getAngleMotor().set(ControlMode.Disabled, 0);
+        Drivetrain.getInstance().applyToAllDrive((talon) -> talon.clearMotionProfileTrajectories());
+        Drivetrain.getInstance().applyToAllAngle((talon) -> talon.clearMotionProfileTrajectories());
     }
 }
