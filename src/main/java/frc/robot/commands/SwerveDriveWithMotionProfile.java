@@ -12,14 +12,20 @@ public class SwerveDriveWithMotionProfile extends Command {
     private double leftLastSetpoint;
     private double rightLastSetpoint;
     private BufferedStreamTrajectory stream;
-
     
-    public SwerveDriveWithMotionProfile(double[][] path, double time) {
+    
+    public SwerveDriveWithMotionProfile(double time) {
         requires(Drivetrain.getInstance());
-        stream = new BufferedTrajectoryPointStream();
-        setupTrajectoryStream(stream, path);
-        Drivetrain.getInstance().applyToAllDrive((driveMotors) -> driveMotors.configMotionProfileTrajectoryPeriod(timeDur));
+        
+        Drivetrain.getInstance().applyToAllDrive((driveMotors) -> driveMotors.configMotionProfileTrajectoryPeriod(time));
         timeTaken = leftPath.length * timeDur;
+        Waypoint[] points = new Waypoint[] {
+            new Waypoint(-4, -1, Pathfinder.d2r(-45)),      // Waypoint @ x=-4, y=-1, exit angle=-45 degrees
+            new Waypoint(-2, -2, 0),                        // Waypoint @ x=-2, y=-2, exit angle=0 radians
+            new Waypoint(0, 0, 0)                           // Waypoint @ x=0, y=0,   exit angle=0 radians
+        };
+        Trajectory.Config config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC, Trajectory.Config.SAMPLES_HIGH, 0.05, 1.7, 2.0, 60.0);
+        Trajectory trajectory = Pathfinder.generate(points, config);
     }
 
     /**
@@ -43,29 +49,40 @@ public class SwerveDriveWithMotionProfile extends Command {
             stream.Write(point);
         }
     }
+    
     */
-    /**
-     * Determines the hypotenuse between the current point 
-     * and the next point and sets that to be the position/speed
-     */
-    public void setupTrajectoryStreamDrive(BufferedStreamTrajectory stream, double[][] path) {
-        for(int i = 1; i < path.length; i++) {
-            
-        }
-    }
-
-    /**
-     * Determines the angle between the two points and sets that to be the desired angle
-     */
-    public void setupTrajectoryStreamAngle(BufferedStreamTrajectory stream, double[][] path) {
-        for(int i = 0; i < path.length; i++) {
-        }
-    }
 
     @Override
     private void initialize() {
-        Drivetrain.getInstance().applyToAllDrive((driveMotors) -> driveMotors.selectProfileSlot(Drivetrain.MOTION_PROF_SLOT, RobotMap.PRIMARY_PID_INDEX));
-        applyToAllDrive((driveMotors) -> driveMotors.startMotionProfile(stream, MIN_BUFFERED_POINTS, ControlMode.MotionProfile));
+        for (int i = 0; i < trajectory.length(); i++) {
+            Trajectory.Segment seg = trajectory.get(i);
+            
+            System.out.printf("%f,%f,%f,%f,%f,%f,%f,%f\n", 
+                seg.dt, seg.x, seg.y, seg.position, seg.velocity, 
+                    seg.acceleration, seg.jerk, seg.heading);
+        }    
+
+        double wheelbase_width = 0.6;
+
+        // The distance between the front and back sides of the wheelbase is 0.5m
+        double wheelbase_depth = 0.5;
+
+        // The swerve mode to generate will be the 'default' mode, where the 
+        // robot will constantly be facing forward and 'sliding' sideways to 
+        // follow a curved path.
+        SwerveModifier.Mode mode = SwerveModifier.Mode.SWERVE_DEFAULT;
+
+        // Create the Modifier Object
+        SwerveModifier modifier = new SwerveModifier(trajectory);
+
+        // Generate the individual wheel trajectories using the original trajectory
+        // as the centre
+        modifier.modify(wheelbase_width, wheelbase_depth, mode);
+
+        Trajectory fl = modifier.getFrontLeftTrajectory();       // Get the Front Left wheel
+        Trajectory fr = modifier.getFrontRightTrajectory();      // Get the Front Right wheel
+        Trajectory bl = modifier.getBackLeftTrajectory();        // Get the Back Left wheel
+        Trajectory br = modifier.getBackRightTrajectory();
     }
 
     @Override
