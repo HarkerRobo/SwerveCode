@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import com.ctre.phoenix.motion.BufferedTrajectoryPointStream;
+import com.ctre.phoenix.motion.TrajectoryPoint;
 
 import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.RobotMap;
@@ -8,6 +9,7 @@ import frc.robot.subsystems.Drivetrain;
 import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.Trajectory;
 import jaci.pathfinder.Waypoint;
+import jaci.pathfinder.Trajectory.Segment;
 import jaci.pathfinder.modifiers.SwerveModifier;
 
 /**
@@ -21,6 +23,7 @@ public class SwerveDriveWithMotionProfile extends Command {
     private static final SwerveModifier.Mode MODE = SwerveModifier.Mode.SWERVE_DEFAULT;
     private static final double WHEELBASE_WIDTH = Drivetrain.DT_WIDTH * 0.0254; // in to m
     private static final double WHEELBASE_DEPTH = Drivetrain.DT_LENGTH * 0.0254; // in to m
+
     private Trajectory fl;
     private Trajectory fr;
     private Trajectory bl;
@@ -47,17 +50,50 @@ public class SwerveDriveWithMotionProfile extends Command {
         Trajectory br = modifier.getBackRightTrajectory();
     }
 
+    private static BufferedTrajectoryPointStream createDriveStreamFromTrajectory(Trajectory traj) {
+        BufferedTrajectoryPointStream stream = new BufferedTrajectoryPointStream();
+        for (int i = 0; i < traj.length(); i++) {
+            Segment seg = traj.get(i);
+            TrajectoryPoint point = new TrajectoryPoint();
+
+            point.position = seg.position;
+            point.velocity = seg.velocity;
+            point.isLastPoint = i == traj.length() - 1;
+            point.arbFeedFwd = 0;
+            point.timeDur = 0;
+            point.zeroPos = i == 0;
+
+            stream.Write(point);
+        }
+        return stream;
+    }
+
+    private static BufferedTrajectoryPointStream createAngleStreamFromTrajectory(Trajectory traj) {
+        BufferedTrajectoryPointStream stream = new BufferedTrajectoryPointStream();
+        for (int i = 0; i<traj.length(); i++) {
+            Segment seg = traj.get(i);
+            TrajectoryPoint point = new TrajectoryPoint();
+
+            point.position = seg.heading * 4096 / 360;
+            point.arbFeedFwd = 0;
+            point.timeDur = 0;
+            point.zeroPos =
+             i == 0;
+
+            stream.Write(point);
+        }
+        return stream;
+    }
+
     @Override
     public void initialize() {
-        // Drivetrain.getInstance().applyToAllAngle((angleMotor) -> angleMotor.selectProfileSlot(Drivetrain.DRIVE_MOTION_PROF_SLOT, RobotMap.PRIMARY_INDEX));
-        // Drivetrain.getInstance().applyToAllDrive((driveMotor) -> driveMotor.selectProfileSlot(Drivetrain.DRIVE_MOTION_PROF_SLOT, RobotMap.PRIMARY_INDEX));
-    
-        
+        Drivetrain.getInstance().applyToAllAngle((angleMotor) -> angleMotor.selectProfileSlot(Drivetrain.ANGLE_MOTION_PROF_SLOT, RobotMap.PRIMARY_INDEX));
+        Drivetrain.getInstance().applyToAllDrive((driveMotor) -> driveMotor.selectProfileSlot(Drivetrain.DRIVE_MOTION_PROF_SLOT, RobotMap.PRIMARY_INDEX));        
     }
 
     @Override
     public void execute() {
-
+        
     }
 
     @Override

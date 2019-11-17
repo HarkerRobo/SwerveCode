@@ -10,6 +10,8 @@ import harkerrobolib.wrappers.HSTalon;
 
 import java.util.function.Consumer;
 
+import com.ctre.phoenix.motorcontrol.StatusFrame;
+
 /**
  * Simulates the drivetrain subsystem on the robot. 
  * A Swerve Drivetrain contains four SwerveModules.
@@ -71,17 +73,23 @@ public class Drivetrain extends Subsystem {
     private static final double DRIVE_VELOCITY_KD = 0.0;
     private static final double DRIVE_VELOCITY_KF = 0.046;// theoretical:  0.034;
 
-    public static final int MOTION_PROF_SLOT = 2;
-    private static final double MOTION_PROF_DRIVE_kF = 0;
-    private static final double MOTION_PROF_DRIVE_kP = 0;
-    private static final double MOTION_PROF_DRIVE_kI = 0;
-    private static final double MOTION_PROF_DRIVE_kD = 0;
+    public static final int DRIVE_MOTION_PROF_SLOT = 1;
+    private static final double DRIVE_MOTION_PROF_kF = 0;
+    private static final double DRIVE_MOTION_PROF_kP = 0;
+    private static final double DRIVE_MOTION_PROF_kI = 0;
+    private static final double DRIVE_MOTION_PROF_kD = 0;
+
+    public static final int ANGLE_MOTION_PROF_SLOT = 1;
+    private static final double ANGLE_MOTION_PROF_kF = 0;
+    private static final double ANGLE_MOTION_PROF_kP = 0;
+    private static final double ANGLE_MOTION_PROF_kI = 0;
+    private static final double ANGLE_MOTION_PROF_kD = 0;
 
     public static final double MOTION_PROF_RAMP_RATE = 0.3;
 
-    private static final int MOTION_FRAME_PERIOD = 0;
+    private static final int MOTION_FRAME_PERIOD = 5;
   
-    public static final double MAX_DRIVE_VELOCITY = 11;
+    public static final double MAX_DRIVE_VELOCITY = 5;
     public static final double DRIVE_RAMP_RATE = 0.1;
     public static final double ANGLE_RAMP_RATE = 0.05;
     public static final double GEAR_RATIO = 6;
@@ -149,12 +157,18 @@ public class Drivetrain extends Subsystem {
     }
     
     private void setupMotionProfilePID() {
-        applyToAllDrive((driveMotor) -> driveMotor.config_kF(MOTION_PROF_SLOT, MOTION_PROF_DRIVE_kF));
-        applyToAllDrive((driveMotor) -> driveMotor.config_kP(MOTION_PROF_SLOT, MOTION_PROF_DRIVE_kP));
-        applyToAllDrive((driveMotor) -> driveMotor.config_kI(MOTION_PROF_SLOT, MOTION_PROF_DRIVE_kI));
-        applyToAllDrive((driveMotor) -> driveMotor.config_kD(MOTION_PROF_SLOT, MOTION_PROF_DRIVE_kD));
-        //Didn't remember what to do here something about status frame period. 
-        //Didn't want to copy paste.
+        applyToAllDrive((driveMotor) -> driveMotor.config_kF(DRIVE_MOTION_PROF_SLOT, DRIVE_MOTION_PROF_kF));
+        applyToAllDrive((driveMotor) -> driveMotor.config_kP(DRIVE_MOTION_PROF_SLOT, DRIVE_MOTION_PROF_kP));
+        applyToAllDrive((driveMotor) -> driveMotor.config_kI(DRIVE_MOTION_PROF_SLOT, DRIVE_MOTION_PROF_kI));
+        applyToAllDrive((driveMotor) -> driveMotor.config_kD(DRIVE_MOTION_PROF_SLOT, DRIVE_MOTION_PROF_kD));
+
+        applyToAllAngle((angleMotor) -> angleMotor.config_kF(ANGLE_MOTION_PROF_SLOT, ANGLE_MOTION_PROF_kF));
+        applyToAllAngle((angleMotor) -> angleMotor.config_kP(ANGLE_MOTION_PROF_SLOT, ANGLE_MOTION_PROF_kP));
+        applyToAllAngle((angleMotor) -> angleMotor.config_kI(ANGLE_MOTION_PROF_SLOT, ANGLE_MOTION_PROF_kI));
+        applyToAllAngle((angleMotor) -> angleMotor.config_kD(ANGLE_MOTION_PROF_SLOT, ANGLE_MOTION_PROF_kD));
+        
+        applyToAllDrive((talon) -> talon.setStatusFramePeriod(StatusFrame.Status_9_MotProfBuffer, MOTION_FRAME_PERIOD));
+        applyToAllAngle((talon) -> talon.setStatusFramePeriod(StatusFrame.Status_9_MotProfBuffer, MOTION_FRAME_PERIOD));
     }
 
     /**
