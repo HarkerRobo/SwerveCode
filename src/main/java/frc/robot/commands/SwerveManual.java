@@ -37,13 +37,10 @@ public class SwerveManual extends IndefiniteCommand {
     private static boolean pigeonFlag; //True if the Driver Right X input is non-zero
     private static double pigeonAngle;
     
-    private double prevTranslationAngle;
-    
     public SwerveManual() {
         requires(Drivetrain.getInstance());
         pigeonFlag = false;
         pigeonAngle = 0;
-        prevTranslationAngle = 0;
         prevPigeonHeading = 0;
         prevTime = System.currentTimeMillis();
     }
@@ -66,6 +63,7 @@ public class SwerveManual extends IndefiniteCommand {
         double turnMagnitude = MathUtil.mapJoystickOutput(OI.getInstance().getDriverGamepad().getRightX(), OI.XBOX_JOYSTICK_DEADBAND);
 
         double currentPigeonHeading = Drivetrain.getInstance().getPigeon().getFusedHeading();
+
         if(pigeonFlag && turnMagnitude == 0) { //If there was joystick input but now there is not
             long currentTime = System.currentTimeMillis();
             double deltaTime = (double)(currentTime - prevTime);
@@ -89,11 +87,6 @@ public class SwerveManual extends IndefiniteCommand {
         if(Drivetrain.getInstance().isFieldSensitive()) {
             translation.rotate(-Drivetrain.getInstance().getPigeon().getFusedHeading());
         }
-
-        // boolean invertSetpoint = Math.abs(translation.getAngle() - prevTranslationAngle) > 90;
-        // prevTranslationAngle = translation.getAngle();
-        // SmartDashboard.putBoolean("Joystick invertSetpoint", invertSetpoint);
-        // System.out.println(invertSetpoint);
 
         Vector topLeftRotation = new Vector(Drivetrain.DT_LENGTH, Drivetrain.DT_WIDTH);
         Vector topRightRotation = new Vector(Drivetrain.DT_LENGTH, -Drivetrain.DT_WIDTH);
@@ -124,11 +117,6 @@ public class SwerveManual extends IndefiniteCommand {
         sumBackRight.scale(1 / largestMag);
 
         Drivetrain.getInstance().setDrivetrain(sumTopLeft, sumTopRight, sumBackLeft, sumBackRight, IS_PERCENT_OUTPUT);
-
-        // if (turnMagnitude<=0.1&&translateX<=0.1&&translateY<=0.1)
-        // {
-        //     Drivetrain.getInstance().applyToAllAngle((angleMotor) -> angleMotor.set(ControlMode.PercentOutput, 0));
-        // }
     }
 
     public static double max4(double a, double b, double c, double d) {
@@ -138,7 +126,6 @@ public class SwerveManual extends IndefiniteCommand {
     @Override
     protected void end() {
         Drivetrain.getInstance().stopAllDrive();
-
     }
 
     @Override
