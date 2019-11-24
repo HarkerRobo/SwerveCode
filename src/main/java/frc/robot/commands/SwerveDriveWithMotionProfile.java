@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import com.ctre.phoenix.motion.BufferedTrajectoryPointStream;
+import com.ctre.phoenix.motion.MotionProfileStatus;
 import com.ctre.phoenix.motion.TrajectoryPoint;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
@@ -9,6 +10,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.RobotMap;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.util.SwerveModule;
+import harkerrobolib.util.Conversions;
+import harkerrobolib.util.Conversions.PositionUnit;
+import harkerrobolib.util.Conversions.SpeedUnit;
 import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.Trajectory;
 import jaci.pathfinder.Waypoint;
@@ -28,6 +32,8 @@ public class SwerveDriveWithMotionProfile extends Command {
     private static final SwerveModifier.Mode MODE = SwerveModifier.Mode.SWERVE_DEFAULT;
 
     private static final int MIN_BUFFERED_POINTS = 4;
+
+    private static final double METERS_TO_FEET = 3.28;
 
     private int timeDur;
 
@@ -54,9 +60,9 @@ public class SwerveDriveWithMotionProfile extends Command {
 
         Trajectory.Config config = new Trajectory.Config(
                 Trajectory.FitMethod.HERMITE_QUINTIC,
-                Trajectory.Config.SAMPLES_HIGH,
-                timeDur, 
-                Drivetrain.MAX_DRIVE_VELOCITY, 
+                Trajectory.Config.SAMPLES_FAST,
+                (double)timeDur / 1000, 
+                Drivetrain.MAX_DRIVE_VELOCITY,  
                 Drivetrain.MAX_DRIVE_ACCELERATION, 
                 Drivetrain.MAX_DRIVE_JERK
         );
@@ -70,10 +76,10 @@ public class SwerveDriveWithMotionProfile extends Command {
         //Generate the individual wheel trajectories using the original trajectory as the center
         modifier.modify(Drivetrain.DT_WIDTH, Drivetrain.DT_LENGTH, MODE);
 
-        Trajectory tl = modifier.getFrontLeftTrajectory();
-        Trajectory tr = modifier.getFrontRightTrajectory();
-        Trajectory bl = modifier.getBackLeftTrajectory();
-        Trajectory br = modifier.getBackRightTrajectory();
+        tl = modifier.getFrontLeftTrajectory();
+        tr = modifier.getFrontRightTrajectory();
+        bl = modifier.getBackLeftTrajectory();
+        br = modifier.getBackRightTrajectory();
 
         //Generate Drive Streams early, since they will always be the same
         tlDriveStream = createDriveStreamFromTrajectory(tl);
@@ -112,15 +118,16 @@ public class SwerveDriveWithMotionProfile extends Command {
     private static BufferedTrajectoryPointStream createDriveStreamFromTrajectory(Trajectory traj) {
         BufferedTrajectoryPointStream stream = new BufferedTrajectoryPointStream();
 
+        SmartDashboard.putNumber("Drive Points", traj.length());
         for (int i = 0; i < traj.length(); i++) {
             Segment seg = traj.get(i);
             TrajectoryPoint point = new TrajectoryPoint();
 
-            point.position = seg.position * Drivetrain.GEAR_RATIO;
-            point.velocity = seg.velocity * Drivetrain.GEAR_RATIO;
+            point.position = Drivetrain.GEAR_RATIO * Conversions.convertPosition(PositionUnit.FEET, (seg.position*METERS_TO_FEET), PositionUnit.ENCODER_UNITS);
+            point.velocity = Drivetrain.GEAR_RATIO * Conversions.convertSpeed(SpeedUnit.FEET_PER_SECOND, (seg.velocity * METERS_TO_FEET), SpeedUnit.ENCODER_UNITS);
             point.profileSlotSelect0 = Drivetrain.DRIVE_MOTION_PROF_SLOT;
             point.isLastPoint = i == traj.length() - 1;
-            point.arbFeedFwd = 0;
+            point.arbFeedFwd = point.velocity > 0 ? Drivetrain.DRIVE_MOTION_PROF_kS : 0;
             point.timeDur = 0; //Set timeDur to zero because the Motion Profile period was already configured
             point.zeroPos = i == 0; //Zero on first point in profile
 
@@ -133,11 +140,13 @@ public class SwerveDriveWithMotionProfile extends Command {
     private static BufferedTrajectoryPointStream createAngleStreamFromTrajectory(Trajectory traj, SwerveModule module) {
         BufferedTrajectoryPointStream stream = new BufferedTrajectoryPointStream();
 
+        SmartDashboard.putNumber("Angle Points", traj.length());
         for (int i = 0; i < traj.length(); i++) {
             Segment seg = traj.get(i);
             TrajectoryPoint point = new TrajectoryPoint();
 
-            point.position = (Drivetrain.convertAngle(module, seg.heading) / 360) * 4096;
+            SmartDashboard.putNumber("Heading", seg.heading);
+            point.position = (Drivetrain.convertAngle(module, Math.toDegrees(seg.heading)) / 360) * 4096;
             point.profileSlotSelect0 = Drivetrain.ANGLE_MOTION_PROF_SLOT;
             point.isLastPoint = i == traj.length() - 1;
             point.arbFeedFwd = 0;
@@ -156,17 +165,30 @@ public class SwerveDriveWithMotionProfile extends Command {
         SmartDashboard.putNumber("Top Left Angle Error", Drivetrain.getInstance().getTopLeft().getAngleMotor().getClosedLoopError());
         SmartDashboard.putNumber("Top Left Drive Error", Drivetrain.getInstance().getTopLeft().getDriveMotor().getClosedLoopError());
         
-        SmartDashboard.putNumber("Top Right Velocity", Drivetrain.getInstance().getTopRight().getDriveMotor().getActiveTrajectoryVelocity());
-        SmartDashboard.putNumber("Top Right Angle Error", Drivetrain.getInstance().getTopRight().getAngleMotor().getClosedLoopError());
-        SmartDashboard.putNumber("Top Right Drive Error", Drivetrain.getInstance().getTopRight().getDriveMotor().getClosedLoopError());
+        // SmartDashboard.putNumber("Top Right Velocity", Drivetrain.getInstance().getTopRight().getDriveMotor().getActiveTrajectoryVelocity());
+        // SmartDashboard.putNumber("Top Right Angle Error", Drivetrain.getInstance().getTopRight().getAngleMotor().getClosedLoopError());
+        // SmartDashboard.putNumber("Top Right Drive Error", Drivetrain.getInstance().getTopRight().getDriveMotor().getClosedLoopError());
 
-        SmartDashboard.putNumber("Back Left Velocity", Drivetrain.getInstance().getBackLeft().getDriveMotor().getActiveTrajectoryVelocity());
-        SmartDashboard.putNumber("Back Left Angle Error", Drivetrain.getInstance().getBackLeft().getAngleMotor().getClosedLoopError());
-        SmartDashboard.putNumber("Back Left Drive Error", Drivetrain.getInstance().getBackLeft().getDriveMotor().getClosedLoopError());
+        // SmartDashboard.putNumber("Back Left Velocity", Drivetrain.getInstance().getBackLeft().getDriveMotor().getActiveTrajectoryVelocity());
+        // SmartDashboard.putNumber("Back Left Angle Error", Drivetrain.getInstance().getBackLeft().getAngleMotor().getClosedLoopError());
+        // SmartDashboard.putNumber("Back Left Drive Error", Drivetrain.getInstance().getBackLeft().getDriveMotor().getClosedLoopError());
 
-        SmartDashboard.putNumber("Back Right Velocity", Drivetrain.getInstance().getBackRight().getDriveMotor().getActiveTrajectoryVelocity());
-        SmartDashboard.putNumber("Back Right Angle Error", Drivetrain.getInstance().getBackRight().getAngleMotor().getClosedLoopError());
-        SmartDashboard.putNumber("Back Right Drive Error", Drivetrain.getInstance().getBackRight().getDriveMotor().getClosedLoopError());
+        // SmartDashboard.putNumber("Back Right Velocity", Drivetrain.getInstance().getBackRight().getDriveMotor().getActiveTrajectoryVelocity());
+        // SmartDashboard.putNumber("Back Right Angle Error", Drivetrain.getInstance().getBackRight().getAngleMotor().getClosedLoopError());
+        // SmartDashboard.putNumber("Back Right Drive Error", Drivetrain.getInstance().getBackRight().getDriveMotor().getClosedLoopError());
+    
+        MotionProfileStatus tlDriveStatus = new MotionProfileStatus();
+        MotionProfileStatus tlAngleStatus = new MotionProfileStatus();
+        Drivetrain.getInstance().getTopLeft().getAngleMotor().getMotionProfileStatus(tlAngleStatus);
+        Drivetrain.getInstance().getTopLeft().getDriveMotor().getMotionProfileStatus(tlDriveStatus);
+
+        System.out.println(tlDriveStatus.btmBufferCnt);
+        SmartDashboard.putNumber("TL Drive Top Buffer", tlDriveStatus.topBufferCnt);
+        SmartDashboard.putNumber("TL Drive Btm Buffer", tlDriveStatus.btmBufferCnt);
+        SmartDashboard.putNumber("TL Angle Top Buffer", tlAngleStatus.topBufferCnt);
+        SmartDashboard.putNumber("TL Angle Btm Buffer", tlAngleStatus.btmBufferCnt);
+        SmartDashboard.putBoolean("TL Drive Has Overrun", tlDriveStatus.hasUnderrun);
+        SmartDashboard.putBoolean("TL Angle Has Overrun", tlAngleStatus.hasUnderrun);
     }
 
     @Override

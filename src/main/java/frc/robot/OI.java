@@ -1,6 +1,9 @@
 package frc.robot;
 
 import frc.robot.commands.SwerveDriveWithMotionProfile;
+import frc.robot.commands.ToggleFieldSensitivity;
+import frc.robot.subsystems.Drivetrain;
+import harkerrobolib.commands.CallMethodCommand;
 import harkerrobolib.wrappers.XboxGamepad;
 import jaci.pathfinder.Waypoint;
 /**
@@ -31,9 +34,15 @@ public class OI {
     }
 
     public void initBindings() {
-        Waypoint[] points = new Waypoint[] {
-            new Waypoint(0, 0, Math.toDegrees(0)),
-            new Waypoint(0, 1, Math.toDegrees(30))
+        Waypoint[] forward = new Waypoint[] {
+            new Waypoint(0, 0, 0),
+            new Waypoint(1, 0, 0)
+        };
+        Waypoint[] rightAndUp = new Waypoint[] {
+            new Waypoint(0, 0, 0),
+            // new Waypoint(2, 0, 0),
+            new Waypoint(2, 1, 0),
+            new Waypoint(2.5, 2, 0)
         };
 
         int timeDur = 10; //ms between each segment
@@ -41,7 +50,11 @@ public class OI {
         // OI.getInstance().getDriverGamepad().getUpDPadButton().whenPressed(
         //         new SwerveDriveWithMotionProfile(points, timeDur)
         // );
+        driverGamepad.getButtonY().whenPressed(new SwerveDriveWithMotionProfile(forward, timeDur));
+        driverGamepad.getButtonA().whenPressed(new SwerveDriveWithMotionProfile(rightAndUp, timeDur));
+        driverGamepad.getButtonBumperRight().whenPressed(new ToggleFieldSensitivity());
     }
+
 
     public XboxGamepad getDriverGamepad() {
         return driverGamepad;

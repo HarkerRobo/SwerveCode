@@ -5,6 +5,7 @@ import frc.robot.RobotMap;
 import frc.robot.commands.SwerveManual;
 import frc.robot.util.SwerveModule;
 import frc.robot.util.Vector;
+import harkerrobolib.util.Conversions;
 import harkerrobolib.wrappers.HSPigeon;
 import harkerrobolib.wrappers.HSTalon;
 
@@ -74,14 +75,15 @@ public class Drivetrain extends Subsystem {
     private static final double DRIVE_VELOCITY_KF = 0.046;// theoretical:  0.034;
 
     public static final int DRIVE_MOTION_PROF_SLOT = 1;
-    private static final double DRIVE_MOTION_PROF_kF = 0;
-    private static final double DRIVE_MOTION_PROF_kP = 0;
+    public static final double DRIVE_MOTION_PROF_kF = DRIVE_VELOCITY_KF;
+    private static final double DRIVE_MOTION_PROF_kP = 0.3;
     private static final double DRIVE_MOTION_PROF_kI = 0;
-    private static final double DRIVE_MOTION_PROF_kD = 0;
+    private static final double DRIVE_MOTION_PROF_kD = 1;
+    public static final double DRIVE_MOTION_PROF_kS = 0.06;
 
     public static final int ANGLE_MOTION_PROF_SLOT = 1;
     private static final double ANGLE_MOTION_PROF_kF = 0;
-    private static final double ANGLE_MOTION_PROF_kP = 0;
+    private static final double ANGLE_MOTION_PROF_kP = ANGLE_POSITION_KP;
     private static final double ANGLE_MOTION_PROF_kI = 0;
     private static final double ANGLE_MOTION_PROF_kD = 0;
 
@@ -92,6 +94,7 @@ public class Drivetrain extends Subsystem {
     public static final double MAX_DRIVE_VELOCITY = 9;
     public static final double MAX_DRIVE_ACCELERATION = 4;
     public static final double MAX_DRIVE_JERK = 50;
+    
     public static final double DRIVE_RAMP_RATE = 0.1;
     public static final double ANGLE_RAMP_RATE = 0.05;
     public static final double GEAR_RATIO = 6;
@@ -111,6 +114,8 @@ public class Drivetrain extends Subsystem {
     private static final int BR_OFFSET = 4605;
 
 	public static final double PIGEON_kP = 0.02;
+
+    private static final double WHEEL_DIAMETER = 4;
 
     private Drivetrain() {
         topLeft = new SwerveModule(RobotMap.TL_DRIVE_ID, TL_DRIVE_INVERTED, TL_DRIVE_SENSOR_PHASE, RobotMap.TL_ANGLE_ID, TL_ANGLE_INVERTED, TL_ANGLE_SENSOR_PHASE);
@@ -136,13 +141,21 @@ public class Drivetrain extends Subsystem {
         pigeon = new HSPigeon(RobotMap.PIGEON_ID);
         pigeon.configFactoryDefault();
         pigeon.zero();
+
+        Conversions.setWheelDiameter(WHEEL_DIAMETER);
     }
 
     @Override
     protected void initDefaultCommand() {
         setDefaultCommand(new SwerveManual());
     }
+
+    public void toggleFieldSensitivity() {
+        isFieldSensitive = !isFieldSensitive;
+        System.out.println(isFieldSensitive);
+    }
     
+
     public void setupPositionPID() {
         applyToAllAngle((angleMotor) -> angleMotor.config_kP(ANGLE_POSITION_SLOT, ANGLE_POSITION_KP));
         applyToAllAngle((angleMotor) -> angleMotor.config_kI(ANGLE_POSITION_SLOT, ANGLE_POSITION_KI));

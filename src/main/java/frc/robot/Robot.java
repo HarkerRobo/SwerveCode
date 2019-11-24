@@ -61,7 +61,7 @@ public class Robot extends TimedRobot {
     public void robotPeriodic() {
         Scheduler.getInstance().run();
 
-        SmartDashboard.putNumber("TL Actual Angle", Drivetrain.getInstance().getTopLeft().getAngleDegrees());
+        SmartDashboard.putNumber("BL Actual Angle", Drivetrain.getInstance().getBackLeft().getAngleDegrees());
         SmartDashboard.putNumber("TL Desired Angle", Drivetrain.getInstance().getTopLeft().getAngleDegrees());
         SmartDashboard.putNumber("TL Angle Error", MathUtil.constrain(Drivetrain.getInstance().getTopLeft().getAngleMotor().getClosedLoopError(), -100, 100));
         SmartDashboard.putNumber("TL Percent Output", Drivetrain.getInstance().getTopLeft().getAngleMotor().getOutputCurrent());
@@ -71,6 +71,8 @@ public class Robot extends TimedRobot {
         // SmartDashboard.putNumber("BR RiseToFall", Drivetrain.getInstance().getBackRight().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
     
         SmartDashboard.putNumber("Pigeon Heading", Drivetrain.getInstance().getPigeon().getFusedHeading());
+
+        SmartDashboard.putBoolean("Is field senstitive", Drivetrain.getInstance().isFieldSensitive());
     }
 
     /**
