@@ -45,13 +45,13 @@ public class OI {
             new Waypoint(2.5, 2, 0)
         };
 
-        int timeDur = 10; //ms between each segment
+        int timeDur = 50; //ms between each segment
 
         // OI.getInstance().getDriverGamepad().getUpDPadButton().whenPressed(
         //         new SwerveDriveWithMotionProfile(points, timeDur)
         // );
         driverGamepad.getButtonY().whenPressed(new SwerveDriveWithMotionProfile(forward, timeDur));
-        driverGamepad.getButtonA().whenPressed(new SwerveDriveWithMotionProfile(rightAndUp, timeDur));
+        //driverGamepad.getButtonA().whenPressed(new SwerveDriveWithMotionProfile(rightAndUp, timeDur));
         driverGamepad.getButtonBumperRight().whenPressed(new ToggleFieldSensitivity());
     }
 
