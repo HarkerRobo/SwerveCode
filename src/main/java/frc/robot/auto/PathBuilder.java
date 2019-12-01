@@ -1,7 +1,12 @@
 // package frc.robot.auto;
+
+// import java.util.List;
+
+
 // /**
-//  * Can use arc tan of the slope in order to get the angle that the anglemotor needs to be at
-//  * Can use the length of the waypoint line in order to get magnitude for drivemotor
+//  * Can use arc tan of the slope in order to get the angle that the anglemotor
+//  * needs to be at Can use the length of the waypoint line in order to get
+//  * magnitude for drivemotor
 //  */
 // public class PathBuilder {
 

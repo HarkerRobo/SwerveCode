@@ -35,16 +35,17 @@ public class SwerveDriveWithMotionProfile extends Command {
 
     private static final int MIN_BUFFERED_POINTS = 4;
 
-    private static final double METERS_TO_FEET = 3.28;
+    private static final double FEET_PER_METER = 3.28;
 
     private int timeDur;
 
-    private Trajectory tl;
-    private Trajectory tr;
-    private Trajectory bl;
-    private Trajectory br;
+    private Trajectory traj;
 
+    private int i;
 
+    private double pigeonHeading;
+
+    public static final double ROTATION_MAGNITUDE = Math.sqrt(Math.pow(Drivetrain.DT_LENGTH, 2) + Math.pow(Drivetrain.DT_WIDTH, 2)); 
     /**
      * Generates a Trajectory from the Waypoints and creates the eight corresponding BufferedTrajectoryPointStreams
      * 
@@ -66,30 +67,36 @@ public class SwerveDriveWithMotionProfile extends Command {
         );
 
         long startTime = System.currentTimeMillis();
-        Trajectory trajectory = Pathfinder.generate(waypoints, config);
+        traj = Pathfinder.generate(waypoints, config);
         SmartDashboard.putNumber("Path Generation Time", System.currentTimeMillis() - startTime);
 
-        SwerveModifier modifier = new SwerveModifier(trajectory);
+        SwerveModifier modifier = new SwerveModifier(traj);
 
         //Generate the individual wheel trajectories using the original trajectory as the center
         modifier.modify(Drivetrain.DT_WIDTH, Drivetrain.DT_LENGTH, MODE);
 
-        tl = modifier.getFrontLeftTrajectory();
-        tr = modifier.getFrontRightTrajectory();
-        bl = modifier.getBackLeftTrajectory();
-        br = modifier.getBackRightTrajectory();
+        // traj = modifier.getFrontrajeftTrajectory();
+        // tr = modifier.getFrontRightTrajectory();
+        // bl = modifier.getBackLeftTrajectory();
+        // br = modifier.getBackRightTrajectory();
     }
-
+    
     @Override
     public void initialize() {
-        Drivetrain.getInstance().applyToAllDrive((driveMotor) -> driveMotor.selectProfileSlot(Drivetrain.DRIVE_VELOCITY_SLOT, RobotMap.PRIMARY_INDEX));     
+        i = 0;//Resets the isfinished case to start again.
+
+        pigeonHeading = Drivetrain.getInstance().getPigeon().getFusedHeading();
+
+        Drivetrain.getInstance().applyToAllDrive((driveMotor) -> driveMotor.selectProfileSlot(Drivetrain.DRIVE_MOTION_PROF_SLOT, RobotMap.PRIMARY_INDEX));     
         Drivetrain.getInstance().applyToAllAngle((angleMotor) -> angleMotor.selectProfileSlot(Drivetrain.ANGLE_POSITION_SLOT, RobotMap.PRIMARY_INDEX));
+        
+        Drivetrain.getInstance().applyToAllDrive((driveMotor) -> driveMotor.setSelectedSensorPosition(0));
 
         // Drivetrain.getInstance().applyToAllDrive((driveMotors) -> driveMotors.configMotionProfileTrajectoryPeriod(timeDur));
         // Drivetrain.getInstance().applyToAllAngle((angleMotors) -> angleMotors.configMotionProfileTrajectoryPeriod(timeDur));
 
-        // Drivetrain.getInstance().getTopLeft().getDriveMotor().startMotionProfile(tlDriveStream, MIN_BUFFERED_POINTS, ControlMode.MotionProfile);
-        // Drivetrain.getInstance().getTopLeft().getAngleMotor().startMotionProfile(tlAngleStream, MIN_BUFFERED_POINTS, ControlMode.MotionProfile);
+        // Drivetrain.getInstance().getTopLeft().getDriveMotor().startMotionProfile(trajDriveStream, MIN_BUFFERED_POINTS, ControlMode.MotionProfile);
+        // Drivetrain.getInstance().getTopLeft().getAngleMotor().startMotionProfile(trajAngleStream, MIN_BUFFERED_POINTS, ControlMode.MotionProfile);
         
         // Drivetrain.getInstance().getTopRight().getDriveMotor().startMotionProfile(trDriveStream, MIN_BUFFERED_POINTS, ControlMode.MotionProfile);
         // Drivetrain.getInstance().getTopRight().getAngleMotor().startMotionProfile(trAngleStream, MIN_BUFFERED_POINTS, ControlMode.MotionProfile);
@@ -101,45 +108,73 @@ public class SwerveDriveWithMotionProfile extends Command {
         // Drivetrain.getInstance().getBackRight().getAngleMotor().startMotionProfile(brAngleStream, MIN_BUFFERED_POINTS, ControlMode.MotionProfile);
         
         Runnable r = new Runnable() {
-            int i = 0;
-
+            // double prevPosition = 0;
             @Override
             public void run() {
-                if (i < tl.length()) {
-                    double heading = tl.get(i).heading;
-                    double velocity = tl.get(i).velocity;
+                if (i < traj.length()) {
+                    Segment seg = traj.get(i);
+                    double heading = seg.heading;
+                    double velocity = Conversions.convertSpeed(SpeedUnit.FEET_PER_SECOND, seg.velocity * FEET_PER_METER, SpeedUnit.ENCODER_UNITS) * Drivetrain.GEAR_RATIO;
+                    double trajPosition = Conversions.convertPosition(PositionUnit.FEET, seg.position * FEET_PER_METER, PositionUnit.ENCODER_UNITS) * Drivetrain.GEAR_RATIO;
 
-                    Vector vec = new Vector(
-                            Math.cos(heading) * Math.sqrt(velocity) * Math.signum(velocity), 
-                            Math.sin(heading) * Math.sqrt(velocity) * Math.signum(velocity)
-                    );
+                    double truePosition = (Drivetrain.getInstance().getTopLeft().getDriveMotor().getSelectedSensorPosition()
+                                            +  Drivetrain.getInstance().getTopRight().getDriveMotor().getSelectedSensorPosition()
+                                            +  Drivetrain.getInstance().getBackLeft().getDriveMotor().getSelectedSensorPosition()
+                                            +  Drivetrain.getInstance().getBackRight().getDriveMotor().getSelectedSensorPosition()) / 4.0;
                     
-                    // Vector tlVecTranslation = vec;    
-                    // Vector trVecTranslation = vec;    
-                    // Vector blVecTranslation = vec;    
-                    // Vector brVecTranslation = vec;    
+                    double error = trajPosition - truePosition;
+                    double output = Drivetrain.DRIVE_MOTION_PROF_kF * velocity + Drivetrain.DRIVE_MOTION_PROF_kP * error;
+                    output = Math.signum(output) * Math.sqrt(output);
 
-                    // double tlDeltaHeading = Math.cos(tl.get(i).heading - tl.get(i-1).heading);
+                    Vector translation = new Vector(Math.cos(heading) * output, Math.sin(heading) * output);
 
-                    // Vector topLeftRotation = new Vector(Drivetrain.DT_LENGTH, Drivetrain.DT_WIDTH);
-                    // Vector topRightRotation = new Vector(Drivetrain.DT_LENGTH, -Drivetrain.DT_WIDTH);
-                    // Vector backLeftRotation = new Vector(-Drivetrain.DT_LENGTH, Drivetrain.DT_WIDTH);
-                    // Vector backRightRotation = new Vector(-Drivetrain.DT_LENGTH, -Drivetrain.DT_WIDTH);
+                    // prevPosition = trajPosition;
 
-                    // topLeftRotation.scale(Math.cos(tlDeltaHeading) / SwerveManual.ROTATION_MAGNITUDE);
-                    // topRightRotation.scale(turnMagnitude / SwerveManual.ROTATION_MAGNITUDE);
-                    // backLeftRotation.scale(turnMagnitude / SwerveManual.ROTATION_MAGNITUDE);
-                    // backRightRotation.scale(turnMagnitude / SwerveManual.ROTATION_MAGNITUDE);
+                    Vector topLeftRotation = new Vector(Drivetrain.DT_LENGTH, Drivetrain.DT_WIDTH);
+                    Vector topRightRotation = new Vector(Drivetrain.DT_LENGTH, -Drivetrain.DT_WIDTH);
+                    Vector backLeftRotation = new Vector(-Drivetrain.DT_LENGTH, Drivetrain.DT_WIDTH);
+                    Vector backRightRotation = new Vector(-Drivetrain.DT_LENGTH, -Drivetrain.DT_WIDTH);
 
-                    // Vector tlVecAngle = new Vector(x, y))
-                    Drivetrain.getInstance().setDrivetrain(vec, vec, vec, vec, false);
-                    i++;
-                    System.out.println(i);   
+                    double turnMagnitude = -Drivetrain.PIGEON_kP * (pigeonHeading - Drivetrain.getInstance().getPigeon().getFusedHeading());
+
+                    //Scale by ROTATION_MAGNITUDE to make the magnitude of all vectors 1
+                    //and then by turnMagnitude to reflect the desired rotational speed
+                    topLeftRotation.scale(turnMagnitude / ROTATION_MAGNITUDE);
+                    topRightRotation.scale(turnMagnitude / ROTATION_MAGNITUDE);
+                    backLeftRotation.scale(turnMagnitude / ROTATION_MAGNITUDE);
+                    backRightRotation.scale(turnMagnitude / ROTATION_MAGNITUDE);
+                    
+                    Vector sumTopLeft = Vector.add(topLeftRotation, translation);
+                    Vector sumTopRight = Vector.add(topRightRotation, translation);
+                    Vector sumBackLeft = Vector.add(backLeftRotation, translation);
+                    Vector sumBackRight = Vector.add(backRightRotation, translation);
+                    
+                    // Scale down the vectors so that the largest possible magnitude is 1 (100% output)
+                    double largestMag = SwerveManual.max4(sumTopLeft.getMagnitude(), sumTopRight.getMagnitude(), sumBackLeft.getMagnitude(), sumBackRight.getMagnitude());
+                    
+                    if(largestMag < 1) 
+                        largestMag = 1; //Set to 1 so none of the vectors are modified
+
+                    sumTopLeft.scale(1 / largestMag);
+                    sumTopRight.scale(1 / largestMag);
+                    sumBackLeft.scale(1 / largestMag);
+                    sumBackRight.scale(1 / largestMag);
+
+                    Drivetrain.getInstance().setDrivetrainVelocity(sumTopLeft, sumTopRight, sumBackLeft, sumBackRight, i > 0 ? Drivetrain.DRIVE_MOTION_PROF_kS : 0, false);
+                    i++;  
+
+                    double trajDesiredPos = Conversions.convertPosition(PositionUnit.FEET, trajPosition * FEET_PER_METER, PositionUnit.ENCODER_UNITS) * Drivetrain.GEAR_RATIO;
+                    double trajActualPos = Drivetrain.getInstance().getTopLeft().getDriveMotor().getSelectedSensorPosition();
+
+                    SmartDashboard.putNumber("Pos Error", Math.abs(trajDesiredPos) - Math.abs(trajActualPos));
+                    SmartDashboard.putNumber("Vel Error", Drivetrain.getInstance().getTopLeft().getDriveMotor().getClosedLoopError());
+                    SmartDashboard.putNumber("Desired Vel", Drivetrain.getInstance().getTopLeft().getDriveMotor().getClosedLoopTarget());
                 }
+                SmartDashboard.putBoolean("Path Finished", i >= traj.length());
             }
         };
         Notifier n = new Notifier(r);
-        n.startPeriodic(timeDur / 1000);
+        n.startPeriodic((double)timeDur / 1000);
     }
 
     // private static BufferedTrajectoryPointStream createDriveStreamFromTrajectory(Trajectory traj) {
@@ -204,24 +239,24 @@ public class SwerveDriveWithMotionProfile extends Command {
         // SmartDashboard.putNumber("Back Right Angle Error", Drivetrain.getInstance().getBackRight().getAngleMotor().getClosedLoopError());
         // SmartDashboard.putNumber("Back Right Drive Error", Drivetrain.getInstance().getBackRight().getDriveMotor().getClosedLoopError());
     
-        MotionProfileStatus tlDriveStatus = new MotionProfileStatus();
-        MotionProfileStatus tlAngleStatus = new MotionProfileStatus();
-        Drivetrain.getInstance().getTopLeft().getAngleMotor().getMotionProfileStatus(tlAngleStatus);
-        Drivetrain.getInstance().getTopLeft().getDriveMotor().getMotionProfileStatus(tlDriveStatus);
+        MotionProfileStatus trajDriveStatus = new MotionProfileStatus();
+        MotionProfileStatus trajAngleStatus = new MotionProfileStatus();
+        Drivetrain.getInstance().getTopLeft().getAngleMotor().getMotionProfileStatus(trajAngleStatus);
+        Drivetrain.getInstance().getTopLeft().getDriveMotor().getMotionProfileStatus(trajDriveStatus);
 
-        // System.out.println(tlDriveStatus.btmBufferCnt);
-        SmartDashboard.putNumber("TL Drive Top Buffer", tlDriveStatus.topBufferCnt);
-        SmartDashboard.putNumber("TL Drive Btm Buffer", tlDriveStatus.btmBufferCnt);
-        SmartDashboard.putNumber("TL Angle Top Buffer", tlAngleStatus.topBufferCnt);
-        SmartDashboard.putNumber("TL Angle Btm Buffer", tlAngleStatus.btmBufferCnt);
-        SmartDashboard.putBoolean("TL Drive Has Overrun", tlDriveStatus.hasUnderrun);
-        SmartDashboard.putBoolean("TL Angle Has Overrun", tlAngleStatus.hasUnderrun);
+        // System.out.printrajn(trajDriveStatus.btmBufferCnt);
+        SmartDashboard.putNumber("traj Drive Top Buffer", trajDriveStatus.topBufferCnt);
+        SmartDashboard.putNumber("traj Drive Btm Buffer", trajDriveStatus.btmBufferCnt);
+        SmartDashboard.putNumber("traj Angle Top Buffer", trajAngleStatus.topBufferCnt);
+        SmartDashboard.putNumber("traj Angle Btm Buffer", trajAngleStatus.btmBufferCnt);
+        SmartDashboard.putBoolean("traj Drive Has Overrun", trajDriveStatus.hasUnderrun);
+        SmartDashboard.putBoolean("traj Angle Has Overrun", trajAngleStatus.hasUnderrun);
     }
 
     @Override
     public boolean isFinished() {
-        return false; //Holds Motion Profile Indefinitely, for testing
-        //return Drivetrain.getInstance().getTopLeft().getAngleMotor().isMotionProfileFinished() && Drivetrain.getInstance().getTopLeft().getDriveMotor().isMotionProfileFinished();
+        // return false; //Holds Motion Profile Indefinitely, for testing
+        return i >= traj.length();
     }
 
     @Override

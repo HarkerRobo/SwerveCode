@@ -116,7 +116,7 @@ public class SwerveManual extends IndefiniteCommand {
         sumBackLeft.scale(1 / largestMag);
         sumBackRight.scale(1 / largestMag);
 
-        Drivetrain.getInstance().setDrivetrain(sumTopLeft, sumTopRight, sumBackLeft, sumBackRight, IS_PERCENT_OUTPUT);
+        Drivetrain.getInstance().setDrivetrainVelocity(sumTopLeft, sumTopRight, sumBackLeft, sumBackRight, 0, IS_PERCENT_OUTPUT);
     }
 
     public static double max4(double a, double b, double c, double d) {

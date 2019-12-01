@@ -10,6 +10,7 @@ import harkerrobolib.util.Conversions.SpeedUnit;
 import harkerrobolib.wrappers.HSTalon;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.DemandType;
 
 /**
  * A swerve module on the drivetrain.
@@ -135,7 +136,7 @@ public class SwerveModule {
         }
     }
     
-    public void setAngleAndDrive(double targetAngle, double output, boolean isPercentOutput) {
+    public void setAngleAndDriveVelocity(double targetAngle, double output, boolean isPercentOutput) {
         boolean shouldReverse = Math.abs(targetAngle - getAngleDegrees()) > 90;
         
         if (shouldReverse) {
@@ -153,6 +154,25 @@ public class SwerveModule {
         int targetPos = (int)((targetAngle / 360) * 4096);
 
         angleMotor.set(ControlMode.Position, targetPos);
+    }
+
+    public void setAngleAndDrivePosition(double targetAngle, double position, double feedForward) {
+        boolean shouldReverse = Math.abs(targetAngle - getAngleDegrees()) > 90;
+        
+        if (shouldReverse) {
+            position = driveMotor.getSelectedSensorPosition() - Math.signum(position) * (position - driveMotor.getSelectedSensorPosition());
+            if (targetAngle - getAngleDegrees() > 90) {
+                targetAngle -= 180;
+            }
+            else {
+                targetAngle += 180;
+            }
+        }
+        
+        int targetPos = (int)((targetAngle / 360) * 4096);
+
+        angleMotor.set(ControlMode.Position, targetPos);
+        driveMotor.set(ControlMode.Position, position, DemandType.ArbitraryFeedForward, feedForward);
     }
 
     /**

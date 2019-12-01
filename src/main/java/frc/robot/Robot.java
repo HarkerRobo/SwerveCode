@@ -73,6 +73,8 @@ public class Robot extends TimedRobot {
         SmartDashboard.putNumber("Pigeon Heading", Drivetrain.getInstance().getPigeon().getFusedHeading());
 
         SmartDashboard.putBoolean("Is field senstitive", Drivetrain.getInstance().isFieldSensitive());
+
+        SmartDashboard.putNumber("TL Drive Pos", Drivetrain.getInstance().getTopLeft().getDriveMotor().getSelectedSensorPosition());
     }
 
     /**

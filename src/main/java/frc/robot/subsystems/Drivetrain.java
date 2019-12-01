@@ -11,6 +11,7 @@ import harkerrobolib.wrappers.HSTalon;
 
 import java.util.function.Consumer;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.StatusFrame;
 
 /**
@@ -72,13 +73,13 @@ public class Drivetrain extends Subsystem {
     private static final double DRIVE_VELOCITY_KP = 0.13;
     private static final double DRIVE_VELOCITY_KI = 0.0;
     private static final double DRIVE_VELOCITY_KD = 0.0;
-    private static final double DRIVE_VELOCITY_KF = 0.046;// theoretical:  0.034;
+    private static final double DRIVE_VELOCITY_KF = 0.046; //theoretical: 0.034;
 
     public static final int DRIVE_MOTION_PROF_SLOT = 1;
-    public static final double DRIVE_MOTION_PROF_kF = DRIVE_VELOCITY_KF;
-    private static final double DRIVE_MOTION_PROF_kP = 0.3;
-    private static final double DRIVE_MOTION_PROF_kI = 0;
-    private static final double DRIVE_MOTION_PROF_kD = 1;
+    public static final double DRIVE_MOTION_PROF_kF = 0.034; //theoretical: 0.034;
+    public static final double DRIVE_MOTION_PROF_kP = 0;//1.8
+    //public static final double DRIVE_MOTION_PROF_kI = 0;
+    //public static final double DRIVE_MOTION_PROF_kD = 0;
     public static final double DRIVE_MOTION_PROF_kS = 0.06;
 
     public static final int ANGLE_MOTION_PROF_SLOT = 1;
@@ -133,9 +134,11 @@ public class Drivetrain extends Subsystem {
         backLeft.getAngleMotor().setSelectedSensorPosition(blAngleOffset);
         backRight.getAngleMotor().setSelectedSensorPosition(brAngleOffset);
 
+        applyToAllDrive((motor) -> motor.setSelectedSensorPosition(0));
+
         setupPositionPID();
         setupVelocityPID();
-        setupMotionProfilePID();
+        // setupMotionProfilePID();
         
         isFieldSensitive = true;
         pigeon = new HSPigeon(RobotMap.PIGEON_ID);
@@ -171,38 +174,50 @@ public class Drivetrain extends Subsystem {
         applyToAllDrive((driveMotor) -> driveMotor.configClosedloopRamp(DRIVE_RAMP_RATE));
     }
     
-    private void setupMotionProfilePID() {
-        applyToAllDrive((driveMotor) -> driveMotor.config_kF(DRIVE_MOTION_PROF_SLOT, DRIVE_MOTION_PROF_kF));
-        applyToAllDrive((driveMotor) -> driveMotor.config_kP(DRIVE_MOTION_PROF_SLOT, DRIVE_MOTION_PROF_kP));
-        applyToAllDrive((driveMotor) -> driveMotor.config_kI(DRIVE_MOTION_PROF_SLOT, DRIVE_MOTION_PROF_kI));
-        applyToAllDrive((driveMotor) -> driveMotor.config_kD(DRIVE_MOTION_PROF_SLOT, DRIVE_MOTION_PROF_kD));
+    // private void setupMotionProfilePID() {
+    //     applyToAllDrive((driveMotor) -> driveMotor.config_kF(DRIVE_MOTION_PROF_SLOT, DRIVE_MOTION_PROF_kF));
+    //     applyToAllDrive((driveMotor) -> driveMotor.config_kP(DRIVE_MOTION_PROF_SLOT, DRIVE_MOTION_PROF_kP));
+    //     applyToAllDrive((driveMotor) -> driveMotor.config_kI(DRIVE_MOTION_PROF_SLOT, DRIVE_MOTION_PROF_kI));
+    //     applyToAllDrive((driveMotor) -> driveMotor.config_kD(DRIVE_MOTION_PROF_SLOT, DRIVE_MOTION_PROF_kD));
 
-        applyToAllAngle((angleMotor) -> angleMotor.config_kF(ANGLE_MOTION_PROF_SLOT, ANGLE_MOTION_PROF_kF));
-        applyToAllAngle((angleMotor) -> angleMotor.config_kP(ANGLE_MOTION_PROF_SLOT, ANGLE_MOTION_PROF_kP));
-        applyToAllAngle((angleMotor) -> angleMotor.config_kI(ANGLE_MOTION_PROF_SLOT, ANGLE_MOTION_PROF_kI));
-        applyToAllAngle((angleMotor) -> angleMotor.config_kD(ANGLE_MOTION_PROF_SLOT, ANGLE_MOTION_PROF_kD));
+    //     applyToAllAngle((angleMotor) -> angleMotor.config_kF(ANGLE_MOTION_PROF_SLOT, ANGLE_MOTION_PROF_kF));
+    //     applyToAllAngle((angleMotor) -> angleMotor.config_kP(ANGLE_MOTION_PROF_SLOT, ANGLE_MOTION_PROF_kP));
+    //     applyToAllAngle((angleMotor) -> angleMotor.config_kI(ANGLE_MOTION_PROF_SLOT, ANGLE_MOTION_PROF_kI));
+    //     applyToAllAngle((angleMotor) -> angleMotor.config_kD(ANGLE_MOTION_PROF_SLOT, ANGLE_MOTION_PROF_kD));
         
-        applyToAllDrive((talon) -> talon.setStatusFramePeriod(StatusFrame.Status_9_MotProfBuffer, MOTION_FRAME_PERIOD));
-        applyToAllAngle((talon) -> talon.setStatusFramePeriod(StatusFrame.Status_9_MotProfBuffer, MOTION_FRAME_PERIOD));
-    }
+    //     applyToAllDrive((talon) -> talon.setStatusFramePeriod(StatusFrame.Status_9_MotProfBuffer, MOTION_FRAME_PERIOD));
+    //     applyToAllAngle((talon) -> talon.setStatusFramePeriod(StatusFrame.Status_9_MotProfBuffer, MOTION_FRAME_PERIOD));
+    // }
 
     /**
      * Sets the output of the drivetrain based on desired output vectors for each swerve module
      */
-    public void setDrivetrain(Vector tl, Vector tr, Vector bl, Vector br, boolean isPercentOutput) {
-        double tlOutput = isPercentOutput ? tl.getMagnitude() : tl.getMagnitude() * MAX_DRIVE_VELOCITY;
-        double trOutput = isPercentOutput ? tr.getMagnitude() : tr.getMagnitude() * MAX_DRIVE_VELOCITY;
-        double blOutput = isPercentOutput ? bl.getMagnitude() : bl.getMagnitude() * MAX_DRIVE_VELOCITY;
-        double brOutput = isPercentOutput ? br.getMagnitude() : br.getMagnitude() * MAX_DRIVE_VELOCITY;
+    public void setDrivetrainVelocity(Vector tl, Vector tr, Vector bl, Vector br, double feedForward, boolean isPercentOutput) {
+        double tlMag = tl.getMagnitude() + feedForward;
+        double trMag = tr.getMagnitude() + feedForward;
+        double blMag = bl.getMagnitude() + feedForward;
+        double brMag = br.getMagnitude() + feedForward;
+
+        double tlOutput = isPercentOutput ? tlMag : (tlMag) * MAX_DRIVE_VELOCITY;
+        double trOutput = isPercentOutput ? trMag : (trMag) * MAX_DRIVE_VELOCITY;
+        double blOutput = isPercentOutput ? blMag : (blMag) * MAX_DRIVE_VELOCITY;
+        double brOutput = isPercentOutput ? brMag : (brMag) * MAX_DRIVE_VELOCITY;
         
-        setSwerveModule(topLeft, tlOutput, convertAngle(topLeft, tl.getAngle()), isPercentOutput);
-		setSwerveModule(topRight, trOutput, convertAngle(topRight, tr.getAngle()), isPercentOutput);
-		setSwerveModule(backLeft, blOutput, convertAngle(backLeft, bl.getAngle()), isPercentOutput);
-        setSwerveModule(backRight, brOutput, convertAngle(backRight, br.getAngle()), isPercentOutput);
+        setSwerveModuleVelocity(topLeft, tlOutput, convertAngle(topLeft, tl.getAngle()), isPercentOutput);
+		setSwerveModuleVelocity(topRight, trOutput, convertAngle(topRight, tr.getAngle()), isPercentOutput);
+		setSwerveModuleVelocity(backLeft, blOutput, convertAngle(backLeft, bl.getAngle()), isPercentOutput);
+        setSwerveModuleVelocity(backRight, brOutput, convertAngle(backRight, br.getAngle()), isPercentOutput);
     }
 
-    public void setSwerveModule(SwerveModule module, double output, double angle, boolean isPercentOutput) {
-        module.setAngleAndDrive(angle, output, isPercentOutput);
+    public void setDrivetrainPosition(Vector tl, Vector tr, Vector bl, Vector br, double feedForward) {
+        getTopLeft().setAngleAndDrivePosition(tl.getAngle(), tl.getMagnitude(), feedForward);
+        getTopRight().setAngleAndDrivePosition(tr.getAngle(), tr.getMagnitude(), feedForward);
+        getBackLeft().setAngleAndDrivePosition(bl.getAngle(), bl.getMagnitude(), feedForward);
+        getBackRight().setAngleAndDrivePosition(br.getAngle(), br.getMagnitude(), feedForward);
+    }
+
+    public void setSwerveModuleVelocity(SwerveModule module, double output, double angle, boolean isPercentOutput) {
+        module.setAngleAndDriveVelocity(angle, output, isPercentOutput);
     }
 
     /** 
@@ -238,10 +253,10 @@ public class Drivetrain extends Subsystem {
      * Stops all drive motors while holding the current angle
      */
     public void stopAllDrive() {
-        setSwerveModule(topLeft, 0, topLeft.getAngleDegrees(), true);
-        setSwerveModule(topRight, 0, topRight.getAngleDegrees(), true);
-        setSwerveModule(backLeft, 0, backLeft.getAngleDegrees(), true);
-        setSwerveModule(backRight, 0, backRight.getAngleDegrees(), true);
+        setSwerveModuleVelocity(topLeft, 0, topLeft.getAngleDegrees(), true);
+        setSwerveModuleVelocity(topRight, 0, topRight.getAngleDegrees(), true);
+        setSwerveModuleVelocity(backLeft, 0, backLeft.getAngleDegrees(), true);
+        setSwerveModuleVelocity(backRight, 0, backRight.getAngleDegrees(), true);
     }
     
     /**
