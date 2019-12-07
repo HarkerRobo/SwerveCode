@@ -33,6 +33,8 @@ import jaci.pathfinder.modifiers.SwerveModifier;
 public class SwerveDriveWithMotionProfile extends Command {
     private static final SwerveModifier.Mode MODE = SwerveModifier.Mode.SWERVE_DEFAULT;
 
+    private static final boolean IS_PERCENT_OUTPUT = false;
+
     private static final int MIN_BUFFERED_POINTS = 4;
 
     private static final double FEET_PER_METER = 3.28;
@@ -87,8 +89,13 @@ public class SwerveDriveWithMotionProfile extends Command {
 
         pigeonHeading = Drivetrain.getInstance().getPigeon().getFusedHeading();
 
-        Drivetrain.getInstance().applyToAllDrive((driveMotor) -> driveMotor.selectProfileSlot(Drivetrain.DRIVE_MOTION_PROF_SLOT, RobotMap.PRIMARY_INDEX));     
-        Drivetrain.getInstance().applyToAllAngle((angleMotor) -> angleMotor.selectProfileSlot(Drivetrain.ANGLE_POSITION_SLOT, RobotMap.PRIMARY_INDEX));
+        Drivetrain.getInstance().applyToAllAngle(
+            (angleMotor) -> angleMotor.selectProfileSlot(Drivetrain.ANGLE_POSITION_SLOT, RobotMap.PRIMARY_INDEX)
+        );
+
+        Drivetrain.getInstance().applyToAllDrive(
+            (driveMotor) -> driveMotor.selectProfileSlot(Drivetrain.DRIVE_VELOCITY_SLOT, RobotMap.PRIMARY_INDEX)
+        );
         
         Drivetrain.getInstance().applyToAllDrive((driveMotor) -> driveMotor.setSelectedSensorPosition(0));
 
@@ -160,7 +167,7 @@ public class SwerveDriveWithMotionProfile extends Command {
                     sumBackLeft.scale(1 / largestMag);
                     sumBackRight.scale(1 / largestMag);
 
-                    Drivetrain.getInstance().setDrivetrainVelocity(sumTopLeft, sumTopRight, sumBackLeft, sumBackRight, i > 0 ? Drivetrain.DRIVE_MOTION_PROF_kS : 0, false);
+                    Drivetrain.getInstance().setDrivetrainVelocity(sumTopLeft, sumTopRight, sumBackLeft, sumBackRight, i > 0 ? Drivetrain.DRIVE_MOTION_PROF_kS : 0, IS_PERCENT_OUTPUT);
                     i++;  
 
                     double trajDesiredPos = Conversions.convertPosition(PositionUnit.FEET, trajPosition * FEET_PER_METER, PositionUnit.ENCODER_UNITS) * Drivetrain.GEAR_RATIO;

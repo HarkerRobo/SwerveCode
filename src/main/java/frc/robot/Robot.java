@@ -50,8 +50,6 @@ public class Robot extends TimedRobot {
     public void robotInit() {
         OI.getInstance().initBindings();
         Drivetrain.getInstance();
-        Drivetrain.getInstance().getPigeon().setFusedHeading(0);
-        Conversions.setWheelDiameter(4);
     }
 
     /**

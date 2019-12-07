@@ -144,6 +144,7 @@ public class Drivetrain extends Subsystem {
         pigeon = new HSPigeon(RobotMap.PIGEON_ID);
         pigeon.configFactoryDefault();
         pigeon.zero();
+        pigeon.setFusedHeading(0);
 
         Conversions.setWheelDiameter(WHEEL_DIAMETER);
     }
