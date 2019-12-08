@@ -6,6 +6,7 @@ import com.ctre.phoenix.motion.TrajectoryPoint;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
 import edu.wpi.first.wpilibj.Notifier;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.RobotMap;
@@ -13,6 +14,7 @@ import frc.robot.subsystems.Drivetrain;
 import frc.robot.util.SwerveModule;
 import frc.robot.util.Vector;
 import harkerrobolib.util.Conversions;
+import harkerrobolib.util.MathUtil;
 import harkerrobolib.util.Conversions.PositionUnit;
 import harkerrobolib.util.Conversions.SpeedUnit;
 import jaci.pathfinder.Pathfinder;
@@ -31,13 +33,13 @@ import jaci.pathfinder.modifiers.SwerveModifier;
  * @since 11/13/19
  */
 public class SwerveDriveWithMotionProfile extends Command {
-    private static final SwerveModifier.Mode MODE = SwerveModifier.Mode.SWERVE_DEFAULT;
+    public static final double ROTATION_MAGNITUDE = Math.sqrt(Math.pow(Drivetrain.DT_LENGTH, 2) + Math.pow(Drivetrain.DT_WIDTH, 2)); 
 
     private static final boolean IS_PERCENT_OUTPUT = false;
 
-    private static final int MIN_BUFFERED_POINTS = 4;
-
     private static final double FEET_PER_METER = 3.28;
+
+    private double startTime;
 
     private int timeDur;
 
@@ -47,7 +49,12 @@ public class SwerveDriveWithMotionProfile extends Command {
 
     private double pigeonHeading;
 
-    public static final double ROTATION_MAGNITUDE = Math.sqrt(Math.pow(Drivetrain.DT_LENGTH, 2) + Math.pow(Drivetrain.DT_WIDTH, 2)); 
+    private Notifier n;
+
+    private static final double PIGEON_KP_MP = 0.03;
+
+    private static final double EPSILON = 1E-9;
+
     /**
      * Generates a Trajectory from the Waypoints and creates the eight corresponding BufferedTrajectoryPointStreams
      * 
@@ -61,7 +68,7 @@ public class SwerveDriveWithMotionProfile extends Command {
 
         Trajectory.Config config = new Trajectory.Config(
                 Trajectory.FitMethod.HERMITE_QUINTIC,
-                Trajectory.Config.SAMPLES_FAST,
+                Trajectory.Config.SAMPLES_HIGH,
                 (double)timeDur / 1000, 
                 Drivetrain.MAX_DRIVE_VELOCITY,  
                 Drivetrain.MAX_DRIVE_ACCELERATION, 
@@ -71,11 +78,11 @@ public class SwerveDriveWithMotionProfile extends Command {
         long startTime = System.currentTimeMillis();
         traj = Pathfinder.generate(waypoints, config);
         SmartDashboard.putNumber("Path Generation Time", System.currentTimeMillis() - startTime);
-
-        SwerveModifier modifier = new SwerveModifier(traj);
+        traj.get(0).heading = traj.get(1).heading;
+        // SwerveModifier modifier = new SwerveModifier(traj);
 
         //Generate the individual wheel trajectories using the original trajectory as the center
-        modifier.modify(Drivetrain.DT_WIDTH, Drivetrain.DT_LENGTH, MODE);
+        // modifier.modify(Drivetrain.DT_WIDTH, Drivetrain.DT_LENGTH, MODE);
 
         // traj = modifier.getFrontrajeftTrajectory();
         // tr = modifier.getFrontRightTrajectory();
@@ -85,6 +92,9 @@ public class SwerveDriveWithMotionProfile extends Command {
     
     @Override
     public void initialize() {
+        startTime = Timer.getFPGATimestamp();
+
+        SmartDashboard.putNumber("Traj len", traj.length());
         i = 0;//Resets the isfinished case to start again.
 
         pigeonHeading = Drivetrain.getInstance().getPigeon().getFusedHeading();
@@ -113,48 +123,60 @@ public class SwerveDriveWithMotionProfile extends Command {
         
         // Drivetrain.getInstance().getBackRight().getDriveMotor().startMotionProfile(brDriveStream, MIN_BUFFERED_POINTS, ControlMode.MotionProfile);
         // Drivetrain.getInstance().getBackRight().getAngleMotor().startMotionProfile(brAngleStream, MIN_BUFFERED_POINTS, ControlMode.MotionProfile);
-        
+       
+
+
+        double heading = traj.get(0).heading;
+        Vector turnAngle = new Vector(Math.cos(heading) * EPSILON, Math.sin(heading) * EPSILON);
+        Drivetrain.getInstance().setDrivetrainVelocity(turnAngle, turnAngle, turnAngle, turnAngle, 0, true, true);
+        boolean atSetpoint = false;
+        long startTime = System.currentTimeMillis();
+        while (!atSetpoint && System.currentTimeMillis() - startTime < 500)
+        {
+            atSetpoint = Math.abs(Drivetrain.getInstance().getTopLeft().getAngleDegrees() - heading * 180 / Math.PI) > 3;
+        }
         Runnable r = new Runnable() {
             // double prevPosition = 0;
             @Override
             public void run() {
+
                 if (i < traj.length()) {
                     Segment seg = traj.get(i);
                     double heading = seg.heading;
                     double velocity = Conversions.convertSpeed(SpeedUnit.FEET_PER_SECOND, seg.velocity * FEET_PER_METER, SpeedUnit.ENCODER_UNITS) * Drivetrain.GEAR_RATIO;
                     double trajPosition = Conversions.convertPosition(PositionUnit.FEET, seg.position * FEET_PER_METER, PositionUnit.ENCODER_UNITS) * Drivetrain.GEAR_RATIO;
-
+                    SmartDashboard.putNumber("Traj Pos", trajPosition);
+                    SmartDashboard.putNumber("Traj Vel", velocity);
                     double truePosition = (Drivetrain.getInstance().getTopLeft().getDriveMotor().getSelectedSensorPosition()
                                             +  Drivetrain.getInstance().getTopRight().getDriveMotor().getSelectedSensorPosition()
                                             +  Drivetrain.getInstance().getBackLeft().getDriveMotor().getSelectedSensorPosition()
                                             +  Drivetrain.getInstance().getBackRight().getDriveMotor().getSelectedSensorPosition()) / 4.0;
-                    
-                    double error = trajPosition - truePosition;
-                    double output = Drivetrain.DRIVE_MOTION_PROF_kF * velocity + Drivetrain.DRIVE_MOTION_PROF_kP * error;
-                    output = Math.signum(output) * Math.sqrt(output);
-
+                    SmartDashboard.putNumber("traj pos", trajPosition);
+                    SmartDashboard.putNumber("seg accel", seg.acceleration);
+                    SmartDashboard.putNumber("True Pos", truePosition);
+                    double error = Math.signum(trajPosition) * (Math.abs(trajPosition) - Math.abs(truePosition));
+                    double constrainedError = MathUtil.constrain(error, -8000, 8000);
+                    SmartDashboard.putNumber("error", constrainedError);
+                    double output = Drivetrain.DRIVE_MOTION_PROF_kF * velocity + Drivetrain.DRIVE_MOTION_PROF_kP * error + Drivetrain.DRIVE_MOTION_PROF_kA * seg.acceleration;
+                    if (i < traj.length() - 1)
+                        output += Drivetrain.DRIVE_MOTION_PROF_kS;
                     Vector translation = new Vector(Math.cos(heading) * output, Math.sin(heading) * output);
 
-                    // prevPosition = trajPosition;
-
-                    Vector topLeftRotation = new Vector(Drivetrain.DT_LENGTH, Drivetrain.DT_WIDTH);
-                    Vector topRightRotation = new Vector(Drivetrain.DT_LENGTH, -Drivetrain.DT_WIDTH);
-                    Vector backLeftRotation = new Vector(-Drivetrain.DT_LENGTH, Drivetrain.DT_WIDTH);
-                    Vector backRightRotation = new Vector(-Drivetrain.DT_LENGTH, -Drivetrain.DT_WIDTH);
-
-                    double turnMagnitude = -Drivetrain.PIGEON_kP * (pigeonHeading - Drivetrain.getInstance().getPigeon().getFusedHeading());
-
+                    double pigeonError = pigeonHeading - Drivetrain.getInstance().getPigeon().getFusedHeading();
+                    double turnMagnitude = -PIGEON_KP_MP * pigeonError;
+                    SmartDashboard.putNumber("Pigeon Error MP", pigeonError);
+                    
                     //Scale by ROTATION_MAGNITUDE to make the magnitude of all vectors 1
                     //and then by turnMagnitude to reflect the desired rotational speed
-                    topLeftRotation.scale(turnMagnitude / ROTATION_MAGNITUDE);
-                    topRightRotation.scale(turnMagnitude / ROTATION_MAGNITUDE);
-                    backLeftRotation.scale(turnMagnitude / ROTATION_MAGNITUDE);
-                    backRightRotation.scale(turnMagnitude / ROTATION_MAGNITUDE);
+                    Vector tlRot = new Vector(Drivetrain.DT_LENGTH, Drivetrain.DT_WIDTH).scale(turnMagnitude / ROTATION_MAGNITUDE);
+                    Vector trRot = new Vector(Drivetrain.DT_LENGTH, -Drivetrain.DT_WIDTH).scale(turnMagnitude / ROTATION_MAGNITUDE);
+                    Vector blRot = new Vector(-Drivetrain.DT_LENGTH, Drivetrain.DT_WIDTH).scale(turnMagnitude / ROTATION_MAGNITUDE);
+                    Vector brRot = new Vector(-Drivetrain.DT_LENGTH, -Drivetrain.DT_WIDTH).scale(turnMagnitude / ROTATION_MAGNITUDE);
                     
-                    Vector sumTopLeft = Vector.add(topLeftRotation, translation);
-                    Vector sumTopRight = Vector.add(topRightRotation, translation);
-                    Vector sumBackLeft = Vector.add(backLeftRotation, translation);
-                    Vector sumBackRight = Vector.add(backRightRotation, translation);
+                    Vector sumTopLeft = Vector.add(tlRot, translation);
+                    Vector sumTopRight = Vector.add(trRot, translation);
+                    Vector sumBackLeft = Vector.add(blRot, translation);
+                    Vector sumBackRight = Vector.add(brRot, translation);
                     
                     // Scale down the vectors so that the largest possible magnitude is 1 (100% output)
                     double largestMag = SwerveManual.max4(sumTopLeft.getMagnitude(), sumTopRight.getMagnitude(), sumBackLeft.getMagnitude(), sumBackRight.getMagnitude());
@@ -166,21 +188,20 @@ public class SwerveDriveWithMotionProfile extends Command {
                     sumTopRight.scale(1 / largestMag);
                     sumBackLeft.scale(1 / largestMag);
                     sumBackRight.scale(1 / largestMag);
-
-                    Drivetrain.getInstance().setDrivetrainVelocity(sumTopLeft, sumTopRight, sumBackLeft, sumBackRight, i > 0 ? Drivetrain.DRIVE_MOTION_PROF_kS : 0, IS_PERCENT_OUTPUT);
+                    // move ks
+                    Drivetrain.getInstance().setDrivetrainVelocity(sumTopLeft, sumTopRight, sumBackLeft, sumBackRight, 0, IS_PERCENT_OUTPUT, true);
                     i++;  
 
                     double trajDesiredPos = Conversions.convertPosition(PositionUnit.FEET, trajPosition * FEET_PER_METER, PositionUnit.ENCODER_UNITS) * Drivetrain.GEAR_RATIO;
                     double trajActualPos = Drivetrain.getInstance().getTopLeft().getDriveMotor().getSelectedSensorPosition();
 
                     SmartDashboard.putNumber("Pos Error", Math.abs(trajDesiredPos) - Math.abs(trajActualPos));
-                    SmartDashboard.putNumber("Vel Error", Drivetrain.getInstance().getTopLeft().getDriveMotor().getClosedLoopError());
-                    SmartDashboard.putNumber("Desired Vel", Drivetrain.getInstance().getTopLeft().getDriveMotor().getClosedLoopTarget());
+                    SmartDashboard.putNumber("TL Angle Error", Drivetrain.getInstance().getTopLeft().getAngleMotor().getClosedLoopError());
                 }
                 SmartDashboard.putBoolean("Path Finished", i >= traj.length());
             }
         };
-        Notifier n = new Notifier(r);
+        n = new Notifier(r);
         n.startPeriodic((double)timeDur / 1000);
     }
 
@@ -230,9 +251,6 @@ public class SwerveDriveWithMotionProfile extends Command {
 
     @Override
     public void execute() {
-        SmartDashboard.putNumber("Top Left Velocity", Drivetrain.getInstance().getTopLeft().getDriveMotor().getActiveTrajectoryVelocity());
-        SmartDashboard.putNumber("Top Left Angle Error", Drivetrain.getInstance().getTopLeft().getAngleMotor().getClosedLoopError());
-        SmartDashboard.putNumber("Top Left Drive Error", Drivetrain.getInstance().getTopLeft().getDriveMotor().getClosedLoopError());
         
         // SmartDashboard.putNumber("Top Right Velocity", Drivetrain.getInstance().getTopRight().getDriveMotor().getActiveTrajectoryVelocity());
         // SmartDashboard.putNumber("Top Right Angle Error", Drivetrain.getInstance().getTopRight().getAngleMotor().getClosedLoopError());
@@ -244,20 +262,7 @@ public class SwerveDriveWithMotionProfile extends Command {
 
         // SmartDashboard.putNumber("Back Right Velocity", Drivetrain.getInstance().getBackRight().getDriveMotor().getActiveTrajectoryVelocity());
         // SmartDashboard.putNumber("Back Right Angle Error", Drivetrain.getInstance().getBackRight().getAngleMotor().getClosedLoopError());
-        // SmartDashboard.putNumber("Back Right Drive Error", Drivetrain.getInstance().getBackRight().getDriveMotor().getClosedLoopError());
-    
-        MotionProfileStatus trajDriveStatus = new MotionProfileStatus();
-        MotionProfileStatus trajAngleStatus = new MotionProfileStatus();
-        Drivetrain.getInstance().getTopLeft().getAngleMotor().getMotionProfileStatus(trajAngleStatus);
-        Drivetrain.getInstance().getTopLeft().getDriveMotor().getMotionProfileStatus(trajDriveStatus);
-
-        // System.out.printrajn(trajDriveStatus.btmBufferCnt);
-        SmartDashboard.putNumber("traj Drive Top Buffer", trajDriveStatus.topBufferCnt);
-        SmartDashboard.putNumber("traj Drive Btm Buffer", trajDriveStatus.btmBufferCnt);
-        SmartDashboard.putNumber("traj Angle Top Buffer", trajAngleStatus.topBufferCnt);
-        SmartDashboard.putNumber("traj Angle Btm Buffer", trajAngleStatus.btmBufferCnt);
-        SmartDashboard.putBoolean("traj Drive Has Overrun", trajDriveStatus.hasUnderrun);
-        SmartDashboard.putBoolean("traj Angle Has Overrun", trajAngleStatus.hasUnderrun);
+        // SmartDashboard.putNumber("Back Right Drive Error", Drivetrain.getInstance().getBackRight().getDriveMotor().getClosedLoopError());  
     }
 
     @Override
@@ -270,5 +275,13 @@ public class SwerveDriveWithMotionProfile extends Command {
     protected void interrupted() {
         Drivetrain.getInstance().applyToAllDrive((talon) -> talon.clearMotionProfileTrajectories());
         Drivetrain.getInstance().applyToAllAngle((talon) -> talon.clearMotionProfileTrajectories());
+
+        end();
+    }
+
+    @Override
+    protected void end() {
+        SmartDashboard.putNumber("Path Total Time", Timer.getFPGATimestamp() - startTime);
+        n.close();
     }
 }

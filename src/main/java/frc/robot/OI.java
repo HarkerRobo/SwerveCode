@@ -41,8 +41,23 @@ public class OI {
         Waypoint[] rightAndUp = new Waypoint[] {
             new Waypoint(0, 0, 0),
             // new Waypoint(2, 0, 0),
-            new Waypoint(2, 1, 0),
-            new Waypoint(2.5, 2, 0)
+            new Waypoint(1, 0, 0),
+            new Waypoint(2, 1, Math.PI / 4),
+            new Waypoint(2.5, 2, 0) 
+        };
+        Waypoint[] backward = new Waypoint[] {
+            new Waypoint(0, 0, 0),
+            new Waypoint(-2, 0, 0)
+        };
+        Waypoint[] upAndDiag = new Waypoint[] {
+            new Waypoint(0, 0, Math.PI / 2),
+            new Waypoint(0, 1.5, Math.PI / 2),
+            new Waypoint(0.7, 2.2, Math.PI / 4)
+        };
+        Waypoint[] semiCirecle = new Waypoint[] {
+            new Waypoint(0, 0, Math.PI/2),
+            new Waypoint(1, 1, 0),
+            new Waypoint(2, 0, Math.PI / -2)
         };
 
         int timeDur = 10; //ms between each segment
@@ -50,8 +65,11 @@ public class OI {
         // OI.getInstance().getDriverGamepad().getUpDPadButton().whenPressed(
         //         new SwerveDriveWithMotionProfile(points, timeDur)
         // );
-        driverGamepad.getButtonY().whenPressed(new SwerveDriveWithMotionProfile(forward, timeDur));
-        driverGamepad.getButtonA().whenPressed(new SwerveDriveWithMotionProfile(rightAndUp, timeDur));
+        
+        driverGamepad.getButtonB().whenPressed(new SwerveDriveWithMotionProfile(semiCirecle, timeDur));
+        // driverGamepad.getButtonX().whenPressed(new SwerveDriveWithMotionProfile(backward, timeDur));
+        // driverGamepad.getButtonA().whenPressed(new SwerveDriveWithMotionProfile(rightAndUp, timeDur));
+        driverGamepad.getButtonY().whenPressed(new SwerveDriveWithMotionProfile(upAndDiag, timeDur));
         driverGamepad.getButtonBumperRight().whenPressed(new ToggleFieldSensitivity());
     }
 

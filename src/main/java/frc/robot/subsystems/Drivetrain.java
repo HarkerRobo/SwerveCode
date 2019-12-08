@@ -76,11 +76,12 @@ public class Drivetrain extends Subsystem {
     private static final double DRIVE_VELOCITY_KF = 0.046; //theoretical: 0.034;
 
     public static final int DRIVE_MOTION_PROF_SLOT = 1;
-    public static final double DRIVE_MOTION_PROF_kF = 0.034; //theoretical: 0.034;
-    public static final double DRIVE_MOTION_PROF_kP = 0;//1.8
+    public static final double DRIVE_MOTION_PROF_kF = 0.00004; //theoretical: 0.000034;
+    public static final double DRIVE_MOTION_PROF_kP = 0.000045;//0.00003
     //public static final double DRIVE_MOTION_PROF_kI = 0;
     //public static final double DRIVE_MOTION_PROF_kD = 0;
     public static final double DRIVE_MOTION_PROF_kS = 0.06;
+    public static final double DRIVE_MOTION_PROF_kA = 0.01;
 
     public static final int ANGLE_MOTION_PROF_SLOT = 1;
     private static final double ANGLE_MOTION_PROF_kF = 0;
@@ -93,6 +94,7 @@ public class Drivetrain extends Subsystem {
     private static final int MOTION_FRAME_PERIOD = 5;
   
     public static final double MAX_DRIVE_VELOCITY = 9;
+    public static final double MP_MAX_DRIVE_VELOCITY = 6;
     public static final double MAX_DRIVE_ACCELERATION = 4;
     public static final double MAX_DRIVE_JERK = 50;
     
@@ -114,7 +116,7 @@ public class Drivetrain extends Subsystem {
     public static final int BL_OFFSET = 11327;
     private static final int BR_OFFSET = 4605;
 
-	public static final double PIGEON_kP = 0.02;
+    public static final double PIGEON_kP = 0.02;
 
     private static final double WHEEL_DIAMETER = 4;
 
@@ -193,21 +195,23 @@ public class Drivetrain extends Subsystem {
     /**
      * Sets the output of the drivetrain based on desired output vectors for each swerve module
      */
-    public void setDrivetrainVelocity(Vector tl, Vector tr, Vector bl, Vector br, double feedForward, boolean isPercentOutput) {
+    public void setDrivetrainVelocity(Vector tl, Vector tr, Vector bl, Vector br, double feedForward, boolean isPercentOutput, boolean isMotionProfile) {
         double tlMag = tl.getMagnitude() + feedForward;
         double trMag = tr.getMagnitude() + feedForward;
         double blMag = bl.getMagnitude() + feedForward;
         double brMag = br.getMagnitude() + feedForward;
 
-        double tlOutput = isPercentOutput ? tlMag : (tlMag) * MAX_DRIVE_VELOCITY;
-        double trOutput = isPercentOutput ? trMag : (trMag) * MAX_DRIVE_VELOCITY;
-        double blOutput = isPercentOutput ? blMag : (blMag) * MAX_DRIVE_VELOCITY;
-        double brOutput = isPercentOutput ? brMag : (brMag) * MAX_DRIVE_VELOCITY;
+        double tlOutput = isPercentOutput ? tlMag : isMotionProfile ? tlMag * MP_MAX_DRIVE_VELOCITY : (tlMag) * MAX_DRIVE_VELOCITY;
+        double trOutput = isPercentOutput ? trMag : isMotionProfile ? trMag * MP_MAX_DRIVE_VELOCITY : (trMag) * MAX_DRIVE_VELOCITY;
+        double blOutput = isPercentOutput ? blMag : isMotionProfile ? blMag * MP_MAX_DRIVE_VELOCITY : (blMag) * MAX_DRIVE_VELOCITY;
+        double brOutput = isPercentOutput ? brMag : isMotionProfile ? brMag * MP_MAX_DRIVE_VELOCITY : (brMag) * MAX_DRIVE_VELOCITY;
+
+
         
-        setSwerveModuleVelocity(topLeft, tlOutput, convertAngle(topLeft, tl.getAngle()), isPercentOutput);
-		setSwerveModuleVelocity(topRight, trOutput, convertAngle(topRight, tr.getAngle()), isPercentOutput);
-		setSwerveModuleVelocity(backLeft, blOutput, convertAngle(backLeft, bl.getAngle()), isPercentOutput);
-        setSwerveModuleVelocity(backRight, brOutput, convertAngle(backRight, br.getAngle()), isPercentOutput);
+        setSwerveModuleVelocity(topLeft, tlOutput, convertAngle(topLeft, tl.getAngle()), isPercentOutput, isMotionProfile);
+		setSwerveModuleVelocity(topRight, trOutput, convertAngle(topRight, tr.getAngle()), isPercentOutput, isMotionProfile);
+		setSwerveModuleVelocity(backLeft, blOutput, convertAngle(backLeft, bl.getAngle()), isPercentOutput, isMotionProfile);
+        setSwerveModuleVelocity(backRight, brOutput, convertAngle(backRight, br.getAngle()), isPercentOutput, isMotionProfile);
     }
 
     public void setDrivetrainPosition(Vector tl, Vector tr, Vector bl, Vector br, double feedForward) {
@@ -217,8 +221,8 @@ public class Drivetrain extends Subsystem {
         getBackRight().setAngleAndDrivePosition(br.getAngle(), br.getMagnitude(), feedForward);
     }
 
-    public void setSwerveModuleVelocity(SwerveModule module, double output, double angle, boolean isPercentOutput) {
-        module.setAngleAndDriveVelocity(angle, output, isPercentOutput);
+    public void setSwerveModuleVelocity(SwerveModule module, double output, double angle, boolean isPercentOutput, boolean isMotionProfile) {
+        module.setAngleAndDriveVelocity(angle, output, isPercentOutput, isMotionProfile);
     }
 
     /** 
@@ -254,10 +258,10 @@ public class Drivetrain extends Subsystem {
      * Stops all drive motors while holding the current angle
      */
     public void stopAllDrive() {
-        setSwerveModuleVelocity(topLeft, 0, topLeft.getAngleDegrees(), true);
-        setSwerveModuleVelocity(topRight, 0, topRight.getAngleDegrees(), true);
-        setSwerveModuleVelocity(backLeft, 0, backLeft.getAngleDegrees(), true);
-        setSwerveModuleVelocity(backRight, 0, backRight.getAngleDegrees(), true);
+        setSwerveModuleVelocity(topLeft, 0, topLeft.getAngleDegrees(), true, false);
+        setSwerveModuleVelocity(topRight, 0, topRight.getAngleDegrees(), true, false);
+        setSwerveModuleVelocity(backLeft, 0, backLeft.getAngleDegrees(), true, false);
+        setSwerveModuleVelocity(backRight, 0, backRight.getAngleDegrees(), true, false);
     }
     
     /**

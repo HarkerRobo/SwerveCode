@@ -136,8 +136,8 @@ public class SwerveModule {
         }
     }
     
-    public void setAngleAndDriveVelocity(double targetAngle, double output, boolean isPercentOutput) {
-        boolean shouldReverse = Math.abs(targetAngle - getAngleDegrees()) > 90;
+    public void setAngleAndDriveVelocity(double targetAngle, double output, boolean isPercentOutput, boolean isMotionProfile) {
+        boolean shouldReverse =  !isMotionProfile && Math.abs(targetAngle - getAngleDegrees()) > 90;
         
         if (shouldReverse) {
             setDriveOutput(-output, isPercentOutput);

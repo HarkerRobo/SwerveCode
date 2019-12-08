@@ -62,7 +62,7 @@ public class Robot extends TimedRobot {
         SmartDashboard.putNumber("BL Actual Angle", Drivetrain.getInstance().getBackLeft().getAngleDegrees());
         SmartDashboard.putNumber("TL Desired Angle", Drivetrain.getInstance().getTopLeft().getAngleDegrees());
         SmartDashboard.putNumber("TL Angle Error", MathUtil.constrain(Drivetrain.getInstance().getTopLeft().getAngleMotor().getClosedLoopError(), -100, 100));
-        SmartDashboard.putNumber("TL Percent Output", Drivetrain.getInstance().getTopLeft().getAngleMotor().getOutputCurrent());
+        SmartDashboard.putNumber("TL Percent Output", Drivetrain.getInstance().getTopLeft().getDriveMotor().getMotorOutputPercent());
         // SmartDashboard.putNumber("TL RiseToFall", Drivetrain.getInstance().getTopLeft().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
         // SmartDashboard.putNumber("TR RiseToFall", Drivetrain.getInstance().getTopRight().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
         // SmartDashboard.putNumber("BL RiseToFall", Drivetrain.getInstance().getBackLeft().getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs());
