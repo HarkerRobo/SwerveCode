@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc.robot.RobotMap;
 import frc.robot.commands.SwerveManual;
+import frc.robot.commands.SwerveManualDDR;
 import frc.robot.util.SwerveModule;
 import frc.robot.util.Vector;
 import harkerrobolib.util.Conversions;
@@ -10,9 +11,6 @@ import harkerrobolib.wrappers.HSPigeon;
 import harkerrobolib.wrappers.HSTalon;
 
 import java.util.function.Consumer;
-
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.StatusFrame;
 
 /**
  * Simulates the drivetrain subsystem on the robot. 
@@ -91,9 +89,9 @@ public class Drivetrain extends Subsystem {
 
     public static final double MOTION_PROF_RAMP_RATE = 0.3;
 
-    private static final int MOTION_FRAME_PERIOD = 5;
+    // private static final int MOTION_FRAME_PERIOD = 5;
   
-    public static final double MAX_DRIVE_VELOCITY = 9;
+    public static final double MAX_DRIVE_VELOCITY = 13;
     public static final double MP_MAX_DRIVE_VELOCITY = 6;
     public static final double MAX_DRIVE_ACCELERATION = 4;
     public static final double MAX_DRIVE_JERK = 50;
@@ -205,8 +203,6 @@ public class Drivetrain extends Subsystem {
         double trOutput = isPercentOutput ? trMag : isMotionProfile ? trMag * MP_MAX_DRIVE_VELOCITY : (trMag) * MAX_DRIVE_VELOCITY;
         double blOutput = isPercentOutput ? blMag : isMotionProfile ? blMag * MP_MAX_DRIVE_VELOCITY : (blMag) * MAX_DRIVE_VELOCITY;
         double brOutput = isPercentOutput ? brMag : isMotionProfile ? brMag * MP_MAX_DRIVE_VELOCITY : (brMag) * MAX_DRIVE_VELOCITY;
-
-
         
         setSwerveModuleVelocity(topLeft, tlOutput, convertAngle(topLeft, tl.getAngle()), isPercentOutput, isMotionProfile);
 		setSwerveModuleVelocity(topRight, trOutput, convertAngle(topRight, tr.getAngle()), isPercentOutput, isMotionProfile);

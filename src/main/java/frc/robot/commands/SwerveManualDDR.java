@@ -25,11 +25,13 @@ import harkerrobolib.util.MathUtil;
  * @author Arjun Dixit
  * @since 11/4/19
  */
-public class SwerveManual extends IndefiniteCommand {
+public class SwerveManualDDR extends IndefiniteCommand {
     public static final double ROTATION_MAGNITUDE = Math.sqrt(Math.pow(Drivetrain.DT_LENGTH, 2) + Math.pow(Drivetrain.DT_WIDTH, 2)); 
     private static final double OUTPUT_MULTIPLIER = 0.5;
     private static final double VELOCITY_HEADING_MULTIPLIER = 70;
     private static final boolean IS_PERCENT_OUTPUT = false;
+
+    private double DDR_TRANSLATION_MAGNITUDE = 1;
 
     private double translateX, translateY, turnMagnitude;
     
@@ -39,12 +41,11 @@ public class SwerveManual extends IndefiniteCommand {
     private static boolean pigeonFlag; //True if the Driver Right X input is non-zero
     private static double pigeonAngle;
     
-    public SwerveManual() {
+    public SwerveManualDDR() {
         requires(Drivetrain.getInstance());
         pigeonFlag = false;
         pigeonAngle = 0;
         prevPigeonHeading = 0;
-        prevTime = System.currentTimeMillis();
     }
 
     @Override
@@ -56,13 +57,34 @@ public class SwerveManual extends IndefiniteCommand {
         Drivetrain.getInstance().applyToAllDrive(
             (driveMotor) -> driveMotor.selectProfileSlot(Drivetrain.DRIVE_VELOCITY_SLOT, RobotMap.PRIMARY_INDEX)
         );
+
+        prevTime = System.currentTimeMillis();
     }
 
     @Override
     protected void execute() {
-        translateX = MathUtil.mapJoystickOutput(OI.getInstance().getDriverGamepad().getLeftX(), OI.XBOX_JOYSTICK_DEADBAND);
-        translateY = MathUtil.mapJoystickOutput(OI.getInstance().getDriverGamepad().getLeftY(), OI.XBOX_JOYSTICK_DEADBAND);
         turnMagnitude = MathUtil.mapJoystickOutput(OI.getInstance().getDriverGamepad().getRightX(), OI.XBOX_JOYSTICK_DEADBAND);
+
+        if (OI.getInstance().getDDRGamepad().getUpBtn().get())
+            translateY = DDR_TRANSLATION_MAGNITUDE;
+        else if (OI.getInstance().getDDRGamepad().getDownBtn().get())
+            translateY = -DDR_TRANSLATION_MAGNITUDE;
+        else
+            translateY = 0;
+
+        if (OI.getInstance().getDDRGamepad().getRightBtn().get())
+            translateX = DDR_TRANSLATION_MAGNITUDE;
+        else if (OI.getInstance().getDDRGamepad().getLeftBtn().get())
+            translateX = -DDR_TRANSLATION_MAGNITUDE;
+        else
+            translateX = 0;
+
+        if (OI.getInstance().getDriverGamepad().getButtonBumperLeftState() || OI.getInstance().getDriverGamepad().getButtonBumperRightState())
+        {
+            translateY = 0;
+            translateX = 0;
+            turnMagnitude = 0;
+        }
 
         double currentPigeonHeading = Drivetrain.getInstance().getPigeon().getFusedHeading();
 

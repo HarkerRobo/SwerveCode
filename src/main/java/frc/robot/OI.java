@@ -3,6 +3,7 @@ package frc.robot;
 import frc.robot.commands.SwerveDriveWithMotionProfile;
 import frc.robot.commands.ToggleFieldSensitivity;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.util.HSDDRPad;
 import harkerrobolib.commands.CallMethodCommand;
 import harkerrobolib.wrappers.XboxGamepad;
 import jaci.pathfinder.Waypoint;
@@ -21,15 +22,19 @@ public class OI {
 
     private static final int DRIVER_PORT = 0;
     private static final int OPERATOR_PORT = 1;
+    private static final int DDR_PORT = 2;
     
     public static final double XBOX_JOYSTICK_DEADBAND = 0.1;
 
     private XboxGamepad operatorGamepad;
     private XboxGamepad driverGamepad;
+    private HSDDRPad ddrGamepad;
 
     private OI() {
         driverGamepad = new XboxGamepad(DRIVER_PORT);
         operatorGamepad = new XboxGamepad(OPERATOR_PORT);
+        ddrGamepad = new HSDDRPad(DDR_PORT);
+
         initBindings();
     }
 
@@ -54,8 +59,8 @@ public class OI {
             new Waypoint(0, 1.5, Math.PI / 2),
             new Waypoint(0.7, 2.2, Math.PI / 4)
         };
-        Waypoint[] semiCirecle = new Waypoint[] {
-            new Waypoint(0, 0, Math.PI/2),
+        Waypoint[] semiCircle = new Waypoint[] {
+            new Waypoint(0, 0, Math.PI / 2),
             new Waypoint(1, 1, 0),
             new Waypoint(2, 0, Math.PI / -2)
         };
@@ -66,10 +71,10 @@ public class OI {
         //         new SwerveDriveWithMotionProfile(points, timeDur)
         // );
         
-        driverGamepad.getButtonB().whenPressed(new SwerveDriveWithMotionProfile(semiCirecle, timeDur));
+        driverGamepad.getButtonB().whenPressed(new SwerveDriveWithMotionProfile(semiCircle, timeDur));
         // driverGamepad.getButtonX().whenPressed(new SwerveDriveWithMotionProfile(backward, timeDur));
         // driverGamepad.getButtonA().whenPressed(new SwerveDriveWithMotionProfile(rightAndUp, timeDur));
-        driverGamepad.getButtonY().whenPressed(new SwerveDriveWithMotionProfile(upAndDiag, timeDur));
+        // driverGamepad.getButtonY().whenPressed(new SwerveDriveWithMotionProfile(upAndDiag, timeDur));
         driverGamepad.getButtonBumperRight().whenPressed(new ToggleFieldSensitivity());
     }
 
@@ -80,6 +85,10 @@ public class OI {
 
     public XboxGamepad getOperatorGamepad() {
         return operatorGamepad;
+    }
+
+    public HSDDRPad getDDRGamepad() {
+        return ddrGamepad;
     }
     
     public static OI getInstance() {
