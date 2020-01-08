@@ -100,13 +100,13 @@ public class Drivetrain extends SubsystemBase {
     public static final double GEAR_RATIO = 6;
     
     /**
-     * Meters between both of the wheels on the front or back
+     * Feet between both of the wheels on the front or back
      */
-    public static final double DT_WIDTH = 0.419; //16.5 in 
+    public static final double DT_WIDTH = 16.5; //0.419 m
     /**
-     * Meters between both of the wheels on the left or right
+     * Feet between both of the wheels on the left or right
      */
-    public static final double DT_LENGTH = 0.523; //20.6 in
+    public static final double DT_LENGTH = 20.6; //0.523 m
     
     public static final int TL_OFFSET = 2212;//1749;//2212-1749
     public static final int TR_OFFSET = 6730;//7638;
@@ -115,7 +115,7 @@ public class Drivetrain extends SubsystemBase {
 
     public static final double PIGEON_kP = 0.02;
 
-    private static final double WHEEL_DIAMETER = 4;
+    public static final double WHEEL_DIAMETER = 4;
 
     private Drivetrain() {
         topLeft = new SwerveModule(RobotMap.TL_DRIVE_ID, TL_DRIVE_INVERTED, TL_DRIVE_SENSOR_PHASE, RobotMap.TL_ANGLE_ID, TL_ANGLE_INVERTED, TL_ANGLE_SENSOR_PHASE);
