@@ -1,11 +1,11 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.OI;
 import frc.robot.RobotMap;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.util.Vector;
-import harkerrobolib.commands.IndefiniteCommand;
 import harkerrobolib.util.MathUtil;
 
 /**
@@ -25,7 +25,7 @@ import harkerrobolib.util.MathUtil;
  * @author Arjun Dixit
  * @since 11/4/19
  */
-public class SwerveManual extends IndefiniteCommand {
+public class SwerveManual extends CommandBase {
     public static final double ROTATION_MAGNITUDE = Math.sqrt(Math.pow(Drivetrain.DT_LENGTH, 2) + Math.pow(Drivetrain.DT_WIDTH, 2)); 
     private static final double OUTPUT_MULTIPLIER = 0.5;
     private static final double VELOCITY_HEADING_MULTIPLIER = 70;
@@ -40,15 +40,17 @@ public class SwerveManual extends IndefiniteCommand {
     private static double pigeonAngle;
     
     public SwerveManual() {
-        requires(Drivetrain.getInstance());
+        addRequirements(Drivetrain.getInstance());
+
         pigeonFlag = false;
         pigeonAngle = 0;
         prevPigeonHeading = 0;
         prevTime = System.currentTimeMillis();
     }
+    
 
     @Override
-    protected void initialize() {
+    public void initialize() {
         Drivetrain.getInstance().applyToAllAngle(
             (angleMotor) -> angleMotor.selectProfileSlot(Drivetrain.ANGLE_POSITION_SLOT, RobotMap.PRIMARY_INDEX)
         );
@@ -59,7 +61,7 @@ public class SwerveManual extends IndefiniteCommand {
     }
 
     @Override
-    protected void execute() {
+    public void execute() {
         translateX = MathUtil.mapJoystickOutput(OI.getInstance().getDriverGamepad().getLeftX(), OI.XBOX_JOYSTICK_DEADBAND);
         translateY = MathUtil.mapJoystickOutput(OI.getInstance().getDriverGamepad().getLeftY(), OI.XBOX_JOYSTICK_DEADBAND);
         turnMagnitude = MathUtil.mapJoystickOutput(OI.getInstance().getDriverGamepad().getRightX(), OI.XBOX_JOYSTICK_DEADBAND);
@@ -124,14 +126,14 @@ public class SwerveManual extends IndefiniteCommand {
     public static double max4(double a, double b, double c, double d) {
         return Math.max(Math.max(a, b), Math.max(c, d));
     }
-    
+
     @Override
-    protected void end() {
-        Drivetrain.getInstance().stopAllDrive();
+    public boolean isFinished() {
+        return false;
     }
 
     @Override
-    protected void interrupted() {
-        end();
+    public void end(boolean interrupted) {
+        Drivetrain.getInstance().stopAllDrive();
     }
 }

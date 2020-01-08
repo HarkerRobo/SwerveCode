@@ -10,8 +10,9 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.command.Scheduler;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.commands.SwerveManual;
 import frc.robot.subsystems.Drivetrain;
 import harkerrobolib.util.Conversions;
 import harkerrobolib.util.MathUtil;
@@ -48,8 +49,9 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void robotInit() {
+        Drivetrain.getInstance().setDefaultCommand(new SwerveManual());
+
         OI.getInstance().initBindings();
-        Drivetrain.getInstance();
     }
 
     /**
@@ -57,7 +59,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void robotPeriodic() {
-        Scheduler.getInstance().run();
+        CommandScheduler.getInstance().run();
 
         SmartDashboard.putNumber("TL Angle Error", Drivetrain.getInstance().getTopLeft().getAngleMotor().getClosedLoopError());
         SmartDashboard.putNumber("TL Drive Error", Drivetrain.getInstance().getTopLeft().getDriveMotor().getClosedLoopError());
@@ -85,7 +87,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousPeriodic() {
-        Scheduler.getInstance().run();
+        CommandScheduler.getInstance().run();
     }
 
     /**
@@ -100,7 +102,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void teleopPeriodic() {
-        Scheduler.getInstance().run();
+        CommandScheduler.getInstance().run();
     }
 
     /**
@@ -115,7 +117,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void testPeriodic() {
-        Scheduler.getInstance().run();
+        CommandScheduler.getInstance().run();
     }
 
     /**

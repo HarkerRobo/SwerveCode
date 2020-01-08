@@ -1,17 +1,11 @@
 package frc.robot.commands;
 
-import com.ctre.phoenix.motion.BufferedTrajectoryPointStream;
-import com.ctre.phoenix.motion.MotionProfileStatus;
-import com.ctre.phoenix.motion.TrajectoryPoint;
-import com.ctre.phoenix.motorcontrol.ControlMode;
-
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.RobotMap;
 import frc.robot.subsystems.Drivetrain;
-import frc.robot.util.SwerveModule;
 import frc.robot.util.Vector;
 import harkerrobolib.util.Conversions;
 import harkerrobolib.util.MathUtil;
@@ -21,7 +15,6 @@ import jaci.pathfinder.Pathfinder;
 import jaci.pathfinder.Trajectory;
 import jaci.pathfinder.Waypoint;
 import jaci.pathfinder.Trajectory.Segment;
-import jaci.pathfinder.modifiers.SwerveModifier;
 
 /**
  * Follows the specified trajectories by close looping and adding necessary Feed Forwards.
@@ -32,7 +25,7 @@ import jaci.pathfinder.modifiers.SwerveModifier;
  * @author Jatin Kohli
  * @since 11/13/19
  */
-public class SwerveDriveWithMotionProfile extends Command {
+public class SwerveDriveWithMotionProfile extends CommandBase {
     public static final double ROTATION_MAGNITUDE = Math.sqrt(Math.pow(Drivetrain.DT_LENGTH, 2) + Math.pow(Drivetrain.DT_WIDTH, 2)); 
 
     private static final boolean IS_PERCENT_OUTPUT = false;
@@ -62,7 +55,8 @@ public class SwerveDriveWithMotionProfile extends Command {
      * @param timeDur The time in ms between each segment of the Trajectory
      */
     public SwerveDriveWithMotionProfile(Waypoint[] waypoints, int timeDur) {
-        requires(Drivetrain.getInstance());
+
+        addRequirements();
     
         this.timeDur = timeDur;
 
@@ -123,8 +117,6 @@ public class SwerveDriveWithMotionProfile extends Command {
         
         // Drivetrain.getInstance().getBackRight().getDriveMotor().startMotionProfile(brDriveStream, MIN_BUFFERED_POINTS, ControlMode.MotionProfile);
         // Drivetrain.getInstance().getBackRight().getAngleMotor().startMotionProfile(brAngleStream, MIN_BUFFERED_POINTS, ControlMode.MotionProfile);
-       
-
 
         double initialHeading = traj.get(0).heading;
         Vector turnAngle = new Vector(Math.cos(initialHeading) * EPSILON, Math.sin(initialHeading) * EPSILON);
@@ -193,7 +185,7 @@ public class SwerveDriveWithMotionProfile extends Command {
                     sumBackRight = Vector.add(brRot, translation);
                     
                     // Scale down the vectors so that the largest possible magnitude is 1 (100% output)
-                    largestMag = SwerveManualDDR.max4(sumTopLeft.getMagnitude(), sumTopRight.getMagnitude(), sumBackLeft.getMagnitude(), sumBackRight.getMagnitude());
+                    largestMag = SwerveManual.max4(sumTopLeft.getMagnitude(), sumTopRight.getMagnitude(), sumBackLeft.getMagnitude(), sumBackRight.getMagnitude());
                     
                     if(largestMag < 1) 
                         largestMag = 1; //Set to 1 so none of the vectors are modified
@@ -281,15 +273,10 @@ public class SwerveDriveWithMotionProfile extends Command {
     }
 
     @Override
-    protected void interrupted() {
+    public void end(boolean interrupted) {
         Drivetrain.getInstance().applyToAllDrive((talon) -> talon.clearMotionProfileTrajectories());
         Drivetrain.getInstance().applyToAllAngle((talon) -> talon.clearMotionProfileTrajectories());
 
-        end();
-    }
-
-    @Override
-    protected void end() {
         SmartDashboard.putNumber("Path Total Time", Timer.getFPGATimestamp() - startTime);
         n.close();
     }

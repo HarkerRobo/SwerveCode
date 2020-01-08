@@ -1,9 +1,8 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
 import frc.robot.commands.SwerveManual;
-import frc.robot.commands.SwerveManualDDR;
 import frc.robot.util.SwerveModule;
 import frc.robot.util.Vector;
 import harkerrobolib.util.Conversions;
@@ -33,7 +32,7 @@ import java.util.function.Consumer;
  * @author Arjun Dixit
  * @since 11/1/19
  */
-public class Drivetrain extends Subsystem {
+public class Drivetrain extends SubsystemBase {
     public static Drivetrain instance;
 
     private SwerveModule topLeft;
@@ -149,16 +148,10 @@ public class Drivetrain extends Subsystem {
         Conversions.setWheelDiameter(WHEEL_DIAMETER);
     }
 
-    @Override
-    protected void initDefaultCommand() {
-        setDefaultCommand(new SwerveManual());
-    }
-
     public void toggleFieldSensitivity() {
         isFieldSensitive = !isFieldSensitive;
         System.out.println(isFieldSensitive);
     }
-    
 
     public void setupPositionPID() {
         applyToAllAngle((angleMotor) -> angleMotor.config_kP(ANGLE_POSITION_SLOT, ANGLE_POSITION_KP));
@@ -316,7 +309,7 @@ public class Drivetrain extends Subsystem {
     }
 
     public static Drivetrain getInstance() {
-        if(instance == null) 
+        if(instance == null)
             instance = new Drivetrain();
         return instance;
     }

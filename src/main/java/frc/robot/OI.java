@@ -71,13 +71,12 @@ public class OI {
         //         new SwerveDriveWithMotionProfile(points, timeDur)
         // );
         
-        driverGamepad.getButtonB().whenPressed(new SwerveDriveWithMotionProfile(semiCircle, timeDur));
-        // driverGamepad.getButtonX().whenPressed(new SwerveDriveWithMotionProfile(backward, timeDur));
-        // driverGamepad.getButtonA().whenPressed(new SwerveDriveWithMotionProfile(rightAndUp, timeDur));
-        // driverGamepad.getButtonY().whenPressed(new SwerveDriveWithMotionProfile(upAndDiag, timeDur));
-        driverGamepad.getButtonBumperRight().whenPressed(new ToggleFieldSensitivity());
+        // driverGamepad.getButtonB().whenPressed(new SwerveDriveWithMotionProfile(semiCircle, timeDur));
+        // // driverGamepad.getButtonX().whenPressed(new SwerveDriveWithMotionProfile(backward, timeDur));
+        // // driverGamepad.getButtonA().whenPressed(new SwerveDriveWithMotionProfile(rightAndUp, timeDur));
+        // // driverGamepad.getButtonY().whenPressed(new SwerveDriveWithMotionProfile(upAndDiag, timeDur));
+        // driverGamepad.getButtonBumperRight().whenPressed(new ToggleFieldSensitivity());
     }
-
 
     public XboxGamepad getDriverGamepad() {
         return driverGamepad;

@@ -2,8 +2,8 @@ package frc.robot.commands;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
-import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.OI;
 import frc.robot.subsystems.Drivetrain;
 
@@ -18,11 +18,11 @@ import frc.robot.subsystems.Drivetrain;
  * @author Chirag Kaushik
  * @since 11/4/19
  */
-public class SwerveTest extends Command {
+public class SwerveTest extends CommandBase {
     private static final double OUTPUT = 0.2;
 
     public SwerveTest() {
-        requires(Drivetrain.getInstance());
+        addRequirements(Drivetrain.getInstance());
     }
 
     public void execute() {
@@ -83,11 +83,6 @@ public class SwerveTest extends Command {
         Drivetrain.getInstance().getBackRight().getAngleMotor().set(ControlMode.Disabled, 0);
         Drivetrain.getInstance().getTopLeft().getAngleMotor().set(ControlMode.Disabled, 0);
         Drivetrain.getInstance().getBackLeft().getAngleMotor().set(ControlMode.Disabled, 0);
-    }
-
-
-    public void interrupted() {
-        end();
     }
 
     public boolean isFinished() {
