@@ -1,6 +1,5 @@
 package frc.robot;
 
-import frc.robot.commands.SwerveDriveWithMotionProfile;
 import frc.robot.commands.ToggleFieldSensitivity;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.util.HSDDRPad;

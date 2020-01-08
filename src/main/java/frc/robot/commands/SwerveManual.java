@@ -1,3 +1,5 @@
+
+
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.geometry.Translation2d;
@@ -9,8 +11,6 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.OI;
 import frc.robot.RobotMap;
 import frc.robot.subsystems.Drivetrain;
-import frc.robot.util.Vector;
-import harkerrobolib.util.Conversions;
 import harkerrobolib.util.MathUtil;
 
 /**
@@ -35,6 +35,12 @@ public class SwerveManual extends CommandBase {
     private static final double OUTPUT_MULTIPLIER = 0.5;
     private static final double VELOCITY_HEADING_MULTIPLIER = 70;
     private static final boolean IS_PERCENT_OUTPUT = false;
+
+    private static final SwerveDriveKinematics swerve = new SwerveDriveKinematics(
+                                                        new Translation2d(-Drivetrain.DT_WIDTH/2, Drivetrain.DT_LENGTH/2),
+                                                        new Translation2d(Drivetrain.DT_WIDTH/2, Drivetrain.DT_LENGTH/2),
+                                                        new Translation2d(-Drivetrain.DT_WIDTH/2, -Drivetrain.DT_LENGTH/2),
+                                                        new Translation2d(Drivetrain.DT_WIDTH/2, -Drivetrain.DT_LENGTH/2));
 
     private double translateX, translateY, turnMagnitude;
     
@@ -74,41 +80,35 @@ public class SwerveManual extends CommandBase {
         //scale input from joysticks
         translateX = translateX * Drivetrain.MAX_DRIVE_VELOCITY;
         translateY = translateY * Drivetrain.MAX_DRIVE_VELOCITY;
-        turnMagnitude = turnMagnitude * Drivetrain.MAX_DRIVE_VELOCITY/(Drivetrain.WHEEL_DIAMETER/2);
+        turnMagnitude = turnMagnitude * Drivetrain.MAX_ROTATION_VELOCITY; /*/ (Drivetrain.WHEEL_DIAMETER / 2)*/;
 
-        SwerveDriveKinematics swerve = new SwerveDriveKinematics(
-        new Translation2d(-Drivetrain.DT_WIDTH/2, Drivetrain.DT_LENGTH/2),
-        new Translation2d(Drivetrain.DT_WIDTH/2, Drivetrain.DT_LENGTH/2),
-        new Translation2d(-Drivetrain.DT_WIDTH/2, -Drivetrain.DT_LENGTH/2),
-        new Translation2d(Drivetrain.DT_WIDTH/2, -Drivetrain.DT_LENGTH/2));
+        // Drivetrain.getInstance().setSwerveModuleVelocity(Drivetrain.getInstance().getTopLeft(), moduleStates[0].speedMetersPerSecond, moduleStates[0].angle.getDegrees(), false, false);
+        // Drivetrain.getInstance().setSwerveModuleVelocity(Drivetrain.getInstance().getTopRight(), moduleStates[1].speedMetersPerSecond, moduleStates[1].angle.getDegrees(), false, false);
+        // Drivetrain.getInstance().setSwerveModuleVelocity(Drivetrain.getInstance().getBackLeft(), moduleStates[2].speedMetersPerSecond, moduleStates[2].angle.getDegrees(), false, false);
+        // Drivetrain.getInstance().setSwerveModuleVelocity(Drivetrain.getInstance().getBackRight(), moduleStates[3].speedMetersPerSecond, moduleStates[3].angle.getDegrees(), false, false);
+
+        double currentPigeonHeading = Drivetrain.getInstance().getPigeon().getFusedHeading();
+
+        if(pigeonFlag && turnMagnitude == 0) { //If there was joystick input but now there is not
+            long currentTime = System.currentTimeMillis();
+            double deltaTime = (double)(currentTime - prevTime);
+            double turnVel = (currentPigeonHeading - prevPigeonHeading) / deltaTime;
+            pigeonAngle =  Drivetrain.getInstance().getPigeon().getFusedHeading() + (Math.abs(turnVel)) * Math.signum(turnVel) * VELOCITY_HEADING_MULTIPLIER; // account for momentum when turning
+        }
+
+        pigeonFlag = Math.abs(turnMagnitude) > 0; //Update pigeon flag
+
+        if(!pigeonFlag) { //If there is no joystick input currently
+            turnMagnitude = -Drivetrain.PIGEON_kP * (pigeonAngle - currentPigeonHeading);
+            SmartDashboard.putNumber("Pigeon Error", pigeonAngle - currentPigeonHeading);
+        }
+
+        prevPigeonHeading = currentPigeonHeading;
+        prevTime = System.currentTimeMillis();
 
         ChassisSpeeds speed = new ChassisSpeeds(translateX, translateY, turnMagnitude);
 
         SwerveModuleState[] moduleStates = swerve.toSwerveModuleStates(speed);
-
-        Drivetrain.getInstance().setSwerveModuleVelocity(Drivetrain.getInstance().getTopLeft(), moduleStates[0].speedMetersPerSecond, moduleStates[0].angle.getDegrees(), false, false);
-        Drivetrain.getInstance().setSwerveModuleVelocity(Drivetrain.getInstance().getTopRight(), moduleStates[1].speedMetersPerSecond, moduleStates[1].angle.getDegrees(), false, false);
-        Drivetrain.getInstance().setSwerveModuleVelocity(Drivetrain.getInstance().getBackLeft(), moduleStates[2].speedMetersPerSecond, moduleStates[2].angle.getDegrees(), false, false);
-        Drivetrain.getInstance().setSwerveModuleVelocity(Drivetrain.getInstance().getBackRight(), moduleStates[3].speedMetersPerSecond, moduleStates[3].angle.getDegrees(), false, false);
-
-        // double currentPigeonHeading = Drivetrain.getInstance().getPigeon().getFusedHeading();
-
-        // if(pigeonFlag && turnMagnitude == 0) { //If there was joystick input but now there is not
-        //     long currentTime = System.currentTimeMillis();
-        //     double deltaTime = (double)(currentTime - prevTime);
-        //     double turnVel = (currentPigeonHeading - prevPigeonHeading) / deltaTime;
-        //     pigeonAngle =  Drivetrain.getInstance().getPigeon().getFusedHeading() + (Math.abs(turnVel)) * Math.signum(turnVel) * VELOCITY_HEADING_MULTIPLIER; // account for momentum when turning
-        // }
-
-        // pigeonFlag = Math.abs(turnMagnitude) > 0; //Update pigeon flag
-
-        // if(!pigeonFlag) { //If there is no joystick input currently
-        //     turnMagnitude = -Drivetrain.PIGEON_kP * (pigeonAngle - currentPigeonHeading);
-        //     SmartDashboard.putNumber("Pigeon Error", pigeonAngle - currentPigeonHeading);
-        // }
-
-        // prevPigeonHeading = currentPigeonHeading;
-        // prevTime = System.currentTimeMillis();
 
         // Vector translation = new Vector(translateX, translateY);
 
@@ -145,7 +145,7 @@ public class SwerveManual extends CommandBase {
         // sumBackLeft.scale(1 / largestMag);
         // sumBackRight.scale(1 / largestMag);
 
-        // Drivetrain.getInstance().setDrivetrainVelocity(sumTopLeft, sumTopRight, sumBackLeft, sumBackRight, 0, IS_PERCENT_OUTPUT, false);
+        Drivetrain.getInstance().setDrivetrainVelocity(moduleStates[0], moduleStates[1], moduleStates[2], moduleStates[3], 0, IS_PERCENT_OUTPUT, false);
     }
 
     public static double max4(double a, double b, double c, double d) {

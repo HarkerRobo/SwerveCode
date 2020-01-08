@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
 import frc.robot.commands.SwerveManual;
@@ -91,6 +92,7 @@ public class Drivetrain extends SubsystemBase {
     // private static final int MOTION_FRAME_PERIOD = 5;
   
     public static final double MAX_DRIVE_VELOCITY = 13;
+    public static final double MAX_ROTATION_VELOCITY = 2 * (2 * Math.PI);
     public static final double MP_MAX_DRIVE_VELOCITY = 6;
     public static final double MAX_DRIVE_ACCELERATION = 4;
     public static final double MAX_DRIVE_JERK = 50;
@@ -186,21 +188,16 @@ public class Drivetrain extends SubsystemBase {
     /**
      * Sets the output of the drivetrain based on desired output vectors for each swerve module
      */
-    public void setDrivetrainVelocity(Vector tl, Vector tr, Vector bl, Vector br, double feedForward, boolean isPercentOutput, boolean isMotionProfile) {
-        double tlMag = tl.getMagnitude() + feedForward;
-        double trMag = tr.getMagnitude() + feedForward;
-        double blMag = bl.getMagnitude() + feedForward;
-        double brMag = br.getMagnitude() + feedForward;
-
-        double tlOutput = isPercentOutput ? tlMag : isMotionProfile ? tlMag * MP_MAX_DRIVE_VELOCITY : (tlMag) * MAX_DRIVE_VELOCITY;
-        double trOutput = isPercentOutput ? trMag : isMotionProfile ? trMag * MP_MAX_DRIVE_VELOCITY : (trMag) * MAX_DRIVE_VELOCITY;
-        double blOutput = isPercentOutput ? blMag : isMotionProfile ? blMag * MP_MAX_DRIVE_VELOCITY : (blMag) * MAX_DRIVE_VELOCITY;
-        double brOutput = isPercentOutput ? brMag : isMotionProfile ? brMag * MP_MAX_DRIVE_VELOCITY : (brMag) * MAX_DRIVE_VELOCITY;
+    public void setDrivetrainVelocity(SwerveModuleState tl, SwerveModuleState tr, SwerveModuleState bl, SwerveModuleState br, double feedForward, boolean isPercentOutput, boolean isMotionProfile) {
+        double tlOutput = tl.speedMetersPerSecond;
+        double trOutput = tr.speedMetersPerSecond;
+        double blOutput = bl.speedMetersPerSecond;
+        double brOutput = br.speedMetersPerSecond;
         
-        setSwerveModuleVelocity(topLeft, tlOutput, convertAngle(topLeft, tl.getAngle()), isPercentOutput, isMotionProfile);
-		setSwerveModuleVelocity(topRight, trOutput, convertAngle(topRight, tr.getAngle()), isPercentOutput, isMotionProfile);
-		setSwerveModuleVelocity(backLeft, blOutput, convertAngle(backLeft, bl.getAngle()), isPercentOutput, isMotionProfile);
-        setSwerveModuleVelocity(backRight, brOutput, convertAngle(backRight, br.getAngle()), isPercentOutput, isMotionProfile);
+        setSwerveModuleVelocity(topLeft, tlOutput, convertAngle(topLeft, tl.angle.getDegrees()), isPercentOutput, isMotionProfile);
+		setSwerveModuleVelocity(topRight, trOutput, convertAngle(topRight, tr.angle.getDegrees()), isPercentOutput, isMotionProfile);
+		setSwerveModuleVelocity(backLeft, blOutput, convertAngle(backLeft, bl.angle.getDegrees()), isPercentOutput, isMotionProfile);
+        setSwerveModuleVelocity(backRight, brOutput, convertAngle(backRight, br.angle.getDegrees()), isPercentOutput, isMotionProfile);
     }
 
     public void setDrivetrainPosition(Vector tl, Vector tr, Vector bl, Vector br, double feedForward) {
