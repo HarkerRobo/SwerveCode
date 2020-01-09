@@ -1,7 +1,7 @@
 
-
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
@@ -37,10 +37,10 @@ public class SwerveManual extends CommandBase {
     private static final boolean IS_PERCENT_OUTPUT = false;
 
     private static final SwerveDriveKinematics swerve = new SwerveDriveKinematics(
-                                                        new Translation2d(-Drivetrain.DT_WIDTH/2, Drivetrain.DT_LENGTH/2),
-                                                        new Translation2d(Drivetrain.DT_WIDTH/2, Drivetrain.DT_LENGTH/2),
-                                                        new Translation2d(-Drivetrain.DT_WIDTH/2, -Drivetrain.DT_LENGTH/2),
-                                                        new Translation2d(Drivetrain.DT_WIDTH/2, -Drivetrain.DT_LENGTH/2));
+                                                        Drivetrain.FRONT_LEFT_LOCATION,
+                                                        Drivetrain.FRONT_RIGHT_LOCATION,
+                                                        Drivetrain.BACK_LEFT_LOCATION,
+                                                        Drivetrain.BACK_RIGHT_LOCATION);
 
     private double translateX, translateY, turnMagnitude;
     
@@ -106,9 +106,14 @@ public class SwerveManual extends CommandBase {
         prevPigeonHeading = currentPigeonHeading;
         prevTime = System.currentTimeMillis();
 
-        ChassisSpeeds speed = new ChassisSpeeds(translateX, translateY, turnMagnitude);
+        // ChassisSpeeds speed = new ChassisSpeeds(translateX, translateY, turnMagnitude);
+        ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+            translateX, translateY, turnMagnitude, Rotation2d.fromDegrees(Drivetrain.getInstance().getPigeon().getFusedHeading()));
 
-        SwerveModuleState[] moduleStates = swerve.toSwerveModuleStates(speed);
+        // Now use this in our kinematics
+        SwerveModuleState[] moduleStates = swerve.toSwerveModuleStates(speeds);
+
+        // SwerveModuleState[] moduleStates = swerve.toSwerveModuleStates(speed);
 
         // Vector translation = new Vector(translateX, translateY);
 

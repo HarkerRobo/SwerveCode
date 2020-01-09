@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
@@ -9,7 +10,6 @@ import frc.robot.util.Vector;
 import harkerrobolib.util.Conversions;
 import harkerrobolib.wrappers.HSPigeon;
 import harkerrobolib.wrappers.HSTalon;
-
 import java.util.function.Consumer;
 
 /**
@@ -43,6 +43,11 @@ public class Drivetrain extends SubsystemBase {
     
     private boolean isFieldSensitive;
     private HSPigeon pigeon;
+
+    public static final Translation2d FRONT_LEFT_LOCATION = new Translation2d(Drivetrain.DT_WIDTH/2, Drivetrain.DT_LENGTH/2);
+    public static final Translation2d FRONT_RIGHT_LOCATION = new Translation2d(Drivetrain.DT_WIDTH/2, -Drivetrain.DT_LENGTH/2);
+    public static final Translation2d BACK_LEFT_LOCATION = new Translation2d(-Drivetrain.DT_WIDTH/2, Drivetrain.DT_LENGTH/2);
+    public static final Translation2d BACK_RIGHT_LOCATION = new Translation2d(-Drivetrain.DT_WIDTH/2, -Drivetrain.DT_LENGTH/2);
 
     private static final boolean TL_DRIVE_INVERTED = false;
     private static final boolean TL_ANGLE_INVERTED = false;
@@ -104,11 +109,11 @@ public class Drivetrain extends SubsystemBase {
     /**
      * Feet between both of the wheels on the front or back
      */
-    public static final double DT_WIDTH = 16.5; //0.419 m
+    public static final double DT_WIDTH = 0.419;//16.5 feet;
     /**
      * Feet between both of the wheels on the left or right
      */
-    public static final double DT_LENGTH = 20.6; //0.523 m
+    public static final double DT_LENGTH = 0.523;//20.6 feet; 
     
     public static final int TL_OFFSET = 2212;//1749;//2212-1749
     public static final int TR_OFFSET = 6730;//7638;

@@ -3,6 +3,8 @@ package frc.robot.util;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Drivetrain;
 import harkerrobolib.util.Conversions;
@@ -188,5 +190,14 @@ public class SwerveModule {
         
     public HSTalon getDriveMotor() {
         return driveMotor;
+    }
+     /**
+     * Returns the current state of the module.
+     *
+     * @return The current state of the module.
+     */
+    public SwerveModuleState getState() {
+        return new SwerveModuleState(Conversions.convertSpeed(SpeedUnit.ENCODER_UNITS, driveMotor.getSelectedSensorVelocity(), SpeedUnit.FEET_PER_SECOND) * 0.254, 
+            new Rotation2d(angleMotor.getSelectedSensorPosition() * 360 / 4096));
     }
 }
