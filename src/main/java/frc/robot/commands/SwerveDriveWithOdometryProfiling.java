@@ -21,7 +21,7 @@ public class SwerveDriveWithOdometryProfiling extends CommandBase {
 
     public void initialize() {
         Rotation2d gyroAngle = Rotation2d.fromDegrees(-Drivetrain.getInstance().getPigeon().getFusedHeading());
-        odometry.resetPosition(new Pose2d(, 0, new Rotation2d()), gyroAngle);
+        // odometry.resetPosition(new Pose2d(, 0, new Rotation2d()), gyroAngle);
     }
         
     public void execute() {

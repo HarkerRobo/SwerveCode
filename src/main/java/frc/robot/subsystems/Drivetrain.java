@@ -47,10 +47,10 @@ public class Drivetrain extends SubsystemBase {
     private HSPigeon pigeon;
     private SwerveDriveOdometry odometry;
 
-    public static final Translation2d FRONT_LEFT_LOCATION = new Translation2d(Drivetrain.DT_WIDTH/2, Drivetrain.DT_LENGTH/2);
-    public static final Translation2d FRONT_RIGHT_LOCATION = new Translation2d(Drivetrain.DT_WIDTH/2, -Drivetrain.DT_LENGTH/2);
-    public static final Translation2d BACK_LEFT_LOCATION = new Translation2d(-Drivetrain.DT_WIDTH/2, Drivetrain.DT_LENGTH/2);
-    public static final Translation2d BACK_RIGHT_LOCATION = new Translation2d(-Drivetrain.DT_WIDTH/2, -Drivetrain.DT_LENGTH/2);
+    public static final Translation2d FRONT_LEFT_LOCATION = new Translation2d(-Drivetrain.DT_WIDTH/2, Drivetrain.DT_LENGTH/2);
+    public static final Translation2d FRONT_RIGHT_LOCATION = new Translation2d(Drivetrain.DT_WIDTH/2, Drivetrain.DT_LENGTH/2);
+    public static final Translation2d BACK_LEFT_LOCATION = new Translation2d(-Drivetrain.DT_WIDTH/2, -Drivetrain.DT_LENGTH/2);
+    public static final Translation2d BACK_RIGHT_LOCATION = new Translation2d(Drivetrain.DT_WIDTH/2, -Drivetrain.DT_LENGTH/2);
 
     private static final boolean TL_DRIVE_INVERTED = false;
     private static final boolean TL_ANGLE_INVERTED = false;
@@ -99,10 +99,10 @@ public class Drivetrain extends SubsystemBase {
 
     // private static final int MOTION_FRAME_PERIOD = 5;
   
-    public static final double MAX_DRIVE_VELOCITY = 13;
-    public static final double MAX_ROTATION_VELOCITY = 2 * (2 * Math.PI);
-    public static final double MP_MAX_DRIVE_VELOCITY = 6;
-    public static final double MAX_DRIVE_ACCELERATION = 4;
+    public static final double MAX_DRIVE_VELOCITY = 2;
+    public static final double MAX_ROTATION_VELOCITY = (2 * Math.PI);
+    public static final double MP_MAX_DRIVE_VELOCITY = 2;
+    public static final double MAX_DRIVE_ACCELERATION = 1.7;
     public static final double MAX_DRIVE_JERK = 50;
     
     public static final double DRIVE_RAMP_RATE = 0.1;
@@ -126,7 +126,7 @@ public class Drivetrain extends SubsystemBase {
     public static final int BL_OFFSET = 11327;
     private static final int BR_OFFSET = 4605;
 
-    public static final double PIGEON_kP = 0.02;
+    public static final double PIGEON_kP = 0.10;
 
     public static final double WHEEL_DIAMETER = 4;
 
@@ -159,8 +159,6 @@ public class Drivetrain extends SubsystemBase {
         pigeon.setFusedHeading(0);
 
         Conversions.setWheelDiameter(WHEEL_DIAMETER);
-
-        odometry = new SwerveDriveOdometry(new , 0);
     }
 
     public void toggleFieldSensitivity() {

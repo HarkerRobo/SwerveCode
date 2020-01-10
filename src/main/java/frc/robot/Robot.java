@@ -14,8 +14,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.commands.SwerveManual;
 import frc.robot.subsystems.Drivetrain;
-import harkerrobolib.util.Conversions;
-import harkerrobolib.util.MathUtil;
 
 /**
  * Send it? You don't know what it means? Well, let me tell you a little story. Think of the 'send' as the package. 

@@ -30,9 +30,9 @@ import harkerrobolib.util.MathUtil;
  * @since 11/4/19
  */
 public class SwerveManual extends CommandBase {
-    public static final double ROTATION_MAGNITUDE = Math.sqrt(Math.pow(Drivetrain.DT_LENGTH, 2) + Math.pow(Drivetrain.DT_WIDTH, 2)); 
+    // public static final double ROTATION_MAGNITUDE = Math.sqrt(Math.pow(Drivetrain.DT_LENGTH, 2) + Math.pow(Drivetrain.DT_WIDTH, 2)); 
     private static final double OUTPUT_MULTIPLIER = 0.5;
-    private static final double VELOCITY_HEADING_MULTIPLIER = 70;
+    private static final double VELOCITY_HEADING_MULTIPLIER = -70;
     private static final boolean IS_PERCENT_OUTPUT = false;
 
     private SwerveDriveKinematics swerve = new SwerveDriveKinematics(
@@ -79,33 +79,31 @@ public class SwerveManual extends CommandBase {
         //scale input from joysticks
         translateX = translateX * Drivetrain.MAX_DRIVE_VELOCITY;
         translateY = translateY * Drivetrain.MAX_DRIVE_VELOCITY;
-        turnMagnitude = turnMagnitude * Drivetrain.MAX_ROTATION_VELOCITY;
+        turnMagnitude = -turnMagnitude * Drivetrain.MAX_ROTATION_VELOCITY;
 
-        // Drivetrain.getInstance().setSwerveModuleVelocity(Drivetrain.getInstance().getTopLeft(), moduleStates[0].speedMetersPerSecond, moduleStates[0].angle.getDegrees(), false, false);
-        // Drivetrain.getInstance().setSwerveModuleVelocity(Drivetrain.getInstance().getTopRight(), moduleStates[1].speedMetersPerSecond, moduleStates[1].angle.getDegrees(), false, false);
-        // Drivetrain.getInstance().setSwerveModuleVelocity(Drivetrain.getInstance().getBackLeft(), moduleStates[2].speedMetersPerSecond, moduleStates[2].angle.getDegrees(), false, false);
-        // Drivetrain.getInstance().setSwerveModuleVelocity(Drivetrain.getInstance().getBackRight(), moduleStates[3].speedMetersPerSecond, moduleStates[3].angle.getDegrees(), false, false);
+        double currentPigeonHeading = Drivetrain.getInstance().getPigeon().getFusedHeading();
 
-        // double currentPigeonHeading = Drivetrain.getInstance().getPigeon().getFusedHeading();
+        if(pigeonFlag && turnMagnitude == 0) { //If there was joystick input but now there is not
+            long currentTime = System.currentTimeMillis();
+            double deltaTime = (double)(currentTime - prevTime);
+            double turnVel = (currentPigeonHeading - prevPigeonHeading) / deltaTime;
+            pigeonAngle = currentPigeonHeading - turnVel * VELOCITY_HEADING_MULTIPLIER; // account for momentum when turning
+        }
 
-        // if(pigeonFlag && turnMagnitude == 0) { //If there was joystick input but now there is not
-        //     long currentTime = System.currentTimeMillis();
-        //     double deltaTime = (double)(currentTime - prevTime);
-        //     double turnVel = (currentPigeonHeading - prevPigeonHeading) / deltaTime;
-        //     pigeonAngle = currentPigeonHeading + turnVel * VELOCITY_HEADING_MULTIPLIER; // account for momentum when turning
-        // }
+        pigeonFlag = Math.abs(turnMagnitude) > 0; //Update pigeon flag
 
-        // pigeonFlag = Math.abs(turnMagnitude) > 0; //Update pigeon flag
+        SmartDashboard.putNumber("Desired Pigeon Angle", pigeonAngle);
+        SmartDashboard.putNumber("Actual Pigeon Angle", currentPigeonHeading);
+        SmartDashboard.putNumber("Turn Magnitude", turnMagnitude);
 
-        // if(!pigeonFlag) { //If there is no joystick input currently
-        //     turnMagnitude = -Drivetrain.PIGEON_kP * (pigeonAngle - currentPigeonHeading);
-        //     SmartDashboard.putNumber("Pigeon Error", pigeonAngle - currentPigeonHeading);
-        // }
+        if(!pigeonFlag) { //If there is no joystick input currently
+            turnMagnitude = Drivetrain.PIGEON_kP * (pigeonAngle - currentPigeonHeading);
+            SmartDashboard.putNumber("Pigeon Error", pigeonAngle - currentPigeonHeading);
+        }
 
-        // prevPigeonHeading = currentPigeonHeading;
-        // prevTime = System.currentTimeMillis();
+        prevPigeonHeading = currentPigeonHeading;
+        prevTime = System.currentTimeMillis();
 
-        // ChassisSpeeds speed = new ChassisSpeeds(translateX, translateY, turnMagnitude);
         ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
             translateX, translateY, turnMagnitude, Rotation2d.fromDegrees(Drivetrain.getInstance().getPigeon().getFusedHeading())
         );
