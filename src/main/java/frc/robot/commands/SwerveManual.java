@@ -35,12 +35,6 @@ public class SwerveManual extends CommandBase {
     private static final double VELOCITY_HEADING_MULTIPLIER = -70;
     private static final boolean IS_PERCENT_OUTPUT = false;
 
-    private SwerveDriveKinematics swerve = new SwerveDriveKinematics(
-                                                        Drivetrain.FRONT_LEFT_LOCATION,
-                                                        Drivetrain.FRONT_RIGHT_LOCATION,
-                                                        Drivetrain.BACK_LEFT_LOCATION,
-                                                        Drivetrain.BACK_RIGHT_LOCATION);
-
     private double translateX, translateY, turnMagnitude;
     
     private static double prevPigeonHeading;
@@ -57,7 +51,6 @@ public class SwerveManual extends CommandBase {
         prevPigeonHeading = 0;
         prevTime = System.currentTimeMillis();
     }
-    
 
     @Override
     public void initialize() {
@@ -109,51 +102,14 @@ public class SwerveManual extends CommandBase {
         );
 
         // Now use this in our kinematics
-        SwerveModuleState[] moduleStates = swerve.toSwerveModuleStates(speeds);
-
-        // SwerveModuleState[] moduleStates = swerve.toSwerveModuleStates(speed);
-
-        // Vector translation = new Vector(translateX, translateY);
-
-        // //Adjust for field sensitive drive using pigeon
-        // if(Drivetrain.getInstance().isFieldSensitive()) {
-        //     translation.rotate(-Drivetrain.getInstance().getPigeon().getFusedHeading());
-        // }
-
-        // Vector topLeftRotation = new Vector(Drivetrain.DT_LENGTH, Drivetrain.DT_WIDTH);
-        // Vector topRightRotation = new Vector(Drivetrain.DT_LENGTH, -Drivetrain.DT_WIDTH);
-        // Vector backLeftRotation = new Vector(-Drivetrain.DT_LENGTH, Drivetrain.DT_WIDTH);
-        // Vector backRightRotation = new Vector(-Drivetrain.DT_LENGTH, -Drivetrain.DT_WIDTH);
-
-        // //Scale by ROTATION_MAGNITUDE to make the magnitude of all vectors 1
-        // //and then by turnMagnitude to reflect the desired rotational speed
-        // topLeftRotation.scale(turnMagnitude / ROTATION_MAGNITUDE);
-        // topRightRotation.scale(turnMagnitude / ROTATION_MAGNITUDE);
-        // backLeftRotation.scale(turnMagnitude / ROTATION_MAGNITUDE);
-        // backRightRotation.scale(turnMagnitude / ROTATION_MAGNITUDE);
-        
-        // Vector sumTopLeft = Vector.add(topLeftRotation, translation).scale(OUTPUT_MULTIPLIER);
-        // Vector sumTopRight = Vector.add(topRightRotation, translation).scale(OUTPUT_MULTIPLIER);
-        // Vector sumBackLeft = Vector.add(backLeftRotation, translation).scale(OUTPUT_MULTIPLIER);
-        // Vector sumBackRight = Vector.add(backRightRotation, translation).scale(OUTPUT_MULTIPLIER);
-        
-        // // Scale down the vectors so that the largest possible magnitude is 1 (100% output)
-        // double largestMag = max4(sumTopLeft.getMagnitude(), sumTopRight.getMagnitude(), sumBackLeft.getMagnitude(), sumBackRight.getMagnitude());
-        
-        // if(largestMag < 1) 
-        //     largestMag = 1; //Set to 1 so none of the vectors are modified
-
-        // sumTopLeft.scale(1 / largestMag);
-        // sumTopRight.scale(1 / largestMag);
-        // sumBackLeft.scale(1 / largestMag);
-        // sumBackRight.scale(1 / largestMag);
+        SwerveModuleState[] moduleStates = Drivetrain.getInstance().getKinematics().toSwerveModuleStates(speeds);
 
         Drivetrain.getInstance().setDrivetrainVelocity(moduleStates[0], moduleStates[1], moduleStates[2], moduleStates[3], 0, IS_PERCENT_OUTPUT, false);
     }
 
-    public static double max4(double a, double b, double c, double d) {
-        return Math.max(Math.max(a, b), Math.max(c, d));
-    }
+    // public static double max4(double a, double b, double c, double d) {
+    //     return Math.max(Math.max(a, b), Math.max(c, d));
+    // }
 
     @Override
     public boolean isFinished() {

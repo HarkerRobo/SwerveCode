@@ -190,13 +190,14 @@ public class SwerveModule {
     public HSTalon getDriveMotor() {
         return driveMotor;
     }
+
      /**
      * Returns the current state of the module.
      *
      * @return The current state of the module.
      */
     public SwerveModuleState getState() {
-        return new SwerveModuleState(Conversions.convertSpeed(SpeedUnit.ENCODER_UNITS, driveMotor.getSelectedSensorVelocity(), SpeedUnit.FEET_PER_SECOND) * 0.254, 
-            new Rotation2d(angleMotor.getSelectedSensorPosition() * 360 / 4096));
+        return new SwerveModuleState(Conversions.convertSpeed(SpeedUnit.ENCODER_UNITS, driveMotor.getSelectedSensorVelocity(), SpeedUnit.FEET_PER_SECOND) * Drivetrain.METERS_PER_FOOT, 
+            new Rotation2d(angleMotor.getSelectedSensorPosition() * 2 * Math.PI / 4096));
     }
 }
