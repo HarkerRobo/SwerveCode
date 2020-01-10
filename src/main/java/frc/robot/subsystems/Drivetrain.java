@@ -1,6 +1,9 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.wpilibj.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
@@ -42,6 +45,7 @@ public class Drivetrain extends SubsystemBase {
     
     private boolean isFieldSensitive;
     private HSPigeon pigeon;
+    private SwerveDriveOdometry odometry;
 
     public static final Translation2d FRONT_LEFT_LOCATION = new Translation2d(Drivetrain.DT_WIDTH/2, Drivetrain.DT_LENGTH/2);
     public static final Translation2d FRONT_RIGHT_LOCATION = new Translation2d(Drivetrain.DT_WIDTH/2, -Drivetrain.DT_LENGTH/2);
@@ -155,6 +159,8 @@ public class Drivetrain extends SubsystemBase {
         pigeon.setFusedHeading(0);
 
         Conversions.setWheelDiameter(WHEEL_DIAMETER);
+
+        odometry = new SwerveDriveOdometry(new , 0);
     }
 
     public void toggleFieldSensitivity() {

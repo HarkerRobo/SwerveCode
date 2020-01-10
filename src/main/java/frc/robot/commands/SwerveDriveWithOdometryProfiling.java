@@ -10,27 +10,31 @@ import frc.robot.subsystems.Drivetrain;
 public class SwerveDriveWithOdometryProfiling extends CommandBase {
 
     // Creating my kinematics object using the module locations
-    SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
-    Drivetrain.FRONT_LEFT_LOCATION, 
-    Drivetrain.FRONT_RIGHT_LOCATION, 
-    Drivetrain.BACK_LEFT_LOCATION, 
-    Drivetrain.BACK_RIGHT_LOCATION
-    );
     
-    SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(m_kinematics,
-        new Rotation2d(Drivetrain.getInstance().getPigeon().getFusedHeading() * Math.PI / 180), new Pose2d(5.0, 13.5, new Rotation2d()));
+    private SwerveDriveOdometry odometry;
+    
 
-    public SwerveDriveWithOdometryProfiling() {
+    public SwerveDriveWithOdometryProfiling(SwerveDriveOdometry odometry) {
         addRequirements(Drivetrain.getInstance());
+        this.odometry = odometry;
+    }
+
+    public void initialize() {
+        Rotation2d gyroAngle = Rotation2d.fromDegrees(-Drivetrain.getInstance().getPigeon().getFusedHeading());
+        odometry.resetPosition(new Pose2d(, 0, new Rotation2d()), gyroAngle);
     }
         
-    public void periodic() {
+    public void execute() {
         Rotation2d gyroAngle = Rotation2d.fromDegrees(-Drivetrain.getInstance().getPigeon().getFusedHeading());
-        Pose2d pose = m_odometry.update(gyroAngle, Drivetrain.getInstance().getTopLeft().getState(), 
+        //Pose2d odometry.getPoseMeters();
+        Pose2d newPose = odometry.update(gyroAngle, Drivetrain.getInstance().getTopLeft().getState(), 
                                                    Drivetrain.getInstance().getTopRight().getState(),
                                                    Drivetrain.getInstance().getBackLeft().getState(), 
                                                    Drivetrain.getInstance().getBackRight().getState());
+    }
 
+    public boolean isFinished() {
+        return true;
     }
 
     public void end(boolean interrupted)

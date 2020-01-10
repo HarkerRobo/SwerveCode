@@ -35,7 +35,7 @@ public class SwerveManual extends CommandBase {
     private static final double VELOCITY_HEADING_MULTIPLIER = 70;
     private static final boolean IS_PERCENT_OUTPUT = false;
 
-    private static final SwerveDriveKinematics swerve = new SwerveDriveKinematics(
+    private SwerveDriveKinematics swerve = new SwerveDriveKinematics(
                                                         Drivetrain.FRONT_LEFT_LOCATION,
                                                         Drivetrain.FRONT_RIGHT_LOCATION,
                                                         Drivetrain.BACK_LEFT_LOCATION,
