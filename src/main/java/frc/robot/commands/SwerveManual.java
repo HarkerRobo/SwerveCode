@@ -2,7 +2,6 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
@@ -80,35 +79,36 @@ public class SwerveManual extends CommandBase {
         //scale input from joysticks
         translateX = translateX * Drivetrain.MAX_DRIVE_VELOCITY;
         translateY = translateY * Drivetrain.MAX_DRIVE_VELOCITY;
-        turnMagnitude = turnMagnitude * Drivetrain.MAX_ROTATION_VELOCITY; /*/ (Drivetrain.WHEEL_DIAMETER / 2)*/;
+        turnMagnitude = turnMagnitude * Drivetrain.MAX_ROTATION_VELOCITY;
 
         // Drivetrain.getInstance().setSwerveModuleVelocity(Drivetrain.getInstance().getTopLeft(), moduleStates[0].speedMetersPerSecond, moduleStates[0].angle.getDegrees(), false, false);
         // Drivetrain.getInstance().setSwerveModuleVelocity(Drivetrain.getInstance().getTopRight(), moduleStates[1].speedMetersPerSecond, moduleStates[1].angle.getDegrees(), false, false);
         // Drivetrain.getInstance().setSwerveModuleVelocity(Drivetrain.getInstance().getBackLeft(), moduleStates[2].speedMetersPerSecond, moduleStates[2].angle.getDegrees(), false, false);
         // Drivetrain.getInstance().setSwerveModuleVelocity(Drivetrain.getInstance().getBackRight(), moduleStates[3].speedMetersPerSecond, moduleStates[3].angle.getDegrees(), false, false);
 
-        double currentPigeonHeading = Drivetrain.getInstance().getPigeon().getFusedHeading();
+        // double currentPigeonHeading = Drivetrain.getInstance().getPigeon().getFusedHeading();
 
-        if(pigeonFlag && turnMagnitude == 0) { //If there was joystick input but now there is not
-            long currentTime = System.currentTimeMillis();
-            double deltaTime = (double)(currentTime - prevTime);
-            double turnVel = (currentPigeonHeading - prevPigeonHeading) / deltaTime;
-            pigeonAngle =  Drivetrain.getInstance().getPigeon().getFusedHeading() + (Math.abs(turnVel)) * Math.signum(turnVel) * VELOCITY_HEADING_MULTIPLIER; // account for momentum when turning
-        }
+        // if(pigeonFlag && turnMagnitude == 0) { //If there was joystick input but now there is not
+        //     long currentTime = System.currentTimeMillis();
+        //     double deltaTime = (double)(currentTime - prevTime);
+        //     double turnVel = (currentPigeonHeading - prevPigeonHeading) / deltaTime;
+        //     pigeonAngle = currentPigeonHeading + turnVel * VELOCITY_HEADING_MULTIPLIER; // account for momentum when turning
+        // }
 
-        pigeonFlag = Math.abs(turnMagnitude) > 0; //Update pigeon flag
+        // pigeonFlag = Math.abs(turnMagnitude) > 0; //Update pigeon flag
 
-        if(!pigeonFlag) { //If there is no joystick input currently
-            turnMagnitude = -Drivetrain.PIGEON_kP * (pigeonAngle - currentPigeonHeading);
-            SmartDashboard.putNumber("Pigeon Error", pigeonAngle - currentPigeonHeading);
-        }
+        // if(!pigeonFlag) { //If there is no joystick input currently
+        //     turnMagnitude = -Drivetrain.PIGEON_kP * (pigeonAngle - currentPigeonHeading);
+        //     SmartDashboard.putNumber("Pigeon Error", pigeonAngle - currentPigeonHeading);
+        // }
 
-        prevPigeonHeading = currentPigeonHeading;
-        prevTime = System.currentTimeMillis();
+        // prevPigeonHeading = currentPigeonHeading;
+        // prevTime = System.currentTimeMillis();
 
         // ChassisSpeeds speed = new ChassisSpeeds(translateX, translateY, turnMagnitude);
         ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-            translateX, translateY, turnMagnitude, Rotation2d.fromDegrees(Drivetrain.getInstance().getPigeon().getFusedHeading()));
+            translateX, translateY, turnMagnitude, Rotation2d.fromDegrees(Drivetrain.getInstance().getPigeon().getFusedHeading())
+        );
 
         // Now use this in our kinematics
         SwerveModuleState[] moduleStates = swerve.toSwerveModuleStates(speeds);

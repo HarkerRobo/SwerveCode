@@ -2,10 +2,8 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveOdometry;
-import edu.wpi.first.wpilibj.trajectory.constraint.SwerveDriveKinematicsConstraint;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Drivetrain;
 
@@ -27,9 +25,12 @@ public class SwerveDriveWithOdometryProfiling extends CommandBase {
     }
         
     public void periodic() {
-        var gyroAngle = Rotation2d.fromDegrees(-Drivetrain.getInstance().getPigeon().getFusedHeading());
-        m_pose = m_odometry.update(gyroAngle, Drivetrain.getInstance().getTopLeft().getState(), Drivetrain.getInstance().getTopRight().getState(),
-            Drivetrain.getInstance().getBackLeft().getState(), Drivetrain.getInstance().getBackRight().getState());
+        Rotation2d gyroAngle = Rotation2d.fromDegrees(-Drivetrain.getInstance().getPigeon().getFusedHeading());
+        Pose2d pose = m_odometry.update(gyroAngle, Drivetrain.getInstance().getTopLeft().getState(), 
+                                                   Drivetrain.getInstance().getTopRight().getState(),
+                                                   Drivetrain.getInstance().getBackLeft().getState(), 
+                                                   Drivetrain.getInstance().getBackRight().getState());
+
     }
 
     public void end(boolean interrupted)

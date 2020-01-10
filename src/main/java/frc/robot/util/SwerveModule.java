@@ -69,7 +69,6 @@ public class SwerveModule {
         angleTalonInit(angleMotor);
 
         invertFlag = false;
-
     }
     
     public void driveTalonInit(HSTalon talon) {
@@ -134,12 +133,12 @@ public class SwerveModule {
         if(isPercentOutput) {
             driveMotor.set(ControlMode.PercentOutput, output);
         } else {
-            driveMotor.set(ControlMode.Velocity, Conversions.convert(SpeedUnit.FEET_PER_SECOND, output, SpeedUnit.ENCODER_UNITS) * Drivetrain.GEAR_RATIO);
+            driveMotor.set(ControlMode.Velocity, Conversions.convert(SpeedUnit.FEET_PER_SECOND, output * Drivetrain.FEET_PER_METER, SpeedUnit.ENCODER_UNITS) * Drivetrain.GEAR_RATIO);
         }
     }
     
     public void setAngleAndDriveVelocity(double targetAngle, double output, boolean isPercentOutput, boolean isMotionProfile) {
-        boolean shouldReverse =  !isMotionProfile && Math.abs(targetAngle - getAngleDegrees()) > 90;
+        boolean shouldReverse = !isMotionProfile && Math.abs(targetAngle - getAngleDegrees()) > 90;
         
         if (shouldReverse) {
             setDriveOutput(-output, isPercentOutput);

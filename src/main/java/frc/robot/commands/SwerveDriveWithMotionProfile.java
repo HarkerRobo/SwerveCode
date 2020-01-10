@@ -3,7 +3,7 @@ package frc.robot.commands;
 // import edu.wpi.first.wpilibj.Notifier;
 // import edu.wpi.first.wpilibj.Timer;
 // import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-// import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 // import frc.robot.RobotMap;
 // import frc.robot.subsystems.Drivetrain;
 // import frc.robot.util.Vector;
@@ -25,7 +25,7 @@ package frc.robot.commands;
 //  * @author Jatin Kohli
 //  * @since 11/13/19
 //  */
-public class SwerveDriveWithMotionProfile {//extends CommandBase {
+public class SwerveDriveWithMotionProfile extends CommandBase {
 //     public static final double ROTATION_MAGNITUDE = Math.sqrt(Math.pow(Drivetrain.DT_LENGTH, 2) + Math.pow(Drivetrain.DT_WIDTH, 2)); 
 
 //     private static final boolean IS_PERCENT_OUTPUT = false;
@@ -56,7 +56,7 @@ public class SwerveDriveWithMotionProfile {//extends CommandBase {
 //      */
 //     public SwerveDriveWithMotionProfile(Waypoint[] waypoints, int timeDur) {
 
-//         addRequirements();
+//         addRequirements(Drivetrain.getInstance());
     
 //         this.timeDur = timeDur;
 

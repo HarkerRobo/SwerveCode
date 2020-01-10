@@ -1,9 +1,6 @@
 package frc.robot;
 
-import frc.robot.commands.ToggleFieldSensitivity;
-import frc.robot.subsystems.Drivetrain;
 import frc.robot.util.HSDDRPad;
-import harkerrobolib.commands.CallMethodCommand;
 import harkerrobolib.wrappers.XboxGamepad;
 import jaci.pathfinder.Waypoint;
 /**
@@ -71,9 +68,9 @@ public class OI {
         // );
         
         // driverGamepad.getButtonB().whenPressed(new SwerveDriveWithMotionProfile(semiCircle, timeDur));
-        // // driverGamepad.getButtonX().whenPressed(new SwerveDriveWithMotionProfile(backward, timeDur));
-        // // driverGamepad.getButtonA().whenPressed(new SwerveDriveWithMotionProfile(rightAndUp, timeDur));
-        // // driverGamepad.getButtonY().whenPressed(new SwerveDriveWithMotionProfile(upAndDiag, timeDur));
+        // driverGamepad.getButtonX().whenPressed(new SwerveDriveWithMotionProfile(backward, timeDur));
+        // driverGamepad.getButtonA().whenPressed(new SwerveDriveWithMotionProfile(rightAndUp, timeDur));
+        // driverGamepad.getButtonY().whenPressed(new SwerveDriveWithMotionProfile(upAndDiag, timeDur));
         // driverGamepad.getButtonBumperRight().whenPressed(new ToggleFieldSensitivity());
     }
 

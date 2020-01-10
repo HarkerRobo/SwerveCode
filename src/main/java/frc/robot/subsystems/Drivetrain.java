@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
-import frc.robot.commands.SwerveManual;
 import frc.robot.util.SwerveModule;
 import frc.robot.util.Vector;
 import harkerrobolib.util.Conversions;
@@ -105,6 +104,9 @@ public class Drivetrain extends SubsystemBase {
     public static final double DRIVE_RAMP_RATE = 0.1;
     public static final double ANGLE_RAMP_RATE = 0.05;
     public static final double GEAR_RATIO = 6;
+
+    public static final double METERS_PER_FOOT = 0.3048;
+    public static final double FEET_PER_METER = 3.28084;
     
     /**
      * Feet between both of the wheels on the front or back
@@ -205,12 +207,12 @@ public class Drivetrain extends SubsystemBase {
         setSwerveModuleVelocity(backRight, brOutput, convertAngle(backRight, br.angle.getDegrees()), isPercentOutput, isMotionProfile);
     }
 
-    public void setDrivetrainPosition(Vector tl, Vector tr, Vector bl, Vector br, double feedForward) {
-        getTopLeft().setAngleAndDrivePosition(tl.getAngle(), tl.getMagnitude(), feedForward);
-        getTopRight().setAngleAndDrivePosition(tr.getAngle(), tr.getMagnitude(), feedForward);
-        getBackLeft().setAngleAndDrivePosition(bl.getAngle(), bl.getMagnitude(), feedForward);
-        getBackRight().setAngleAndDrivePosition(br.getAngle(), br.getMagnitude(), feedForward);
-    }
+    // public void setDrivetrainPosition(Vector tl, Vector tr, Vector bl, Vector br, double feedForward) {
+    //     getTopLeft().setAngleAndDrivePosition(tl.getAngle(), tl.getMagnitude(), feedForward);
+    //     getTopRight().setAngleAndDrivePosition(tr.getAngle(), tr.getMagnitude(), feedForward);
+    //     getBackLeft().setAngleAndDrivePosition(bl.getAngle(), bl.getMagnitude(), feedForward);
+    //     getBackRight().setAngleAndDrivePosition(br.getAngle(), br.getMagnitude(), feedForward);
+    // }
 
     public void setSwerveModuleVelocity(SwerveModule module, double output, double angle, boolean isPercentOutput, boolean isMotionProfile) {
         module.setAngleAndDriveVelocity(angle, output, isPercentOutput, isMotionProfile);
