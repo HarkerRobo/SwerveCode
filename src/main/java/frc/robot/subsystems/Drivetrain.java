@@ -105,7 +105,7 @@ public class Drivetrain extends SubsystemBase {
     public static final double MAX_DRIVE_VELOCITY = 2;
     public static final double MAX_ROTATION_VELOCITY = (2 * Math.PI);
     public static final double MP_MAX_DRIVE_VELOCITY = 2;
-    public static final double MAX_DRIVE_ACCELERATION = 1.7;
+    public static final double MAX_DRIVE_ACCELERATION = 1.2;
     public static final double MAX_DRIVE_JERK = 50;
 
     public static final double DRIVE_RAMP_RATE = 0.1;

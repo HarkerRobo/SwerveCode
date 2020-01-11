@@ -1,5 +1,11 @@
 package frc.robot;
 
+import java.util.List;
+
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.geometry.Translation2d;
+import frc.robot.commands.SwerveDriveWithOdometryProfiling;
 import frc.robot.util.HSDDRPad;
 import harkerrobolib.wrappers.XboxGamepad;
 import jaci.pathfinder.Waypoint;
@@ -35,43 +41,25 @@ public class OI {
     }
 
     public void initBindings() {
-        Waypoint[] forward = new Waypoint[] {
-            new Waypoint(0, 0, 0),
-            new Waypoint(2, 0, 0)
-        };
-        Waypoint[] rightAndUp = new Waypoint[] {
-            new Waypoint(0, 0, 0),
-            // new Waypoint(2, 0, 0),
-            new Waypoint(1, 0, 0),
-            new Waypoint(2, 1, Math.PI / 4),
-            new Waypoint(2.5, 2, 0) 
-        };
-        Waypoint[] backward = new Waypoint[] {
-            new Waypoint(0, 0, 0),
-            new Waypoint(-2, 0, 0)
-        };
-        Waypoint[] upAndDiag = new Waypoint[] {
-            new Waypoint(0, 0, Math.PI / 2),
-            new Waypoint(0, 1.5, Math.PI / 2),
-            new Waypoint(0.7, 2.2, Math.PI / 4)
-        };
-        Waypoint[] semiCircle = new Waypoint[] {
-            new Waypoint(0, 0, Math.PI / 2),
-            new Waypoint(1, 1, 0),
-            new Waypoint(2, 0, Math.PI / -2)
-        };
-
-        int timeDur = 10; //ms between each segment
-
-        // OI.getInstance().getDriverGamepad().getUpDPadButton().whenPressed(
-        //         new SwerveDriveWithMotionProfile(points, timeDur)
-        // );
-        
-        // driverGamepad.getButtonB().whenPressed(new SwerveDriveWithMotionProfile(semiCircle, timeDur));
+        driverGamepad.getButtonB().whenPressed(new SwerveDriveWithOdometryProfiling(
+            List.of( 
+                new Pose2d(0, 0, Rotation2d.fromDegrees(-90)),
+                new Pose2d(2, 2, Rotation2d.fromDegrees(-90)),
+                new Pose2d(-2, 4, Rotation2d.fromDegrees(-90)),
+                new Pose2d(0, 6, Rotation2d.fromDegrees(-90)))));
         // driverGamepad.getButtonX().whenPressed(new SwerveDriveWithMotionProfile(backward, timeDur));
         // driverGamepad.getButtonA().whenPressed(new SwerveDriveWithMotionProfile(rightAndUp, timeDur));
         // driverGamepad.getButtonY().whenPressed(new SwerveDriveWithMotionProfile(upAndDiag, timeDur));
         // driverGamepad.getButtonBumperRight().whenPressed(new ToggleFieldSensitivity());
+
+        driverGamepad.getButtonA().whenPressed(new SwerveDriveWithOdometryProfiling( 
+            new Pose2d(0, 0, new Rotation2d(0)),
+            // Pass through these two interior waypoints, making an 's' curve path
+            List.of(
+                new Translation2d(2, 0)
+            ),
+            // End 3 meters straight ahead of where we started, facing forward
+            new Pose2d(2, 0, new Rotation2d(0))));
     }
 
     public XboxGamepad getDriverGamepad() {
