@@ -1,105 +1,96 @@
 package frc.robot.commands;
 
-import java.util.List;
-import java.util.ListIterator;
-
-import com.ctre.phoenix.motion.BufferedTrajectoryPointStream;
-
-import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.controller.PIDController;
+import edu.wpi.first.wpilibj.controller.ProfiledPIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.trajectory.Trajectory;
+import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
+import frc.robot.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
-import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
-import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.kinematics.SwerveDriveOdometry;
-import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.trajectory.Trajectory;
-import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
-import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj.trajectory.constraint.SwerveDriveKinematicsConstraint;
-import frc.robot.subsystems.Drivetrain;
-import frc.robot.util.Vector;
 
-public class SwerveDriveWithOdometryProfiling extends CommandBase {
-
-    private SwerveDriveOdometry odometry;
+/**
+ * Controls the drivetrain using WPILib's SwerveControllerCommand with 
+ * 
+ * @author Jatin Kohli
+ * @author Chirag Kaushik
+ * @author Shahzeb Lakhani
+ * @author Anirudh Kotamraju
+ * @author Arjun Dixit
+ */
+public class SwerveDriveWithOdometryProfiling extends SwerveControllerCommand {
+    
+    private Timer timer;
     private Trajectory trajectory;
-    private List<Trajectory.State> trajectoryPoints;
-    private int index;
-
-    private static final double SPEED_MULTIPLIER = 0.5;
-    
-    public SwerveDriveWithOdometryProfiling(Pose2d startingPose, List<Translation2d> midpoints, Pose2d endingPose) {
-        addRequirements(Drivetrain.getInstance());
         
-        SwerveDriveKinematicsConstraint voltageConstraint = new SwerveDriveKinematicsConstraint(
-                                            Drivetrain.getInstance().getKinematics(), Drivetrain.MP_MAX_DRIVE_VELOCITY);
-
-        TrajectoryConfig config =
-            new TrajectoryConfig(Drivetrain.MAX_DRIVE_VELOCITY,
-                                Drivetrain.MAX_DRIVE_ACCELERATION)
-                .setKinematics(Drivetrain.getInstance().getKinematics())
-                .addConstraint(voltageConstraint);
-
-        trajectory = TrajectoryGenerator.generateTrajectory(startingPose, midpoints, endingPose, config);
-        trajectoryPoints = trajectory.getStates();
-        odometry = Drivetrain.getInstance().getOdometry();
+    public SwerveDriveWithOdometryProfiling(Trajectory trajectory) {
+        super(trajectory,
+            Drivetrain.getInstance()::getPose,
+            Drivetrain.getInstance().getKinematics(), 
+            new PIDController(Drivetrain.MP_X_KP, Drivetrain.MP_X_KI, Drivetrain.MP_X_KD), 
+            new PIDController(Drivetrain.MP_Y_KP, Drivetrain.MP_Y_KI, Drivetrain.MP_Y_KD), 
+            new ProfiledPIDController(Drivetrain.MP_THETA_KP, Drivetrain.MP_THETA_KI, Drivetrain.MP_THETA_KD,
+                                    Drivetrain.THETA_CONSTRAINTS),
+            Drivetrain.getInstance()::setDrivetrainModuleStates,
+            Drivetrain.getInstance()
+        );
+        
+        this.trajectory = trajectory;
+        timer = new Timer();
     }
 
-    public SwerveDriveWithOdometryProfiling(List<Pose2d> poses) {
-        addRequirements(Drivetrain.getInstance());
-        
-        SwerveDriveKinematicsConstraint voltageConstraint = new SwerveDriveKinematicsConstraint(
-                                            Drivetrain.getInstance().getKinematics(), Drivetrain.MP_MAX_DRIVE_VELOCITY);
-
-        TrajectoryConfig config =
-            new TrajectoryConfig(Drivetrain.MAX_DRIVE_VELOCITY,
-                                Drivetrain.MAX_DRIVE_ACCELERATION)
-                .setKinematics(Drivetrain.getInstance().getKinematics())
-                .addConstraint(voltageConstraint);
-
-        trajectory = TrajectoryGenerator.generateTrajectory(poses, config);
-        trajectoryPoints = trajectory.getStates();
-        odometry = Drivetrain.getInstance().getOdometry();
-    }
-
+    @Override
     public void initialize() {
-        Rotation2d gyroAngle = Rotation2d.fromDegrees(-Drivetrain.getInstance().getPigeon().getFusedHeading());
-        odometry.resetPosition(new Pose2d(), gyroAngle);
-        index = 0;
+        super.initialize();
 
-        SmartDashboard.putNumber("Amount Trajectory Points", trajectoryPoints.size());
-        SmartDashboard.putNumber("Trajectory Time", trajectory.getTotalTimeSeconds());
-    }
+        timer.start();
         
+        // Drivetrain.getInstance().getOdometry().resetPosition(
+        //         new Pose2d(trajectory.getInitialPose().getTranslation(), trajectory.getInitialPose().getRotation()),
+        //         new Rotation2d(Math.toRadians(Drivetrain.getInstance().getPigeon().getFusedHeading())));
+
+        //Set to x and y from starting Pose2d of path but keep current rotation value from odometry
+        Pose2d initialPose = new Pose2d(trajectory.getInitialPose().getTranslation(), 
+                Drivetrain.getInstance().getOdometry().getPoseMeters().getRotation());
+
+        Rotation2d currentRot = Rotation2d.fromDegrees(-Drivetrain.getInstance().getPigeon().getFusedHeading());
+
+        Drivetrain.getInstance().getOdometry().resetPosition(initialPose, currentRot);
+    }   
+    
+    @Override
     public void execute() {
-        Trajectory.State state = trajectoryPoints.get(index);
-
-        SmartDashboard.putNumber("Next Trajectory X Position", state.poseMeters.getTranslation().getX());
-        SmartDashboard.putNumber("Next Trajectory Y Position", state.poseMeters.getTranslation().getY());
-        SmartDashboard.putNumber("Next Trajectory Rotation", state.poseMeters.getRotation().getRadians());;
+        super.execute();
         
-        Vector translationVector = new Vector(state.poseMeters.getTranslation().getX(), state.poseMeters.getTranslation().getY());
-        Vector odometryCorrectionVector = new Vector(0, 0); // TODO
-        Vector sum = translationVector.add(odometryCorrectionVector);
+        double deltaT = timer.get();
+        SmartDashboard.putNumber("Time", timer.get());
+        Trajectory.State state = trajectory.sample(deltaT);
 
-        ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-            sum.getX() * SPEED_MULTIPLIER, sum.getY() * SPEED_MULTIPLIER, state.poseMeters.getRotation().getRadians() * SPEED_MULTIPLIER, Rotation2d.fromDegrees(Drivetrain.getInstance().getPigeon().getFusedHeading()));
+        Translation2d desiredTranslation = state.poseMeters.getTranslation();
+        double desiredRotation = state.poseMeters.getRotation().getDegrees();
 
-        SwerveModuleState[] moduleStates = Drivetrain.getInstance().getKinematics().toSwerveModuleStates(speeds);
-        Drivetrain.getInstance().setDrivetrainVelocity(moduleStates[0], moduleStates[1], moduleStates[2], moduleStates[3], 0, false, false);
-                
-        index++;
+        Translation2d currentTranslation = Drivetrain.getInstance().getPose().getTranslation();
+        double currentRotation = Drivetrain.getInstance().getPose().getRotation().getDegrees();
+
+        SmartDashboard.putNumber("Trajectory X Error", desiredTranslation.getX() - currentTranslation.getX());
+        SmartDashboard.putNumber("Trajectory Y Error", desiredTranslation.getY() - currentTranslation.getY());
+        SmartDashboard.putNumber("Trajectory Angle Error", desiredRotation - currentRotation);
+
+        SmartDashboard.putNumber("Trajectory X", desiredTranslation.getX());
+        SmartDashboard.putNumber("Trajectory Y", desiredTranslation.getY());
+        SmartDashboard.putNumber("Trajectory Angle", desiredRotation);
     }
 
+    @Override
     public boolean isFinished() {
-        return index >= trajectoryPoints.size();
-    }
-
-    public void end(boolean interrupted)
-    {
-        
+        return super.isFinished();
     }
     
+    @Override
+    public void end(boolean interrupted) {
+        super.end(interrupted);
+        timer.reset();
+    }
 }

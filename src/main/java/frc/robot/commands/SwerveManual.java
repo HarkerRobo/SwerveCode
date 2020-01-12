@@ -85,9 +85,8 @@ public class SwerveManual extends CommandBase {
 
         pigeonFlag = Math.abs(turnMagnitude) > 0; //Update pigeon flag
 
-        SmartDashboard.putNumber("Desired Pigeon Angle", pigeonAngle);
-        SmartDashboard.putNumber("Actual Pigeon Angle", currentPigeonHeading);
-        SmartDashboard.putNumber("Turn Magnitude", turnMagnitude);
+        // SmartDashboard.putNumber("Desired Pigeon Angle", pigeonAngle);
+        // SmartDashboard.putNumber("Actual Pigeon Angle", currentPigeonHeading);
 
         if(!pigeonFlag) { //If there is no joystick input currently
             turnMagnitude = Drivetrain.PIGEON_kP * (pigeonAngle - currentPigeonHeading);

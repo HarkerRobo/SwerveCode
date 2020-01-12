@@ -1,17 +1,13 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.trajectory.Trajectory;
-import edu.wpi.first.wpilibj.trajectory.TrajectoryConfig;
-import edu.wpi.first.wpilibj.trajectory.TrajectoryGenerator;
-import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
-import edu.wpi.first.wpilibj.trajectory.constraint.SwerveDriveKinematicsConstraint;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
 import frc.robot.util.SwerveModule;
@@ -19,7 +15,6 @@ import harkerrobolib.util.Conversions;
 import harkerrobolib.wrappers.HSPigeon;
 import harkerrobolib.wrappers.HSTalon;
 
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -47,10 +42,10 @@ public class Drivetrain extends SubsystemBase {
     private SwerveModule backLeft;
     private SwerveModule backRight;
 
-    private boolean isFieldSensitive                                                                                                                   ;
-    private HSPigeon pigeon                                                                                                                   ;
-    private SwerveDriveOdometry odometry                                                                                                                            ;
-    private SwerveDriveKinematics kinematics                                                                                                                   ;
+    // private boolean isFieldSensitive;
+    private HSPigeon pigeon;
+    private SwerveDriveOdometry odometry;
+    private SwerveDriveKinematics kinematics;
 
     public static final Translation2d FRONT_LEFT_LOCATION = new Translation2d(-Drivetrain.DT_WIDTH/2, Drivetrain.DT_LENGTH/2);
     public static final Translation2d FRONT_RIGHT_LOCATION = new Translation2d(Drivetrain.DT_WIDTH/2, Drivetrain.DT_LENGTH/2);
@@ -76,7 +71,7 @@ public class Drivetrain extends SubsystemBase {
     private static final boolean BR_ANGLE_SENSOR_PHASE = true;
 
     public static final int ANGLE_POSITION_SLOT = 0;
-    private static final double ANGLE_POSITION_KP = 0.85;// 1.0
+    private static final double ANGLE_POSITION_KP = 0.85;
     private static final double ANGLE_POSITION_KI = 0.0;
     private static final double ANGLE_POSITION_KD = 30.0;
 
@@ -86,27 +81,10 @@ public class Drivetrain extends SubsystemBase {
     private static final double DRIVE_VELOCITY_KD = 0.0;
     private static final double DRIVE_VELOCITY_KF = 0.046; // theoretical: 0.034;
 
-    public static final int DRIVE_MOTION_PROF_SLOT = 1;
-    public static final double DRIVE_MOTION_PROF_kF = 0.00004; // theoretical: 0.000034;
-    public static final double DRIVE_MOTION_PROF_kP = 0.000045;// 0.00003
-    // public static final double DRIVE_MOTION_PROF_kI = 0;
-    // public static final double DRIVE_MOTION_PROF_kD = 0;
-
-    public static final int ANGLE_MOTION_PROF_SLOT = 1;
-    private static final double ANGLE_MOTION_PROF_kF = 0;
-    private static final double ANGLE_MOTION_PROF_kP = ANGLE_POSITION_KP;
-    private static final double ANGLE_MOTION_PROF_kI = 0;
-    private static final double ANGLE_MOTION_PROF_kD = 0;
-
-    public static final double MOTION_PROF_RAMP_RATE = 0.3;
-
-    // private static final int MOTION_FRAME_PERIOD = 5;
-
     public static final double MAX_DRIVE_VELOCITY = 2;
     public static final double MAX_ROTATION_VELOCITY = (2 * Math.PI);
-    public static final double MP_MAX_DRIVE_VELOCITY = 2;
+    public static final double MAX_ROTATION_ACCELERATION = 2 * (2 * Math.PI);
     public static final double MAX_DRIVE_ACCELERATION = 1.2;
-    public static final double MAX_DRIVE_JERK = 50;
 
     public static final double DRIVE_RAMP_RATE = 0.1;
     public static final double ANGLE_RAMP_RATE = 0.05;
@@ -115,27 +93,36 @@ public class Drivetrain extends SubsystemBase {
     public static final double METERS_PER_FOOT = 0.3048;
     public static final double FEET_PER_METER = 3.28084;
 
-    public static final double DRIVE_KS = 0.0;
-    public static final double DRIVE_KV = 0.0;
-    public static final double DRIVE_KA = 0.0;
-
     /**
      * Feet between both of the wheels on the front or back
      */
-    public static final double DT_WIDTH = 0.419;// 16.5 feet;
+    public static final double DT_WIDTH = 0.419; //16.5 feet;
     /**
      * Feet between both of the wheels on the left or right
      */
-    public static final double DT_LENGTH = 0.523;// 20.6 feet;
+    public static final double DT_LENGTH = 0.523; //20.6 feet;
 
-    public static final int TL_OFFSET = 2212;// 1749;//2212-1749
-    public static final int TR_OFFSET = 6730;// 7638;
+    public static final int TL_OFFSET = 2212;
+    public static final int TR_OFFSET = 6730;
     public static final int BL_OFFSET = 11327;
     private static final int BR_OFFSET = 4605;
 
     public static final double PIGEON_kP = 0.10;
 
     public static final double WHEEL_DIAMETER = 4;
+
+    public static final double MP_X_KP = 2.6;
+    public static final double MP_X_KI = 0;
+    public static final double MP_X_KD = 15;
+
+    public static final double MP_Y_KP = 0.7;
+    public static final double MP_Y_KI = 0;
+    public static final double MP_Y_KD = 0;
+
+    public static final double MP_THETA_KP = 3.1;
+    public static final double MP_THETA_KI = 0;
+    public static final double MP_THETA_KD = 0;
+	public static final Constraints THETA_CONSTRAINTS = new Constraints(MAX_ROTATION_VELOCITY, MAX_ROTATION_ACCELERATION);
 
     private Drivetrain() {
         topLeft = new SwerveModule(RobotMap.TL_DRIVE_ID, TL_DRIVE_INVERTED, TL_DRIVE_SENSOR_PHASE, RobotMap.TL_ANGLE_ID,
@@ -161,9 +148,8 @@ public class Drivetrain extends SubsystemBase {
 
         setupPositionPID();
         setupVelocityPID();
-        // setupMotionProfilePID();
 
-        isFieldSensitive = true;
+        // isFieldSensitive = true;
         pigeon = new HSPigeon(RobotMap.PIGEON_ID);
         pigeon.configFactoryDefault();
         pigeon.zero();
@@ -177,38 +163,33 @@ public class Drivetrain extends SubsystemBase {
         odometry = new SwerveDriveOdometry(kinematics, new Rotation2d());
     }
 
+    @Override
+    public void periodic() {
+        odometry.update(Rotation2d.fromDegrees(-Math.toRadians(pigeon.getFusedHeading())),
+                Drivetrain.getInstance().getTopLeft().getState(), Drivetrain.getInstance().getTopRight().getState(),
+                Drivetrain.getInstance().getBackLeft().getState(), Drivetrain.getInstance().getBackRight().getState());
+
+        SmartDashboard.putNumber("Current X", getPose().getTranslation().getX());
+        SmartDashboard.putNumber("Current Y", getPose().getTranslation().getY());
+        SmartDashboard.putNumber("Current Rot", getPose().getRotation().getDegrees());
+    }
+
     /**
      * Returns the currently-estimated pose of the robot.
      *
      * @return The pose.
      */
     public Pose2d getPose() {
-        return odometry.getPoseMeters();
+        Pose2d rawPose = odometry.getPoseMeters();
+
+        return new Pose2d(new Translation2d(-rawPose.getTranslation().getY(), rawPose.getTranslation().getX()), 
+                rawPose.getRotation());
     }
 
-    /**
-     * Gets the average distance of the two encoders.
-     *
-     * @return the average of the two encoder readings
-     */
-    public double getAverageEncoderDistance() {
-        return (topLeft.getDriveMotor().getSelectedSensorPosition()
-                + topRight.getDriveMotor().getSelectedSensorPosition()
-                + backLeft.getDriveMotor().getSelectedSensorPosition()
-                + backRight.getDriveMotor().getSelectedSensorPosition()) / 4;
-    }
-
-    @Override
-    public void periodic() {
-        odometry.update(new Rotation2d(Math.toRadians(pigeon.getFusedHeading())),
-                Drivetrain.getInstance().getTopLeft().getState(), Drivetrain.getInstance().getTopRight().getState(),
-                Drivetrain.getInstance().getBackLeft().getState(), Drivetrain.getInstance().getBackRight().getState());
-    }
-
-    public void toggleFieldSensitivity() {
-        isFieldSensitive = !isFieldSensitive;
-        System.out.println(isFieldSensitive);
-    }
+    // public void toggleFieldSensitivity() {
+    //     isFieldSensitive = !isFieldSensitive;
+    //     System.out.println(isFieldSensitive);
+    // }
 
     public void setupPositionPID() {
         applyToAllAngle((angleMotor) -> angleMotor.config_kP(ANGLE_POSITION_SLOT, ANGLE_POSITION_KP));
@@ -225,32 +206,9 @@ public class Drivetrain extends SubsystemBase {
         applyToAllDrive((driveMotor) -> driveMotor.configClosedloopRamp(DRIVE_RAMP_RATE));
     }
 
-    // private void setupMotionProfilePID() {
-    // applyToAllDrive((driveMotor) -> driveMotor.config_kF(DRIVE_MOTION_PROF_SLOT,
-    // DRIVE_MOTION_PROF_kF));
-    // applyToAllDrive((driveMotor) -> driveMotor.config_kP(DRIVE_MOTION_PROF_SLOT,
-    // DRIVE_MOTION_PROF_kP));
-    // applyToAllDrive((driveMotor) -> driveMotor.config_kI(DRIVE_MOTION_PROF_SLOT,
-    // DRIVE_MOTION_PROF_kI));
-    // applyToAllDrive((driveMotor) -> driveMotor.config_kD(DRIVE_MOTION_PROF_SLOT,
-    // DRIVE_MOTION_PROF_kD));
-
-    // applyToAllAngle((angleMotor) -> angleMotor.config_kF(ANGLE_MOTION_PROF_SLOT,
-    // ANGLE_MOTION_PROF_kF));
-    // applyToAllAngle((angleMotor) -> angleMotor.config_kP(ANGLE_MOTION_PROF_SLOT,
-    // ANGLE_MOTION_PROF_kP));
-    // applyToAllAngle((angleMotor) -> angleMotor.config_kI(ANGLE_MOTION_PROF_SLOT,
-    // ANGLE_MOTION_PROF_kI));
-    // applyToAllAngle((angleMotor) -> angleMotor.config_kD(ANGLE_MOTION_PROF_SLOT,
-    // ANGLE_MOTION_PROF_kD));
-
-    // applyToAllDrive((talon) ->
-    // talon.setStatusFramePeriod(StatusFrame.Status_9_MotProfBuffer,
-    // MOTION_FRAME_PERIOD));
-    // applyToAllAngle((talon) ->
-    // talon.setStatusFramePeriod(StatusFrame.Status_9_MotProfBuffer,
-    // MOTION_FRAME_PERIOD));
-    // }
+    public void setDrivetrainModuleStates(SwerveModuleState[] states) {
+        setDrivetrainVelocity(states[0], states[1], states[2], states[3], 0, false, true);
+    }
 
     /**
      * Sets the output of the drivetrain based on desired output vectors for each
@@ -272,18 +230,6 @@ public class Drivetrain extends SubsystemBase {
         setSwerveModuleVelocity(backRight, brOutput, convertAngle(backRight, br.angle.getDegrees()), isPercentOutput,
                 isMotionProfile);
     }
-
-    // public void setDrivetrainPosition(Vector tl, Vector tr, Vector bl, Vector br,
-    // double feedForward) {
-    // getTopLeft().setAngleAndDrivePosition(tl.getAngle(), tl.getMagnitude(),
-    // feedForward);
-    // getTopRight().setAngleAndDrivePosition(tr.getAngle(), tr.getMagnitude(),
-    // feedForward);
-    // getBackLeft().setAngleAndDrivePosition(bl.getAngle(), bl.getMagnitude(),
-    // feedForward);
-    // getBackRight().setAngleAndDrivePosition(br.getAngle(), br.getMagnitude(),
-    // feedForward);
-    // }
 
     public void setSwerveModuleVelocity(SwerveModule module, double output, double angle, boolean isPercentOutput,
             boolean isMotionProfile) {
@@ -321,6 +267,10 @@ public class Drivetrain extends SubsystemBase {
 
         return targetAngle;
     }
+
+    // public boolean isFieldSensitive() {
+    //     return isFieldSensitive;
+    // }
 
     /**
      * Stops all drive motors while holding the current angle
@@ -391,50 +341,9 @@ public class Drivetrain extends SubsystemBase {
         return odometry;
     }
 
-    public boolean isFieldSensitive() {
-        return isFieldSensitive;
-    }
-
     public static Drivetrain getInstance() {
         if (instance == null)
             instance = new Drivetrain();
         return instance;
     }
-
-    // /**
-    //  * Use this to pass the autonomous command to the main {@link Robot} class.
-    //  * Needs to be changed for swerve
-    //  *
-    //  * @return the command to run in autonomous
-    //  */
-    // public Command getAutonomousCommand() {
-    //     // Create a voltage constraint to ensure we don't accelerate too fast
-    //     SwerveDriveKinematicsConstraint kinematicsConstraint =
-    //         new SwerveDriveKinematicsConstraint(kinematics, MAX_DRIVE_VELOCITY);
-
-    //     // Create config for trajectory
-    //     TrajectoryConfig config =
-    //         new TrajectoryConfig(MP_MAX_DRIVE_VELOCITY,
-    //                             MAX_DRIVE_ACCELERATION)
-    //             // Add kinematics to ensure max speed is actually obeyed
-    //             .setKinematics(kinematics)
-    //             // Apply the voltage constraint
-    //             .addConstraint(kinematicsConstraint);
-
-    //     // An example trajectory to follow.  All units in meters.
-    //     Trajectory exampleTrajectory = TrajectoryGenerator.generateTrajectory(
-    //         // Start at the origin facing the +X direction
-    //         new Pose2d(0, 0, new Rotation2d(0)),
-    //         // Pass through these two interior waypoints, making an 's' curve path
-    //         List.of(
-    //             new Translation2d(1, 1),
-    //             new Translation2d(2, -1)
-    //         ),
-    //         // End 3 meters straight ahead of where we started, facing forward
-    //         new Pose2d(3, 0, new Rotation2d(0)),
-    //         // Pass config
-    //         config
-    //     );
-
-    // }
 }
