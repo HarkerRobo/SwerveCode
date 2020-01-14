@@ -141,11 +141,12 @@ public class Drivetrain extends SubsystemBase {
         int blAngleOffset = (backLeft.getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs() - BL_OFFSET) / 4;
         int brAngleOffset = (backRight.getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs() - BR_OFFSET) / 4;
 
-        topLeft.getAngleMotor().setSelectedSensorPosition(tlAngleOffset);
-        topRight.getAngleMotor().setSelectedSensorPosition(trAngleOffset);
-        backLeft.getAngleMotor().setSelectedSensorPosition(blAngleOffset);
-        backRight.getAngleMotor().setSelectedSensorPosition(brAngleOffset);
-
+        topLeft.getAngleMotor().setSelectedSensorPosition(tlAngleOffset + 1024);
+        topRight.getAngleMotor().setSelectedSensorPosition(trAngleOffset +1024);
+        backLeft.getAngleMotor().setSelectedSensorPosition(blAngleOffset + 1024);
+        backRight.getAngleMotor().setSelectedSensorPosition(brAngleOffset + 1024);
+        System.out.println(tlAngleOffset);
+        System.out.println(trAngleOffset);
         applyToAllDrive((motor) -> motor.setSelectedSensorPosition(0));
 
         setupPositionPID();
