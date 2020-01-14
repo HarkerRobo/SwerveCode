@@ -17,6 +17,8 @@ import harkerrobolib.wrappers.HSTalon;
 
 import java.util.function.Consumer;
 
+import com.ctre.phoenix.sensors.PigeonIMUConfiguration;
+
 /**
  * Simulates the drivetrain subsystem on the robot. A Swerve Drivetrain contains
  * four SwerveModules.
@@ -152,20 +154,22 @@ public class Drivetrain extends SubsystemBase {
         // isFieldSensitive = true;
         pigeon = new HSPigeon(RobotMap.PIGEON_ID);
         pigeon.configFactoryDefault();
-        pigeon.zero();
-        pigeon.setFusedHeading(90);
-
+        pigeon.zero();        
+        pigeon.setYaw(90);
+        System.out.println(pigeon.setFusedHeading(90));
+        System.out.println(pigeon.setAccumZAngle(90));
         Conversions.setWheelDiameter(WHEEL_DIAMETER);
 
         kinematics = new SwerveDriveKinematics(Drivetrain.FRONT_LEFT_LOCATION, Drivetrain.FRONT_RIGHT_LOCATION,
                 Drivetrain.BACK_LEFT_LOCATION, Drivetrain.BACK_RIGHT_LOCATION);
 
-        odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(), new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
+        odometry = new SwerveDriveOdometry(kinematics, Rotation2d.fromDegrees(pigeon.getFusedHeading() +90), new Pose2d(new Translation2d(), Rotation2d.fromDegrees(/**90 */ 0 )));
+
     }
 
     @Override
     public void periodic() {
-        odometry.update(Rotation2d.fromDegrees(pigeon.getFusedHeading()),
+        odometry.update(Rotation2d.fromDegrees(pigeon.getFusedHeading() + 90),
                 Drivetrain.getInstance().getTopLeft().getState(), Drivetrain.getInstance().getTopRight().getState(),
                 Drivetrain.getInstance().getBackLeft().getState(), Drivetrain.getInstance().getBackRight().getState());
 
@@ -266,6 +270,12 @@ public class Drivetrain extends SubsystemBase {
         }
 
         return targetAngle;
+    }
+
+    
+    
+    public void setPigeonToNinety() {
+        pigeon.setFusedHeading(90);
     }
 
     // public boolean isFieldSensitive() {

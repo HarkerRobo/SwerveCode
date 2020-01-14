@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.trajectory.constraint.SwerveDriveKinematicsConstrai
 import frc.robot.commands.SwerveDriveWithOdometryProfiling;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.util.HSDDRPad;
+import harkerrobolib.commands.CallMethodCommand;
 import harkerrobolib.wrappers.XboxGamepad;
 
 /**
@@ -66,6 +67,7 @@ public class OI {
 
         driverGamepad.getButtonA().whenPressed(new SwerveDriveWithOdometryProfiling(linearTrajectory));
         driverGamepad.getButtonB().whenPressed(new SwerveDriveWithOdometryProfiling(circle));
+        driverGamepad.getButtonBumperLeft().whenPressed(new CallMethodCommand(() -> Drivetrain.getInstance().setPigeonToNinety()));
     }
 
     public XboxGamepad getDriverGamepad() {

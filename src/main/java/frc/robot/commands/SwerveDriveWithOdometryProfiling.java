@@ -53,11 +53,26 @@ public class SwerveDriveWithOdometryProfiling extends SwerveControllerCommand {
 
         //Set to x and y from starting Pose2d of path but keep current rotation value from odometry
         Pose2d initialPose = new Pose2d(trajectory.getInitialPose().getTranslation(), 
-                Drivetrain.getInstance().getOdometry().getPoseMeters().getRotation());
+                Rotation2d.fromDegrees(Drivetrain.getInstance().getPigeon().getFusedHeading() + /**90*/ 0));
+        // Pose2d initialPose = trajectory.getInitialPose();
 
-        Rotation2d currentRot = Rotation2d.fromDegrees(Drivetrain.getInstance().getPigeon().getFusedHeading());
+        Rotation2d currentRot = Rotation2d.fromDegrees(Drivetrain.getInstance().getPigeon().getFusedHeading() + 90);
+
+        for(Trajectory.State state : trajectory.getStates()) {
+
+            System.out.print("X: " + state.poseMeters.getTranslation().getX() + ".  Y: " + state.poseMeters.getTranslation().getY() + ". Ang " + state.poseMeters.getRotation().getDegrees());
+        }
+
 
         Drivetrain.getInstance().getOdometry().resetPosition(initialPose, currentRot);
+        System.out.println(Drivetrain.getInstance().getOdometry().getPoseMeters().getRotation().getDegrees());
+        System.out.println(Drivetrain.getInstance().getOdometry().getPoseMeters().getTranslation().getX());
+        System.out.println(Drivetrain.getInstance().getOdometry().getPoseMeters().getTranslation().getY());
+
+        
+
+
+
     }   
     
     @Override
@@ -67,7 +82,6 @@ public class SwerveDriveWithOdometryProfiling extends SwerveControllerCommand {
         double deltaT = timer.get();
         SmartDashboard.putNumber("Time", timer.get());
         Trajectory.State state = trajectory.sample(deltaT);
-
         Translation2d desiredTranslation = state.poseMeters.getTranslation();
         double desiredRotation = state.poseMeters.getRotation().getDegrees();
 
@@ -87,6 +101,8 @@ public class SwerveDriveWithOdometryProfiling extends SwerveControllerCommand {
     public boolean isFinished() {
         return super.isFinished();
     }
+
+    
     
     @Override
     public void end(boolean interrupted) {
