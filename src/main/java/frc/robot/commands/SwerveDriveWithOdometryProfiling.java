@@ -53,7 +53,8 @@ public class SwerveDriveWithOdometryProfiling extends SwerveControllerCommand {
 
         //Set to x and y from starting Pose2d of path but keep current rotation value from odometry
         Pose2d initialPose = new Pose2d(trajectory.getInitialPose().getTranslation(), 
-                Rotation2d.fromDegrees(Drivetrain.getInstance().getPigeon().getFusedHeading() + /**90*/ 0));
+                Rotation2d.fromDegrees(Drivetrain.getInstance().getPigeon().getFusedHeading() + /*90*/ 90));
+        //If this fails, try again but with the line below
         // Pose2d initialPose = trajectory.getInitialPose();
 
         Rotation2d currentRot = Rotation2d.fromDegrees(Drivetrain.getInstance().getPigeon().getFusedHeading() + 90);

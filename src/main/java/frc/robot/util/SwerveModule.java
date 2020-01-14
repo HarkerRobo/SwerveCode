@@ -198,6 +198,6 @@ public class SwerveModule {
      */
     public SwerveModuleState getState() {
         return new SwerveModuleState(Conversions.convertSpeed(SpeedUnit.ENCODER_UNITS, driveMotor.getSelectedSensorVelocity() / Drivetrain.GEAR_RATIO, SpeedUnit.FEET_PER_SECOND) * Drivetrain.METERS_PER_FOOT, 
-            new Rotation2d(angleMotor.getSelectedSensorPosition() * 2 * Math.PI / 4096));
+            new Rotation2d(angleMotor.getSelectedSensorPosition() * 2 * Math.PI / 4096 + Math.PI / 2));
     }
 }

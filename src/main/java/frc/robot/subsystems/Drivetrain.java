@@ -141,10 +141,10 @@ public class Drivetrain extends SubsystemBase {
         int blAngleOffset = (backLeft.getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs() - BL_OFFSET) / 4;
         int brAngleOffset = (backRight.getAngleMotor().getSensorCollection().getPulseWidthRiseToFallUs() - BR_OFFSET) / 4;
 
-        topLeft.getAngleMotor().setSelectedSensorPosition(tlAngleOffset + 1024);
-        topRight.getAngleMotor().setSelectedSensorPosition(trAngleOffset +1024);
-        backLeft.getAngleMotor().setSelectedSensorPosition(blAngleOffset + 1024);
-        backRight.getAngleMotor().setSelectedSensorPosition(brAngleOffset + 1024);
+        topLeft.getAngleMotor().setSelectedSensorPosition(tlAngleOffset/* + 1024*/);
+        topRight.getAngleMotor().setSelectedSensorPosition(trAngleOffset); /* +1024)*/
+        backLeft.getAngleMotor().setSelectedSensorPosition(blAngleOffset/* + 1024*/);
+        backRight.getAngleMotor().setSelectedSensorPosition(brAngleOffset/* + 1024*/);
         System.out.println(tlAngleOffset);
         System.out.println(trAngleOffset);
         applyToAllDrive((motor) -> motor.setSelectedSensorPosition(0));
@@ -156,15 +156,15 @@ public class Drivetrain extends SubsystemBase {
         pigeon = new HSPigeon(RobotMap.PIGEON_ID);
         pigeon.configFactoryDefault();
         pigeon.zero();        
-        pigeon.setYaw(90);
-        System.out.println(pigeon.setFusedHeading(90));
-        System.out.println(pigeon.setAccumZAngle(90));
+        // pigeon.setYaw(90);
+        // System.out.println(pigeon.setFusedHeading(90));
+        // System.out.println(pigeon.setAccumZAngle(90));
         Conversions.setWheelDiameter(WHEEL_DIAMETER);
 
         kinematics = new SwerveDriveKinematics(Drivetrain.FRONT_LEFT_LOCATION, Drivetrain.FRONT_RIGHT_LOCATION,
                 Drivetrain.BACK_LEFT_LOCATION, Drivetrain.BACK_RIGHT_LOCATION);
 
-        odometry = new SwerveDriveOdometry(kinematics, Rotation2d.fromDegrees(pigeon.getFusedHeading() +90), new Pose2d(new Translation2d(), Rotation2d.fromDegrees(/**90 */ 0 )));
+        odometry = new SwerveDriveOdometry(kinematics, Rotation2d.fromDegrees(pigeon.getFusedHeading() + 90), new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
 
     }
 
@@ -212,6 +212,9 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void setDrivetrainModuleStates(SwerveModuleState[] states) {
+        for (int i = 0; i < 4; i++) {
+            states[i] = new SwerveModuleState(states[i].speedMetersPerSecond, states[i].angle.plus(Rotation2d.fromDegrees(90)));
+        }
         setDrivetrainVelocity(states[0], states[1], states[2], states[3], 0, false, true);
     }
 
