@@ -55,7 +55,7 @@ public class SwerveDriveWithOdometryProfiling extends SwerveControllerCommand {
         Pose2d initialPose = new Pose2d(trajectory.getInitialPose().getTranslation(), 
                 Drivetrain.getInstance().getOdometry().getPoseMeters().getRotation());
 
-        Rotation2d currentRot = Rotation2d.fromDegrees(-Drivetrain.getInstance().getPigeon().getFusedHeading());
+        Rotation2d currentRot = Rotation2d.fromDegrees(Drivetrain.getInstance().getPigeon().getFusedHeading());
 
         Drivetrain.getInstance().getOdometry().resetPosition(initialPose, currentRot);
     }   

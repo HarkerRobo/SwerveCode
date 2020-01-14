@@ -153,19 +153,19 @@ public class Drivetrain extends SubsystemBase {
         pigeon = new HSPigeon(RobotMap.PIGEON_ID);
         pigeon.configFactoryDefault();
         pigeon.zero();
-        pigeon.setFusedHeading(0);
+        pigeon.setFusedHeading(90);
 
         Conversions.setWheelDiameter(WHEEL_DIAMETER);
 
         kinematics = new SwerveDriveKinematics(Drivetrain.FRONT_LEFT_LOCATION, Drivetrain.FRONT_RIGHT_LOCATION,
                 Drivetrain.BACK_LEFT_LOCATION, Drivetrain.BACK_RIGHT_LOCATION);
 
-        odometry = new SwerveDriveOdometry(kinematics, new Rotation2d());
+        odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(), new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
 
     @Override
     public void periodic() {
-        odometry.update(Rotation2d.fromDegrees(-Math.toRadians(pigeon.getFusedHeading())),
+        odometry.update(Rotation2d.fromDegrees(pigeon.getFusedHeading()),
                 Drivetrain.getInstance().getTopLeft().getState(), Drivetrain.getInstance().getTopRight().getState(),
                 Drivetrain.getInstance().getBackLeft().getState(), Drivetrain.getInstance().getBackRight().getState());
 
